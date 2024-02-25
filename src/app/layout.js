@@ -5,7 +5,7 @@ import SessionProvider from "../components/SessionProvider";
 import NavBar from "../components/NavBar";
 import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { authOptions } from "../lib/auth";
 
 const fontSans = FontSans({
   subsets: ["latin"],
