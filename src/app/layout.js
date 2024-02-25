@@ -6,6 +6,8 @@ import NavBar from "../components/NavBar";
 import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
 import { authOptions } from "../lib/auth";
+import { Suspense } from "react";
+import Loading from "./loading";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -38,7 +40,7 @@ export default async function RootLayout({ children }) {
             <section className="mx-auto max-w-5xl text-2xl flex justify-between gap-2">
               <NavBar />
             </section>
-            {children}
+            <Suspense fallback={<Loading />}>{children}</Suspense>
           </SessionProvider>
         </ThemeProvider>
       </body>
