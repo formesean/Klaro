@@ -1,11 +1,11 @@
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { getServerSession } from "next-auth";
-import SessionProvider from "@/components/SessionProvider";
-import NavBar from "@/components/NavBar";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ModeToggle } from "@/components/ModeToggle";
-import { cn } from "@/lib/utils";
+import SessionProvider from "../components/SessionProvider";
+import NavBar from "../components/NavBar";
+import { ThemeProvider } from "../components/theme-provider";
+import { ModeToggle } from "../components/ModeToggle";
+import { cn } from "../lib/utils";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
