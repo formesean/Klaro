@@ -9,9 +9,9 @@ export default async function Home() {
   }
 
   return (
-    <div>
-      THIS IS THE SENDER PAGE <br /> <br />
-      YOU'RE LOGGED IN IF YOU SEE THIS PAGE
+    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      <h1>THIS IS THE SENDER PAGE</h1>
+      <h2>YOU ARE LOGGED IN IF YOU SEE THIS PAGE</h2>
     </div>
   );
 }
