@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import SessionProvider from "../components/SessionProvider";
 import NavBar from "../components/NavBar";
 import { ThemeProvider } from "../components/theme-provider";
-import { ModeToggle } from "../components/ModeToggle";
 import { cn } from "../lib/utils";
 
 const fontSans = FontSans({
@@ -37,7 +36,6 @@ export default async function RootLayout({ children }) {
           <SessionProvider session={session}>
             <section className="mx-auto max-w-5xl text-2xl flex justify-between gap-2">
               <NavBar />
-              <ModeToggle />
             </section>
             {children}
           </SessionProvider>
