@@ -5,6 +5,7 @@ import SessionProvider from "../components/SessionProvider";
 import NavBar from "../components/NavBar";
 import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
+import { authOptions } from "./api/auth/[...nextauth]/route";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -17,7 +18,7 @@ const fontSans = FontSans({
 // };
 
 export default async function RootLayout({ children }) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en">
