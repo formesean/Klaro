@@ -14,9 +14,7 @@ export async function createSenderAccount(sessionEmail) {
     const sessionsQuery = query(sessionsCollection);
     const sessionsSnapshot = await getDocs(sessionsQuery);
 
-    sessionsSnapshot.forEach(async (sessionDoc) => {
-      const sessionData = sessionDoc.data();
-
+    sessionsSnapshot.forEach(async () => {
       const usersCollection = collection(db, "users");
       const usersQuery = query(
         usersCollection,

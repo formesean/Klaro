@@ -2,53 +2,46 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { ModeToggle } from "../components/ModeToggle";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect } from "react";
-import { checkRole } from "../app/api/checkRole";
+import {
+  checkRole,
+  deliveryServiceRole,
+  senderRole,
+} from "../app/api/handleRole";
 import { createSenderAccount } from "../app/api/createSenderAccount";
+import { useLayoutEffect } from "react";
 
-async function checkIfAuthorized(session) {
-  if (session && session.user) {
-    const isAuthorized = await checkRole(session.user.email);
-    return isAuthorized;
+async function checkAndHandleRole(session, router) {
+  if (!session) return;
+
+  const isDeliveryAcc = await checkRole(session.user?.email);
+
+  if (isDeliveryAcc) {
+    await deliveryServiceRole(session.user?.email);
+    router.replace("/dashboard");
+  } else {
+    await senderRole(session.user?.email);
+    await createSenderAccount(session.user.email);
+    router.replace("/send-parcel");
   }
-  return false;
 }
 
 function AuthButton() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    const handleRole = async () => {
-      const isDeliveryAcc = await checkIfAuthorized(session);
+  useLayoutEffect(() => {
+    checkAndHandleRole(session, router);
+  }, [session, router]);
 
-      if (isDeliveryAcc) {
-        router.push("/dashboard");
-      } else {
-        if (session && session.user) {
-          createSenderAccount(session.user.email);
-          router.push("/send-parcel");
-        }
-      }
-    };
-
-    handleRole();
-  }, [session]);
-
-  if (session && session.user) {
+  if (session?.user) {
     return (
       <>
-        {session?.user?.name}{" "}
-        <button onClick={() => signOut()}>Sign out</button>
+        {session.user.name} <button onClick={() => signOut()}>Sign out</button>
       </>
     );
   }
 
-  return (
-    <>
-      <button onClick={() => signIn("google")}>Sign in</button>
-    </>
-  );
+  return <button onClick={() => signIn("google")}>Sign in</button>;
 }
 
 export default function NavBar() {

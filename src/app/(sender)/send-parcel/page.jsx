@@ -1,13 +1,13 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "../../../lib/auth";
+"use client";
+import { redirect, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
-export default async function Home() {
-  const session = await getServerSession(authOptions);
+export default async function SendParcel() {
+  const { data: session } = useSession();
+  const router = useRouter();
 
-  // comment line 9 to 11 to visit the sender page without logging in
-  if (!session || !session.user) {
-    redirect("/");
+  if (!session) {
+    return redirect("/");
   }
 
   return (
