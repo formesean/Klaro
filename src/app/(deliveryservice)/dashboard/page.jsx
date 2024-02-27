@@ -8,6 +8,14 @@ export default async function Dashboard() {
 
   if (!session) {
     return redirect("/");
+  } else {
+     if (session.user.role === "deliveryService") {
+      return router.replace("/dashboard");
+    }
+
+    if (session.user.role === "sender") {
+      return router.replace("/send-parcel");
+    }
   }
 
   return (
