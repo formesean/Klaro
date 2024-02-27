@@ -1,12 +1,13 @@
 "use client";
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
-export default async function SendParcel() {
+export default function SendParcel() {
   const { data: session } = useSession();
-  const router = useRouter();
+  // const router = useRouter();
 
-  if (!session) {
+  if (!session || session.user.role !== "sender") {
     return redirect("/");
   }
 

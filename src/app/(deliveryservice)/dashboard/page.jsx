@@ -2,20 +2,12 @@
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-export default async function Dashboard() {
+export default function Dashboard() {
   const { data: session } = useSession();
-  const router = useRouter();
+  // const router = useRouter();
 
-  if (!session) {
+  if (!session || session.user.role !== "deliveryService") {
     return redirect("/");
-  } else {
-     if (session.user.role === "deliveryService") {
-      return router.replace("/dashboard");
-    }
-
-    if (session.user.role === "sender") {
-      return router.replace("/send-parcel");
-    }
   }
 
   return (

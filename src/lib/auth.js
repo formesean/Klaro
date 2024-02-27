@@ -1,6 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import { FirestoreAdapter } from "@auth/firebase-adapter";
 import { cert } from "firebase-admin/app";
+import { checkRole } from "../app/api/handleUser";
 
 export const authOptions = {
   // Configure one or more authentication providers
@@ -8,34 +9,31 @@ export const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      profile(profile) {
+      async profile(profile) {
+        const isDeliveryAcc = await checkRole(profile.email);
+
         return {
           id: profile.sub,
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-          role: profile.role ?? "user",
+          role: isDeliveryAcc ? "deliveryService" : "sender",
         };
       },
     }),
   ],
-  // callbacks: {
-  //   async jwt({ token, user, trigger, session }) {
-  //     if (user) {
-  //       token.role = user.role;
-  //     }
-
-  //     if (trigger === "update" && session?.name) {
-  //       token.name = session.name;
-  //     }
-
-  //     return token;
-  //   },
-  //   async session({ session, token }) {
-  //     session.user.role = token.role;
-  //     return session;
-  //   },
-  // },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.role = token.role;
+      return session;
+    },
+  },
   adapter: FirestoreAdapter({
     credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
@@ -43,4 +41,7 @@ export const authOptions = {
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
     }),
   }),
+  session: {
+    strategy: "jwt",
+  },
 };
