@@ -15,6 +15,7 @@ export default function SendParcel() {
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <h1>THIS IS THE SENDER PAGE</h1>
       <h2>YOU ARE LOGGED IN IF YOU SEE THIS PAGE</h2>
+      <h3>IN DEVELOPMENT</h3>
     </div>
   );
 }
