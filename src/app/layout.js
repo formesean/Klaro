@@ -38,7 +38,9 @@ export default async function RootLayout({ children }) {
         >
           <SessionProvider session={session}>
             <NavBar />
-            <Suspense fallback={<Loading />}>{children}</Suspense>
+            {/* <Suspense fallback={<Loading />}> */}
+            {children}
+            {/* </Suspense> */}
           </SessionProvider>
         </ThemeProvider>
       </body>
