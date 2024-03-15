@@ -1,6 +1,7 @@
 "use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { ModeToggle } from "../components/ModeToggle";
+import { Button } from "./ui/button";
 
 function AuthButton() {
   const { data: session } = useSession();
@@ -8,12 +9,12 @@ function AuthButton() {
   if (session?.user) {
     return (
       <>
-        {session.user.name} <button onClick={() => signOut()}>Sign out</button>
+        {session.user.name} <Button onClick={() => signOut()}>Sign out</Button>
       </>
     );
   }
 
-  return <button onClick={() => signIn("google")}>Sign in</button>;
+  return <Button onClick={() => signIn("google")}>Sign in</Button>;
 }
 
 export default function NavBar() {
