@@ -11,9 +11,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div>
-        <h1>Sender Dashboard</h1>
-      </div>
+      <h1>Sender Dashboard</h1>
     </div>
   );
 }

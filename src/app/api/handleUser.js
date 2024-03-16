@@ -7,6 +7,7 @@ import {
   updateDoc,
   setDoc,
   where,
+  addDoc,
 } from "firebase/firestore";
 
 export async function checkRole(sessionEmail) {
@@ -25,29 +26,23 @@ export async function senderExists(sessionEmail) {
   return !snapshot.empty;
 }
 
-// export async function createSenderAccount(sessionEmail) {
-//   try {
-//     const sessionsCollection = collection(db, "sessions");
-//     const sessionsQuery = query(sessionsCollection);
-//     const sessionsSnapshot = await getDocs(sessionsQuery);
+export async function createSender(data) {
+  const userRef = collection(db, "senderAccounts");
+  const q = await addDoc(userRef, data);
+}
 
-//     sessionsSnapshot.forEach(async () => {
-//       const usersCollection = collection(db, "users");
-//       const usersQuery = query(
-//         usersCollection,
-//         where("email", "==", sessionEmail)
-//       );
-//       const usersSnapshot = await getDocs(usersQuery);
+export async function createDeliveryService(data, sessionEmail) {
+  const userRef = collection(db, "deliveryAccounts");
+  const q = query(userRef, where("email", "==", sessionEmail));
+  const snapshot = await getDocs(q);
 
-//       if (!usersSnapshot.empty) {
-//         const userDoc = usersSnapshot.docs[0];
-//         const userID = userDoc.id;
+  if (!snapshot.empty) {
+    const docRef = snapshot.docs[0].ref;
 
-//         const senderAccountsRef = doc(db, "senderAccounts", userID);
-//         await setDoc(senderAccountsRef, { userID });
-//       }
-//     });
-//   } catch (error) {
-//     throw error;
-//   }
-// }
+    try {
+      await updateDoc(docRef, data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}

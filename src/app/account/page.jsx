@@ -1,36 +1,80 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../components/ui/form";
 import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { senderExists } from "../api/handleUser";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { createSender, senderExists } from "../api/handleUser";
+import { useRouter } from "next/navigation";
 
-export default async function CompleteAccount() {
+const formSchema = z.object({
+  fullName: z.string().min(2, {
+    message: "Full Name must be at least 2 characters.",
+  }),
+  address: z.string().min(2, {
+    message: "Address must be at least 2 characters.",
+  }),
+});
+
+export default function CompleteAccount() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: "",
+      address: "",
+    },
+  });
 
-  if (!session) {
-    return redirect("/");
+  (async () => {
+    if (session) {
+      try {
+        if (
+          (await senderExists(session?.user.email)) ||
+          session?.user.role === "deliveryService"
+        ) {
+          router.replace("/dashboard");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      router.replace("/");
+    }
+  })();
+
+  async function onSubmit(data) {
+    try {
+      const userData = {
+        email: session?.user.email,
+        fullName: data.fullName,
+        address: data.address,
+        parcels: [],
+      };
+
+      await createSender(userData);
+
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   }
-
-  if (
-    (session.user.role !== "sender" ||
-      session.user.role !== "deliveryService") &&
-    (await senderExists(session?.user.email))
-  ) {
-    return redirect("/dashboard");
-  }
-
-  // TO DO: redirect the user into the dashboard after the account creation is complete
-  const handleButton = () => {};
 
   return (
     <div className="fixed top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4">
@@ -38,23 +82,45 @@ export default async function CompleteAccount() {
         <Card>
           <CardHeader>
             <CardTitle>Complete your account</CardTitle>
-            {/* <CardDescription>Card Description</CardDescription> */}
           </CardHeader>
           <CardContent>
-            <div className="grid w-full max-w-sm gap-1.5">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input type="text" id="fullName" placeholder="Juan Dela Cruz" />
-            </div>
-            <div className="grid w-full max-w-sm gap-1.5 mt-5">
-              <Label htmlFor="address">Address</Label>
-              <Input type="text" id="address" placeholder="123 Street" />
-            </div>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Juan Dela Cruz" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input placeholder="123 Street" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full">
+                  Submit
+                </Button>
+              </form>
+            </Form>
           </CardContent>
-          <CardFooter>
-            <Button className="w-full" onClick={handleButton()}>
-              Create account
-            </Button>
-          </CardFooter>
         </Card>
       </div>
     </div>
