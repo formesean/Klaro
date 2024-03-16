@@ -1,14 +1,21 @@
 "use client";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { senderExists } from "./api/handleUser";
 
-export default function Home() {
+export default async function Home() {
   const { data: session } = useSession();
 
+  if (session?.user.role === "deliveryService") {
+    return redirect("/dashboard");
+  }
+
   if (
-    session?.user.role === "deliveryService" ||
-    session?.user.role === "sender"
+    session?.user.role === "sender" &&
+    !(await senderExists(session?.user.email))
   ) {
+    return redirect("/account");
+  } else if (session?.user.role === "sender") {
     return redirect("/dashboard");
   }
 

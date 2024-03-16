@@ -12,12 +12,21 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { senderExists } from "../api/handleUser";
 
-export default function CompleteAccount() {
+export default async function CompleteAccount() {
   const { data: session } = useSession();
 
   if (!session) {
     return redirect("/");
+  }
+
+  if (
+    (session.user.role !== "sender" ||
+      session.user.role !== "deliveryService") &&
+    (await senderExists(session?.user.email))
+  ) {
+    return redirect("/dashboard");
   }
 
   // TO DO: redirect the user into the dashboard after the account creation is complete
