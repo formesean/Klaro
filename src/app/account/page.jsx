@@ -19,8 +19,8 @@ import { Input } from "../../components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { createSender, senderExists } from "../api/handleUser";
 import { useRouter } from "next/navigation";
+import { useUsers } from "../api/useUsers";
 
 const formSchema = z.object({
   fullName: z.string().min(2, {
@@ -33,6 +33,7 @@ const formSchema = z.object({
 
 export default function CompleteAccount() {
   const { data: session } = useSession();
+  const { checkRole, createSender } = useUsers();
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -46,7 +47,7 @@ export default function CompleteAccount() {
     if (session) {
       try {
         if (
-          (await senderExists(session?.user.email)) ||
+          (await checkRole(session?.user.email)) ||
           session?.user.role === "deliveryService"
         ) {
           router.replace("/dashboard");
