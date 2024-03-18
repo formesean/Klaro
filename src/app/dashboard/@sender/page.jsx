@@ -156,35 +156,45 @@ export default function Page() {
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
