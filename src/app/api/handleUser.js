@@ -7,6 +7,7 @@ import {
   updateDoc,
   setDoc,
   where,
+  addDoc,
 } from "firebase/firestore";
 
 export async function checkRole(sessionEmail) {
@@ -17,96 +18,31 @@ export async function checkRole(sessionEmail) {
   return !snapshot.empty;
 }
 
-export async function deliveryServiceRole(sessionEmail) {
-  try {
-    const sessionsCollection = collection(db, "sessions");
-    const sessionsQuery = query(sessionsCollection);
-    const sessionsSnapshot = await getDocs(sessionsQuery);
+export async function senderExists(sessionEmail) {
+  const userRef = collection(db, "senderAccounts");
+  const q = query(userRef, where("email", "==", sessionEmail));
+  const snapshot = await getDocs(q);
 
-    sessionsSnapshot.forEach(async () => {
-      const usersCollection = collection(db, "users");
-      const usersQuery = query(
-        usersCollection,
-        where("email", "==", sessionEmail)
-      );
-      const usersSnapshot = await getDocs(usersQuery);
-
-      if (!usersSnapshot.empty) {
-        const userDoc = usersSnapshot.docs[0];
-        const userID = userDoc.id;
-        const userRef = doc(db, "users", userID);
-        await updateDoc(userRef, { role: "deliveryService" });
-      }
-    });
-  } catch (error) {
-    throw error;
-  }
+  return !snapshot.empty;
 }
 
-export async function senderRole(sessionEmail) {
-  try {
-    const sessionsCollection = collection(db, "sessions");
-    const sessionsQuery = query(sessionsCollection);
-    const sessionsSnapshot = await getDocs(sessionsQuery);
-
-    sessionsSnapshot.forEach(async () => {
-      const usersCollection = collection(db, "users");
-      const usersQuery = query(
-        usersCollection,
-        where("email", "==", sessionEmail)
-      );
-      const usersSnapshot = await getDocs(usersQuery);
-
-      if (!usersSnapshot.empty) {
-        const userDoc = usersSnapshot.docs[0];
-        const userID = userDoc.id;
-        const userRef = doc(db, "users", userID);
-        await updateDoc(userRef, { role: "sender" });
-      }
-    });
-  } catch (error) {
-    throw error;
-  }
+export async function createSender(data) {
+  const userRef = collection(db, "senderAccounts");
+  const q = await addDoc(userRef, data);
 }
 
-export async function createSenderAccount(sessionEmail) {
-  try {
-    const sessionsCollection = collection(db, "sessions");
-    const sessionsQuery = query(sessionsCollection);
-    const sessionsSnapshot = await getDocs(sessionsQuery);
+export async function createDeliveryService(data, sessionEmail) {
+  const userRef = collection(db, "deliveryAccounts");
+  const q = query(userRef, where("email", "==", sessionEmail));
+  const snapshot = await getDocs(q);
 
-    sessionsSnapshot.forEach(async () => {
-      const usersCollection = collection(db, "users");
-      const usersQuery = query(
-        usersCollection,
-        where("email", "==", sessionEmail)
-      );
-      const usersSnapshot = await getDocs(usersQuery);
+  if (!snapshot.empty) {
+    const docRef = snapshot.docs[0].ref;
 
-      if (!usersSnapshot.empty) {
-        const userDoc = usersSnapshot.docs[0];
-        const userID = userDoc.id;
-
-        const senderAccountsRef = doc(db, "senderAccounts", userID);
-        await setDoc(senderAccountsRef, { userID });
-      }
-    });
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function checkAndHandleRole(session, router) {
-  if (!session) return;
-
-  try {
-    if (session?.user.role === "sender") {
-      await createSenderAccount(session.user.email);
-      router.replace("/send-parcel");
-    } else {
-      router.replace("/dashboard");
+    try {
+      await updateDoc(docRef, data);
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
   }
 }

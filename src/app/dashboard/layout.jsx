@@ -1,11 +1,9 @@
 "use client";
+import { useSession } from "next-auth/react";
 
-function checkuserRole() {
-  return "sender";
-}
+export default function Layout({ sender, deliveryService }) {
+  const { data: session } = useSession();
+  const role = session?.user.role;
 
-export default function Layout({ sender, deliveryservice }) {
-  const role = checkuserRole();
-
-  return <>{role === "deliveryservice" ? deliveryservice : sender}</>;
+  return <>{role === "deliveryService" ? deliveryService : sender}</>;
 }
