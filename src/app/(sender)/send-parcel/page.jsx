@@ -31,7 +31,6 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
 import { Label } from "../../../components/ui/label";
-import { useItem } from "../../api/useItem";
 import { useEffect, useState } from "react";
 
 const FormSchema = z.object({
@@ -47,17 +46,29 @@ const FormSchema = z.object({
 });
 
 export default function Forms() {
+  const router = useRouter();
   const { data: session } = useSession();
+  const [items, setItems] = useState([]);
   const [itemData, setItemData] = useState({
     itemName: "",
     itemQuantity: 0,
     itemPrice: 0.0,
   });
-  const [items, setItems] = useState([]);
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      receiverName: "",
+      receiverEmail: "",
+      receiverAddress: "",
+      items: [itemData],
+    },
+  });
 
-  if (!session || session.user.role !== "sender") {
-    return redirect("/");
-  }
+  useEffect(() => {
+    if (!session || session.user.role !== "sender") {
+      router.push("/");
+    }
+  }, [session, router]);
 
   useEffect(() => {
     const cachedFormData = localStorage.getItem("formData");
@@ -90,16 +101,6 @@ export default function Forms() {
   useEffect(() => {
     localStorage.setItem("items", JSON.stringify(items));
   }, [items]);
-
-  const form = useForm({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      receiverName: "",
-      receiverEmail: "",
-      receiverAddress: "",
-      items: [itemData],
-    },
-  });
 
   const handleChange = (e) => {
     const { id, value } = e.target;
