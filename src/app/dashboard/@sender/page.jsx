@@ -34,9 +34,9 @@ import { Checkbox } from "../../../components/ui/checkbox";
 
 export default function Page() {
   return (
-    <div className="">
-      <Card className="max-w-screen m-12">
-        <div class="grid grid-rows-2 grid-cols-4 gap-4">
+    <div>
+      <Card className="max-w-screen m-12 max-sm:m-3">
+        <div class="grid max-md:grid-cols-1 grid-rows-2 grid-cols-4 gap-4 ">
           <Card className="row-span-3 col-span-1 mt-2 ml-2 mb-2">
             <CardContent className="mt-4">
               <div>
@@ -103,37 +103,39 @@ export default function Page() {
               </div>
             </CardContent>
           </Card>
-          <Card className="row-span-2 col-span-1 mt-2">
-            <div>
-              <div className="pt-2 pl-2">
-                <p class="font-sans text-4xl font-bold">69</p>
+          <div className="flex flex-row row-span-2 col-span-3 w-[100%] max-sm:ml-2 mt-2 mr-2 ">
+            <Card className="row-span-2 col-span-1 w-[33%] mr-2 ">
+              <div>
+                <div className="pt-2 pl-2">
+                  <p class="font-sans text-4xl font-bold pr-5">69</p>
+                </div>
+                <div className="pl-2 pb-2">
+                  <p>En Route</p>
+                </div>
               </div>
-              <div className="pl-2 pb-2">
-                <p>En Route</p>
+            </Card>
+            <Card className="row-span-2 col-span-1 w-[33%] mr-2 ">
+              <div>
+                <div className="pt-2 pl-2">
+                  <p class="font-sans text-4xl font-bold">325</p>
+                </div>
+                <div className="pl-2 pb-2">
+                  <p>Delivered</p>
+                </div>
               </div>
-            </div>
-          </Card>
-          <Card className="row-span-2 col-span-1 mt-2">
-            <div>
-              <div className="pt-2 pl-2">
-                <p class="font-sans text-4xl font-bold">325</p>
+            </Card>
+            <Card className="row-span-2 col-span-1 w-[33%] mr-5">
+              <div>
+                <div className="pt-2 pl-2">
+                  <p class="font-sans text-4xl font-bold">43</p>
+                </div>
+                <div className="pl-2 pb-2">
+                  <p>Pending</p>
+                </div>
               </div>
-              <div className="pl-2 pb-2">
-                <p>Delivered</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="row-span-2 col-span-1 mt-2 mr-2">
-            <div>
-              <div className="pt-2 pl-2">
-                <p class="font-sans text-4xl font-bold">43</p>
-              </div>
-              <div className="pl-2 pb-2">
-                <p>Pending</p>
-              </div>
-            </div>
-          </Card>
-          <div className="row-span-1 col-span-3 rounded-lg border bg-card text-card-foreground shadow-sm mr-2 mb-2 flex flex-col ">
+            </Card>
+          </div>
+          <div className="row-span-1 col-span-3 rounded-lg border bg-card text-card-foreground shadow-sm max-sm:ml-2 mr-2 mb-2 flex flex-col ">
             <CardHeader className="text-base font-bold flex">
               Order History
             </CardHeader>
@@ -156,35 +158,45 @@ export default function Page() {
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>12345678901</TableCell>
                     <TableCell>Balay ni Mayang</TableCell>
                     <TableCell>In transit</TableCell>
                     <TableCell>01/01/24</TableCell>
-                    <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    <TableCell>
+                      <Button className="mt-1.5 mb-1.5">View Details</Button>
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
