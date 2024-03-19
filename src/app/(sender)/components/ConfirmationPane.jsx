@@ -53,7 +53,6 @@ export function ConfirmationPane({ processOrder, isFormComplete }) {
           type="submit"
           onClick={handleProcessOrder}
           disabled={!isFormComplete}
-          className="select-none"
         >
           Process Order
         </Button>
