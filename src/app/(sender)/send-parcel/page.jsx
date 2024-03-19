@@ -31,8 +31,8 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
 import { Label } from "../../../components/ui/label";
-import { useItem } from "../../api/useItem";
 import { useEffect, useState } from "react";
+import { ConfirmationPane } from "../components/ConfirmationPane";
 
 const FormSchema = z.object({
   receiverName: z.string().min(3, {
@@ -44,55 +44,75 @@ const FormSchema = z.object({
   receiverAddress: z.string().min(3, {
     message: "Address must be at least 3 characters.",
   }),
-  itemName: z.string(),
-  itemQuantity: z.number(),
-  itemPrice: z.number(),
 });
 
-export default function SendParcel() {
+export default function Forms() {
+  const router = useRouter();
   const { data: session } = useSession();
-  const { createItem, fetchItems, fetchItem, updateItem, removeItem } =
-    useItem();
+  const [isFormComplete, setIsFormComplete] = useState(false);
+  const [items, setItems] = useState([]);
   const [itemData, setItemData] = useState({
     itemName: "",
     itemQuantity: 0,
-    itemPrice: 0,
+    itemPrice: 0.0,
   });
-  const [items, setItems] = useState([]);
-
-  if (!session || session.user.role !== "sender") {
-    return redirect("/");
-  }
-
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       receiverName: "",
       receiverEmail: "",
       receiverAddress: "",
-      itemName: "",
-      itemQuantity: "",
-      itemPrice: "",
+      items: [itemData],
     },
   });
 
   useEffect(() => {
-    const getItems = async () => {
-      const itemsData = await fetchItems();
-      setItems(itemsData);
-    };
-    getItems();
-  }, [fetchItems]);
+    const nameValue = form.watch("receiverName");
+    const emailValue = form.watch("receiverEmail");
+    const addressValue = form.watch("receiverAddress");
+    const complete =
+      nameValue !== "" && emailValue !== "" && addressValue !== "";
 
-  //FOR CONSULTATION
-  function processOrder(data) {
-    //processes order.
-    const userData = {
-      receiverName: data.receiverName,
-      receiverEmail: data.receiverName,
-      receiverAddress: data.receiverAddress,
-    };
-  }
+    setIsFormComplete(complete);
+  }, [form.watch()]);
+
+  useEffect(() => {
+    if (!session || session.user.role !== "sender") {
+      router.push("/");
+    }
+  }, [session, router]);
+
+  useEffect(() => {
+    const cachedFormData = localStorage.getItem("formData");
+    if (cachedFormData) {
+      const parsedData = JSON.parse(cachedFormData);
+      form.reset(parsedData);
+    }
+
+    const cachedItemData = localStorage.getItem("itemData");
+    if (cachedItemData) {
+      const parsedItemData = JSON.parse(cachedItemData);
+      setItemData(parsedItemData);
+    }
+
+    const cachedItems = localStorage.getItem("items");
+    if (cachedItems) {
+      const parsedData = JSON.parse(cachedItems);
+      setItems(parsedData);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("formData", JSON.stringify(form.getValues()));
+  }, [form.getValues()]);
+
+  useEffect(() => {
+    localStorage.setItem("itemData", JSON.stringify(itemData));
+  }, [itemData]);
+
+  useEffect(() => {
+    localStorage.setItem("items", JSON.stringify(items));
+  }, [items]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -102,7 +122,7 @@ export default function SendParcel() {
     }));
   };
 
-  async function handleItem(e) {
+  const handleItem = (e) => {
     e.preventDefault();
 
     try {
@@ -110,22 +130,32 @@ export default function SendParcel() {
         throw new Error("All fields are required");
       }
 
-      const itemRef = await createItem(itemData);
+      const newItem = { ...itemData };
+
+      setItems((prevItems) => [...prevItems, newItem]);
 
       setItemData({
         itemName: "",
         itemQuantity: 0,
-        itemPrice: 0,
+        itemPrice: 0.0,
       });
     } catch (error) {
       console.error("Error adding item:", error.message);
     }
-  }
+  };
 
-  const handleRemoveItem = async (item) => {
-    await removeItem(item.id);
-    const updatedItems = await fetchItems();
-    setItems(updatedItems);
+  const handleRemoveItem = (itemToRemove) => {
+    try {
+      const updatedItems = items.filter((item) => item !== itemToRemove);
+
+      setItems(updatedItems);
+    } catch (error) {
+      console.error("Error removing item:", error.message);
+    }
+  };
+
+  const processOrder = (data) => {
+    localStorage.setItem("orderData", JSON.stringify({ ...data, items }));
   };
 
   return (
@@ -184,7 +214,6 @@ export default function SendParcel() {
 
             <Card className="m-8">
               <CardHeader>Parcel Contents</CardHeader>
-              {/* w-screen mx-6 max-md:w-full max-md:pr-[55px] */}
               <div className="flex justify-between py-4 mx-3 max-md:flex-col">
                 <div className="mx-3  w-screen max-md:w-full max-md:pe-3">
                   <Label htmlFor="itemName">item:</Label>
@@ -217,7 +246,7 @@ export default function SendParcel() {
                 </div>
               </div>
 
-              <div className="flex justify-end mr-6 mb-3 max-md:mr-8">
+              <div className="flex justify-end mr-6 mb-3 max-md:mr-4">
                 <Button onClick={handleItem}>Add Item</Button>
               </div>
 
@@ -262,9 +291,10 @@ export default function SendParcel() {
               </Table>
             </Card>
             <div className="flex justify-end mr-8 mb-3 ">
-              <Button type="submit" value="Submit">
-                Process Order
-              </Button>
+              <ConfirmationPane
+                processOrder={processOrder}
+                isFormComplete={isFormComplete}
+              />
             </div>
           </form>
         </Form>
