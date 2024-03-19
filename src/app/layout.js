@@ -21,10 +21,13 @@ export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
 
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className="scroll-smooth scrollbar-thin scrollbar-thumb-white scrollbar-track-green-500"
+    >
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "max-h-screen bg-background font-sans antialiased",
           fontSans.variable
         )}
       >

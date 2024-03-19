@@ -1,5 +1,5 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -48,7 +48,6 @@ const FormSchema = z.object({
 
 export default function Forms() {
   const router = useRouter();
-  const currentPathname = usePathname();
   const { data: session } = useSession();
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [items, setItems] = useState([]);
@@ -84,16 +83,7 @@ export default function Forms() {
       items.length > 0;
 
     setIsFormComplete(complete);
-  }, [form.watch()]);
-
-  useEffect(() => {
-    if (currentPathname !== "/send-parcel") {
-      localStorage.removeItem("formData");
-      localStorage.removeItem("itemData");
-      localStorage.removeItem("items");
-      localStorage.removeItem("orderData");
-    }
-  }, [currentPathname]);
+  }, [form.watch(), items]);
 
   useEffect(() => {
     const cachedFormData = localStorage.getItem("formData");
