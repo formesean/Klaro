@@ -62,7 +62,6 @@ export default function Forms() {
       receiverName: "",
       receiverEmail: "",
       receiverAddress: "",
-      items: [itemData],
     },
   });
 
@@ -158,7 +157,7 @@ export default function Forms() {
   };
 
   const processOrder = (data) => {
-    localStorage.setItem("orderData", JSON.stringify({ ...data, items }));
+    // localStorage.setItem("orderData", JSON.stringify({ ...data, items }));
   };
 
   return (
@@ -295,7 +294,8 @@ export default function Forms() {
             </Card>
             <div className="flex justify-end mr-8 mb-3 ">
               <ConfirmationPane
-                processOrder={processOrder}
+                formData={form.getValues()}
+                item={items}
                 isFormComplete={isFormComplete}
               />
             </div>

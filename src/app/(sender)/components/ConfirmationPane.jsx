@@ -22,23 +22,17 @@ import {
   TableRow,
 } from "../../../components/ui/table";
 
-export function ConfirmationPane({ processOrder, isFormComplete }) {
-  const [orderData, setOrderData] = useState(null);
+export function ConfirmationPane({ formData, item, isFormComplete }) {
+  const [recipientData, setRecipientData] = useState(formData);
+  const [itemsData, setItemsData] = useState(item);
 
   const handleProcessOrder = () => {
-    processOrder();
+    setRecipientData(formData);
+    setItemsData(item);
   };
 
-  useEffect(() => {
-    const data = localStorage.getItem("orderData");
-
-    if (data) {
-      setOrderData(JSON.parse(data));
-    }
-  }, []);
-
-  const merchandiseSubtotal = orderData
-    ? orderData.items.reduce(
+  const merchandiseSubtotal = itemsData
+    ? itemsData.reduce(
         (subtotal, item) => subtotal + item.itemPrice * item.itemQuantity,
         0
       )
@@ -66,10 +60,11 @@ export function ConfirmationPane({ processOrder, isFormComplete }) {
                 <Card className="mb-4">
                   <CardHeader>Delivery Information</CardHeader>
                   <CardContent>
-                    {orderData && (
+                    {recipientData && (
                       <p>
-                        {orderData.receiverName} | {orderData.receiverEmail} |{" "}
-                        {orderData.receiverAddress}
+                        {recipientData.receiverName} |{" "}
+                        {recipientData.receiverEmail} |{" "}
+                        {recipientData.receiverAddress}
                       </p>
                     )}
                   </CardContent>
@@ -89,8 +84,8 @@ export function ConfirmationPane({ processOrder, isFormComplete }) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {orderData &&
-                          orderData.items.map((item, index) => (
+                        {itemsData &&
+                          itemsData.map((item, index) => (
                             <TableRow key={index}>
                               <TableCell>{item.itemName}</TableCell>
                               <TableCell>{item.itemPrice}</TableCell>
