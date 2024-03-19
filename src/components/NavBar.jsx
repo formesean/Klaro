@@ -60,10 +60,51 @@ export default function NavBar() {
   };
 
   return (
-    <div className="flex justify-between items-center py-2 px-4">
-      <div className="flex items-center gap-10">
-        <h1 className="text-2xl font-bold">Klaro</h1>
-        <div className="hidden sm:flex items-center gap-6">
+    <div className={`sticky left-0 top-0 z-50 bg-inherit shadow`}>
+      <div className="flex justify-between items-center py-2 px-4">
+        <div className="flex items-center gap-10">
+          <h1 className="text-2xl font-bold">Klaro</h1>
+          <div className="hidden sm:flex items-center gap-6">
+            {NavItems.filter(
+              (item) =>
+                item.for === "all" ||
+                (item.for === "receiver" && !userRole) ||
+                (item.for === "receiver" && userRole === "receiver") ||
+                (Array.isArray(item.for) && item.for.includes(userRole))
+            ).map((item) => (
+              <NavLink
+                key={item.title}
+                item={item}
+                currentPath={currentPath}
+                theme={theme}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <ModeToggle />
+          <button
+            className={`block sm:hidden focus:outline-none ${
+              showMenu ? (theme === "dark" ? "text-white" : "text-black") : ""
+            }`}
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            <Menu className={`h-6 w-6 ${showMenu ? "hidden" : "block"}`} />
+            <X className={`h-6 w-6 ${showMenu ? "block" : "hidden"}`} />
+          </button>
+
+          <div className="hidden sm:flex items-center gap-6">
+            <AuthButton user={user} onClick={closeMenu} />
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div
+          className={`${showMenu ? "flex" : "hidden"} ${
+            theme === "dark" ? "bg-black" : "bg-white"
+          } sm:hidden flex-col gap-4 absolute w-[90%] top-14 left-2/4 -translate-x-2/4 p-4 rounded-lg shadow-[rgb(255 255 255 / 0.5)] shadow`}
+        >
           {NavItems.filter(
             (item) =>
               item.for === "all" ||
@@ -76,51 +117,12 @@ export default function NavBar() {
               item={item}
               currentPath={currentPath}
               theme={theme}
+              mobile
+              onClick={closeMenu}
             />
           ))}
+          <AuthButton user={user} mobile onClick={closeMenu} />
         </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <ModeToggle />
-        <button
-          className={`block sm:hidden focus:outline-none ${
-            showMenu ? (theme === "dark" ? "text-white" : "text-black") : ""
-          }`}
-          onClick={() => setShowMenu(!showMenu)}
-        >
-          <Menu className={`h-6 w-6 ${showMenu ? "hidden" : "block"}`} />
-          <X className={`h-6 w-6 ${showMenu ? "block" : "hidden"}`} />
-        </button>
-
-        <div className="hidden sm:flex items-center gap-6">
-          <AuthButton user={user} onClick={closeMenu} />
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <div
-        className={`${showMenu ? "flex" : "hidden"} ${
-          theme === "dark" ? "bg-black" : "bg-white"
-        } sm:hidden flex-col gap-4 absolute w-[90%] top-14 left-2/4 -translate-x-2/4 p-4 rounded-lg shadow-[rgb(255 255 255 / 0.5)] shadow`}
-      >
-        {NavItems.filter(
-          (item) =>
-            item.for === "all" ||
-            (item.for === "receiver" && !userRole) ||
-            (item.for === "receiver" && userRole === "receiver") ||
-            (Array.isArray(item.for) && item.for.includes(userRole))
-        ).map((item) => (
-          <NavLink
-            key={item.title}
-            item={item}
-            currentPath={currentPath}
-            theme={theme}
-            mobile
-            onClick={closeMenu}
-          />
-        ))}
-        <AuthButton user={user} mobile onClick={closeMenu} />
       </div>
     </div>
   );
