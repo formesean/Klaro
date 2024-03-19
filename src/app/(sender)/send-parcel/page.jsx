@@ -1,5 +1,5 @@
 "use client";
-import { redirect, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -48,6 +48,7 @@ const FormSchema = z.object({
 
 export default function Forms() {
   const router = useRouter();
+  const currentPathname = usePathname();
   const { data: session } = useSession();
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [items, setItems] = useState([]);
@@ -67,20 +68,32 @@ export default function Forms() {
   });
 
   useEffect(() => {
+    if (!session || session.user.role !== "sender") {
+      router.push("/");
+    }
+  }, [session, router]);
+
+  useEffect(() => {
     const nameValue = form.watch("receiverName");
     const emailValue = form.watch("receiverEmail");
     const addressValue = form.watch("receiverAddress");
     const complete =
-      nameValue !== "" && emailValue !== "" && addressValue !== "";
+      nameValue !== "" &&
+      emailValue !== "" &&
+      addressValue !== "" &&
+      items.length > 0;
 
     setIsFormComplete(complete);
   }, [form.watch()]);
 
   useEffect(() => {
-    if (!session || session.user.role !== "sender") {
-      router.push("/");
+    if (currentPathname !== "/send-parcel") {
+      localStorage.removeItem("formData");
+      localStorage.removeItem("itemData");
+      localStorage.removeItem("items");
+      localStorage.removeItem("orderData");
     }
-  }, [session, router]);
+  }, [currentPathname]);
 
   useEffect(() => {
     const cachedFormData = localStorage.getItem("formData");
