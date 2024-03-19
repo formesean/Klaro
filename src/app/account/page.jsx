@@ -21,6 +21,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createSender, senderExists } from "../api/handleUser";
 import { useRouter } from "next/navigation";
+import { createOrder, getOrder, getSenderAccount } from "../api/test";
+import { collection } from "firebase/firestore";
 
 const formSchema = z.object({
   fullName: z.string().min(2, {
@@ -67,14 +69,15 @@ export default function CompleteAccount() {
         address: data.address,
         parcels: [],
       };
-
+      
       await createSender(userData);
+
 
       router.replace("/dashboard");
     } catch (error) {
       console.error("Error submitting form:", error);
     }
-  }
+  }   
 
   return (
     <div className="fixed top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4">

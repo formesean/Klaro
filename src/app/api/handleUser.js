@@ -23,7 +23,7 @@ export async function senderExists(sessionEmail) {
   const q = query(userRef, where("email", "==", sessionEmail));
   const snapshot = await getDocs(q);
 
-  return !snapshot.empty;
+  return !snapshot.empty
 }
 
 export async function createSender(data) {
