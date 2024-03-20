@@ -1,5 +1,5 @@
 "use client";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -32,6 +32,7 @@ import {
 } from "../../../components/ui/dropdown-menu";
 import { Label } from "../../../components/ui/label";
 import { useEffect, useState } from "react";
+import { ConfirmationPane } from "../components/ConfirmationPane";
 
 const FormSchema = z.object({
   receiverName: z.string().min(3, {
@@ -48,6 +49,7 @@ const FormSchema = z.object({
 export default function Forms() {
   const router = useRouter();
   const { data: session } = useSession();
+  const [isFormComplete, setIsFormComplete] = useState(false);
   const [items, setItems] = useState([]);
   const [itemData, setItemData] = useState({
     itemName: "",
@@ -69,6 +71,19 @@ export default function Forms() {
       router.push("/");
     }
   }, [session, router]);
+
+  useEffect(() => {
+    const nameValue = form.watch("receiverName");
+    const emailValue = form.watch("receiverEmail");
+    const addressValue = form.watch("receiverAddress");
+    const complete =
+      nameValue !== "" &&
+      emailValue !== "" &&
+      addressValue !== "" &&
+      items.length > 0;
+
+    setIsFormComplete(complete);
+  }, [form.watch(), items]);
 
   useEffect(() => {
     const cachedFormData = localStorage.getItem("formData");
@@ -143,7 +158,7 @@ export default function Forms() {
   };
 
   const processOrder = (data) => {
-    localStorage.setItem("orderData", JSON.stringify({ ...data, items }));
+    // localStorage.setItem("orderData", JSON.stringify({ ...data, items }));
   };
 
   return (
@@ -234,7 +249,7 @@ export default function Forms() {
                 </div>
               </div>
 
-              <div className="flex justify-end mr-6 mb-3 max-md:mr-8">
+              <div className="flex justify-end mr-6 mb-3 max-md:mr-4">
                 <Button onClick={handleItem}>Add Item</Button>
               </div>
 
@@ -279,9 +294,11 @@ export default function Forms() {
               </Table>
             </Card>
             <div className="flex justify-end mr-8 mb-3 ">
-              <Button type="submit" value="Submit">
-                Process Order
-              </Button>
+              <ConfirmationPane
+                formData={form.getValues()}
+                item={items}
+                isFormComplete={isFormComplete}
+              />
             </div>
           </form>
         </Form>

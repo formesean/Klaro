@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { senderExists } from "./api/handleUser";
 
-export default function Home() {
+export default async function Home() {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -27,7 +27,7 @@ export default function Home() {
   }, [session, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+    <div className="flex flex-col items-center justify-center py-2">
       <h1>THIS IS THE HOME PAGE</h1>
     </div>
   );
