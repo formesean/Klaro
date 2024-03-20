@@ -46,3 +46,29 @@ export async function createDeliveryService(data, sessionEmail) {
     }
   }
 }
+
+// //gets sender details
+// export async function fetchSenderAccount(sessionEmail)
+// {
+//   try {
+//     const userRef = collection(db, "senderAccounts");
+//     const q = query(userRef, where("email", "==", sessionEmail));
+//     const snapshot = await getDocs(q);
+
+//     let details = {};
+//     snapshot.forEach(doc=>{
+//       const data = doc.data();
+//       details = {
+//         senderID: doc.id,
+//         email: data.email,
+//         fullName: data.fullName,
+//         address: data.address
+//       }
+//     });
+
+//   return details;
+//   } catch (error) {
+//     console.error("Error fetching sender account:", error);
+//     throw error;
+//   }
+// }

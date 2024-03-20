@@ -39,3 +39,9 @@ next-env.d.ts
 
 
 /src/app/api/useSports.ts
+
+/src/app/api/test.ts
+
+/src/app/api/useItemsJavascript.ts
+
+/src/app/api/useOrdersJavascript.ts
