@@ -101,6 +101,13 @@ export function ConfirmationPane({ formData, item, isFormComplete }) {
                 </Card>
 
                 <Card className="mt-4">
+                  <CardHeader>Delivery Service</CardHeader>
+                  <CardContent>
+                    <p>Place delivery service name here</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="mt-4">
                   <CardHeader>Payment</CardHeader>
 
                   <CardContent>

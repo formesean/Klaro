@@ -14,7 +14,7 @@ import {
   FormItem,
   FormLabel,
 } from "../../../components/ui/form";
-import { Card, CardHeader } from "../../../components/ui/card";
+import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import {
   Table,
   TableBody,
@@ -33,6 +33,21 @@ import {
 import { Label } from "../../../components/ui/label";
 import { useEffect, useState } from "react";
 import { ConfirmationPane } from "../components/ConfirmationPane";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../../../components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../../components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "../.././../lib/utils";
 
 const FormSchema = z.object({
   receiverName: z.string().min(3, {
@@ -46,10 +61,35 @@ const FormSchema = z.object({
   }),
 });
 
+const frameworks = [
+  {
+    value: "option1",
+    label: "option1",
+  },
+  {
+    value: "option2",
+    label: "option2",
+  },
+  {
+    value: "option3",
+    label: "option3",
+  },
+  {
+    value: "option4",
+    label: "option4",
+  },
+  {
+    value: "option5",
+    label: "option5",
+  },
+];
+
 export default function Forms() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isFormComplete, setIsFormComplete] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
   const [items, setItems] = useState([]);
   const [itemData, setItemData] = useState({
     itemName: "",
@@ -165,57 +205,114 @@ export default function Forms() {
       <Card className="m-12">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(processOrder)}>
-            <Card className="m-8">
-              <CardHeader>Recipient Information</CardHeader>
-              <div className="flex max-md:flex-col mb-6">
-                <FormField
-                  control={form.control}
-                  name="receiverName"
-                  render={({ field }) => (
-                    <>
-                      <FormItem className=" w-screen mx-6 max-md:w-full max-md:pr-[55px]">
-                        <FormLabel>name:</FormLabel>
-                        <FormControl>
-                          <Input type="string" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    </>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="receiverEmail"
-                  render={({ field }) => (
-                    <>
-                      <FormItem className=" w-screen mx-6 max-md:w-full max-md:pr-[55px]">
-                        <FormLabel>email:</FormLabel>
-                        <FormControl>
-                          <Input type="string" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    </>
-                  )}
-                />
-                <FormField
-                  className="py-4 mx-3"
-                  control={form.control}
-                  name="receiverAddress"
-                  render={({ field }) => (
-                    <>
-                      <FormItem className=" w-screen mx-6 max-md:w-full max-md:pr-[55px]">
-                        <FormLabel>address:</FormLabel>
-                        <FormControl>
-                          <Input type="string" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    </>
-                  )}
-                />
+            <div className="flex max-md:flex-col m-8">
+              <div className="w-[1800px] max-md:w-full">
+                <Card className="max-md:w-full">
+                  <CardHeader>Recipient Information</CardHeader>
+                  <div className="flex max-md:flex-col mb-6">
+                    <FormField
+                      control={form.control}
+                      name="receiverName"
+                      render={({ field }) => (
+                        <>
+                          <FormItem className="mx-6 max-md:w-full max-md:pr-[55px] w-full">
+                            <FormLabel>name:</FormLabel>
+                            <FormControl>
+                              <Input type="string" {...field} />
+                            </FormControl>
+                          </FormItem>
+                        </>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="receiverEmail"
+                      render={({ field }) => (
+                        <>
+                          <FormItem className="mx-6 max-md:w-full max-md:pr-[55px] w-full">
+                            <FormLabel>email:</FormLabel>
+                            <FormControl>
+                              <Input type="string" {...field} />
+                            </FormControl>
+                          </FormItem>
+                        </>
+                      )}
+                    />
+                    <FormField
+                      className="py-4 mx-3"
+                      control={form.control}
+                      name="receiverAddress"
+                      render={({ field }) => (
+                        <>
+                          <FormItem className="mx-6 max-md:w-full max-md:pr-[55px] w-full">
+                            <FormLabel>address:</FormLabel>
+                            <FormControl>
+                              <Input type="string" {...field} />
+                            </FormControl>
+                          </FormItem>
+                        </>
+                      )}
+                    />
+                  </div>
+                </Card>
               </div>
-            </Card>
+
+              <Card className="ml-3 max-md:ml-0 max-md:mt-6">
+                <CardHeader>Delivery Service</CardHeader>
+                <CardContent>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        disabled={open}
+                        className="w-[200px] justify-between mt-8"
+                      >
+                        {value
+                          ? frameworks.find(
+                              (framework) => framework.value === value
+                            )?.label
+                          : "Select delivery service..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Search delivery service..." />
+                        <CommandEmpty>No delivery service found.</CommandEmpty>
+                        <CommandList>
+                          {frameworks.map((framework) => (
+                            <CommandItem
+                              key={framework.value}
+                              value={framework.value}
+                              onSelect={(currentValue) => {
+                                setValue(
+                                  currentValue === value ? "" : currentValue
+                                );
+                                setOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  value === framework.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {framework.label}
+                            </CommandItem>
+                          ))}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </CardContent>
+              </Card>
+            </div>
 
             <Card className="m-8">
-              <CardHeader>Parcel Contents</CardHeader>
+              <CardHeader>Order Contents</CardHeader>
               <div className="flex justify-between py-4 mx-3 max-md:flex-col">
                 <div className="mx-3  w-screen max-md:w-full max-md:pe-3">
                   <Label htmlFor="itemName">item:</Label>
