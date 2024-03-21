@@ -11,7 +11,12 @@ import {
   AlertDialogTrigger,
 } from "../../../components/ui/alert-dialog";
 import { Button } from "../../../components/ui/button";
-import { Card, CardContent, CardHeader } from "../../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
 import {
   Table,
   TableBody,
@@ -21,8 +26,22 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
+import { useOrders } from "../../api/useOrders";
+import { useItems } from "../../api/useItems";
+import { useSender } from "../../api/useSender";
+import { Timestamp } from "firebase/firestore";
 
-export function ConfirmationPane({ formData, item, isFormComplete }) {
+export function ConfirmationPane({
+  formData,
+  item,
+  deliveryServiceName,
+  isFormComplete,
+  sessionEmail,
+}) {
+  const { getDocRef, fetchSender } = useSender();
+  const { createOrder } = useOrders();
+  const { createItem } = useItems();
+
   const [recipientData, setRecipientData] = useState(formData);
   const [itemsData, setItemsData] = useState(item);
 
@@ -40,6 +59,38 @@ export function ConfirmationPane({ formData, item, isFormComplete }) {
   const shippingTotal = 50;
   const totalPayment = merchandiseSubtotal + shippingTotal;
 
+  const handleOrder = async () => {
+    const itemsPath = [];
+    const senderRef = await getDocRef(sessionEmail);
+    const senderData = await fetchSender(senderRef);
+
+    for (const itemObject of itemsData) {
+      const docRef = await createItem(itemObject);
+      itemsPath.push(docRef.path);
+    }
+
+    const orderData = {
+      items: itemsPath,
+      sender: senderRef.path,
+      senderName: senderData.fullName,
+      senderEmail: senderData.email,
+      senderAddress: senderData.address,
+      receiverName: recipientData.receiverName,
+      receiverEmail: recipientData.receiverEmail,
+      receiverAddress:
+        recipientData.receiverName + ", " + recipientData.receiverAddress2,
+      deliveryService: deliveryServiceName.name,
+      totalQuantity: itemsData.reduce(
+        (total, item) => total + item.itemQuantity,
+        0
+      ),
+      totalPrice: totalPayment,
+      dateIssued: Timestamp.now(),
+    };
+
+    const orderRef = await createOrder(orderData);
+  };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -56,23 +107,27 @@ export function ConfirmationPane({ formData, item, isFormComplete }) {
           <AlertDialogTitle>Order Checkout</AlertDialogTitle>
           <AlertDialogDescription>
             <Card>
-              <CardContent className="max-h-[500px] pt-[24px] overflow-y-auto scrollbar-thin scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+              <CardContent className="max-h-[500px] pt-[24px] overflow-y-auto scrollbar-thin">
                 <Card className="mb-4">
-                  <CardHeader>Delivery Information</CardHeader>
+                  <CardHeader>
+                    <CardTitle>Delivery Information</CardTitle>
+                  </CardHeader>
                   <CardContent>
                     {recipientData && (
                       <p>
                         {recipientData.receiverName} |{" "}
                         {recipientData.receiverEmail} |{" "}
-                        {recipientData.receiverAddress}
+                        {recipientData.receiverAddress1} <span>, </span>{" "}
+                        {recipientData.receiverAddress2}
                       </p>
                     )}
                   </CardContent>
                 </Card>
 
                 <Card className="my-4">
-                  <CardHeader>Item Information</CardHeader>
-
+                  <CardHeader>
+                    <CardTitle>Item Information</CardTitle>
+                  </CardHeader>
                   <CardContent>
                     <Table>
                       <TableHeader>
@@ -101,15 +156,18 @@ export function ConfirmationPane({ formData, item, isFormComplete }) {
                 </Card>
 
                 <Card className="mt-4">
-                  <CardHeader>Delivery Service</CardHeader>
+                  <CardHeader>
+                    <CardTitle>Delivery Service</CardTitle>
+                  </CardHeader>
                   <CardContent>
-                    <p>Place delivery service name here</p>
+                    {deliveryServiceName.name} | {deliveryServiceName.email}
                   </CardContent>
                 </Card>
 
                 <Card className="mt-4">
-                  <CardHeader>Payment</CardHeader>
-
+                  <CardHeader>
+                    <CardTitle>Payment</CardTitle>
+                  </CardHeader>
                   <CardContent>
                     <Table>
                       <TableBody className="text-right">
@@ -145,7 +203,9 @@ export function ConfirmationPane({ formData, item, isFormComplete }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Place Order</AlertDialogAction>
+          <AlertDialogAction onClick={handleOrder}>
+            Place Order
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
