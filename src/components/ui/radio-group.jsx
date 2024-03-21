@@ -7,8 +7,8 @@ import {
   PackageCheck,
   Warehouse,
   Truck,
-  UserCheck,
   PackagePlus,
+  ClipboardList,
 } from "lucide-react";
 
 import { cn } from "../../lib/utils";
@@ -46,20 +46,20 @@ const RadioGroupItemWithIcons = React.forwardRef(
   ({ className, selected, ...props }, ref) => {
     let icon;
     switch (selected) {
-      case "option-sent":
-        icon = <PackageCheck />;
+      case "option-delivered":
+        icon = <PackageCheck className="w-10 h-10" />;
         break;
       case "option-hub":
-        icon = <Warehouse />;
+        icon = <Warehouse className="w-10 h-10" />;
         break;
       case "option-transit":
-        icon = <Truck />;
+        icon = <Truck className="w-10 h-10" />;
         break;
       case "option-partner":
-        icon = <UserCheck />;
+        icon = <PackagePlus className="w-10 h-10" />;
         break;
       case "option-order":
-        icon = <PackagePlus />;
+        icon = <ClipboardList className="w-10 h-10" />;
         break;
       default:
         icon = <Circle />;
@@ -69,7 +69,7 @@ const RadioGroupItemWithIcons = React.forwardRef(
       <RadioGroupPrimitive.Item
         ref={ref}
         className={cn(
-          "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          "aspect-square h-4 w-4 rounded-full border-[2px] border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
