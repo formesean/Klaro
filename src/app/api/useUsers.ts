@@ -9,6 +9,11 @@ import {
 } from "firebase/firestore";
 
 export const useUsers = () => {
+  /**
+   * Checks if a user has a delivery role.
+   * @param {string} sessionEmail - The email of the user.
+   * @returns {Promise<boolean>} A Promise resolving to true if the user has a delivery role, false otherwise.
+   */
   const checkRole = async (sessionEmail: string): Promise<boolean> => {
     try {
       const userRef = collection(db, "deliveryAccounts");
@@ -21,6 +26,11 @@ export const useUsers = () => {
     }
   };
 
+  /**
+   * Checks if a sender exists based on the provided email.
+   * @param {string} sessionEmail - The email of the sender.
+   * @returns {Promise<boolean>} A Promise resolving to true if the sender exists, false otherwise.
+   */
   const senderExists = async (sessionEmail: string): Promise<boolean> => {
     try {
       const userRef = collection(db, "senderAccounts");
@@ -33,14 +43,5 @@ export const useUsers = () => {
     }
   };
 
-  const createSender = async (data: any): Promise<void> => {
-    try {
-      const userRef = collection(db, "senderAccounts");
-      await addDoc(userRef, data);
-    } catch (error) {
-      console.error("Error creating sender:", error);
-    }
-  };
-
-  return { checkRole, senderExists, createSender };
+  return { checkRole, senderExists };
 };
