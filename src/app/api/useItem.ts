@@ -39,17 +39,16 @@ export const useItem = () => {
    * Fetches all items from the "items" collection in Firestore.
    * @returns {Promise<Item[]>} A promise that resolves with an array containing all fetched items, or rejects if an error occurs.
    */
-  const fetchItems = async () => {
+  const fetchItems = async (): Promise<Item[] | undefined> => {
     try {
       const querySnapshot = await getDocs(collection(db, "items"));
       const items: Item[] = querySnapshot.docs.map((doc) => ({
-        id: doc.ref,
         ...doc.data(),
       })) as Item[];
       return items;
     } catch (error) {
       console.error("Error getting items:", error);
-      throw error;
+      return undefined;
     }
   };
 

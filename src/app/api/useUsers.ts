@@ -42,23 +42,5 @@ export const useUsers = () => {
     }
   };
 
-  const createDeliveryService = async (
-    data: any,
-    sessionEmail: string
-  ): Promise<void> => {
-    try {
-      const userRef = collection(db, "deliveryAccounts");
-      const q = query(userRef, where("email", "==", sessionEmail));
-      const snapshot = await getDocs(q);
-
-      if (!snapshot.empty) {
-        const docRef = snapshot.docs[0].ref;
-        await updateDoc(docRef, data);
-      }
-    } catch (error) {
-      console.error("Error creating delivery service:", error);
-    }
-  };
-
-  return { checkRole, senderExists, createSender, createDeliveryService };
+  return { checkRole, senderExists, createSender };
 };

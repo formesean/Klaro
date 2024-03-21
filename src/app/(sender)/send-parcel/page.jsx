@@ -102,6 +102,7 @@ export default function Forms() {
       receiverName: "",
       receiverEmail: "",
       receiverAddress: "",
+      items: [itemData],
     },
   });
 
