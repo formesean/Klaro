@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,28 +26,37 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
+import { useToast } from "../../../components/ui/use-toast";
 import { useOrders } from "../../api/useOrders";
 import { useItems } from "../../api/useItems";
 import { useSender } from "../../api/useSender";
+import { useDeliveryService } from "../../api/useDeliveryService";
+import { useParcels } from "../../api/useParcels";
 import { Timestamp } from "firebase/firestore";
 
 export function ConfirmationPane({
   formData,
   item,
-  deliveryServiceName,
+  deliveryServiceData,
   isFormComplete,
   sessionEmail,
+  clearData,
 }) {
   const { getDocRef, fetchSender } = useSender();
+  const { getDocRefByEmail } = useDeliveryService();
   const { createOrder } = useOrders();
   const { createItem } = useItems();
+  const { createParcel } = useParcels();
 
+  const { toast } = useToast();
   const [recipientData, setRecipientData] = useState(formData);
   const [itemsData, setItemsData] = useState(item);
+  const [showToast, setShowToast] = useState(false);
 
   const handleProcessOrder = () => {
     setRecipientData(formData);
     setItemsData(item);
+    setShowToast(true);
   };
 
   const merchandiseSubtotal = itemsData
@@ -60,39 +69,56 @@ export function ConfirmationPane({
   const totalPayment = merchandiseSubtotal + shippingTotal;
 
   const handleOrder = async () => {
-    const itemsPath = [];
+    const itemsRef = [];
     const senderRef = await getDocRef(sessionEmail);
     const senderData = await fetchSender(senderRef);
-
+    const deliveryServiceRef = await getDocRefByEmail(
+      deliveryServiceData.email
+    );
     for (const itemObject of itemsData) {
       const docRef = await createItem(itemObject);
-      itemsPath.push(docRef.path);
+      itemsRef.push(docRef);
     }
-
     const orderData = {
-      items: itemsPath,
-      sender: senderRef.path,
+      items: itemsRef,
+      sender: senderRef,
       senderName: senderData.fullName,
       senderEmail: senderData.email,
       senderAddress: senderData.address,
       receiverName: recipientData.receiverName,
       receiverEmail: recipientData.receiverEmail,
       receiverAddress:
-        recipientData.receiverName + ", " + recipientData.receiverAddress2,
-      deliveryService: deliveryServiceName.name,
+        recipientData.receiverAddress1 + ", " + recipientData.receiverAddress2,
+      deliveryService: deliveryServiceRef,
       totalQuantity: itemsData.reduce(
         (total, item) => total + item.itemQuantity,
         0
       ),
+      shippingFee: shippingTotal,
       totalPrice: totalPayment,
       dateIssued: Timestamp.now(),
     };
-
     const orderRef = await createOrder(orderData);
+    const rtn = Math.floor(Math.random() * 9000000000) + 1000000000;
+    const currentLocation = senderData.address
+      .split(",")
+      .slice(1)
+      .join(",")
+      .trim();
+    const deliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const parcelData = {
+      orderRef,
+      rtn: rtn,
+      currentStatus: "Order Placed",
+      currentLocation: currentLocation,
+      deliveryDate: deliveryDate,
+    };
+    await createParcel(parcelData);
+    await clearData();
   };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={showToast} onOpenChange={setShowToast}>
       <AlertDialogTrigger asChild>
         <Button
           type="submit"
@@ -107,8 +133,8 @@ export function ConfirmationPane({
           <AlertDialogTitle>Order Checkout</AlertDialogTitle>
           <AlertDialogDescription>
             <Card>
-              <CardContent className="max-h-[500px] pt-[24px] overflow-y-auto scrollbar-thin">
-                <Card className="mb-4">
+              <CardContent className="flex flex-col gap-5 max-h-[500px] w-full p-5 overflow-y-auto scrollbar-thin">
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle>Delivery Information</CardTitle>
                   </CardHeader>
@@ -124,7 +150,7 @@ export function ConfirmationPane({
                   </CardContent>
                 </Card>
 
-                <Card className="my-4">
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle>Item Information</CardTitle>
                   </CardHeader>
@@ -155,16 +181,16 @@ export function ConfirmationPane({
                   </CardContent>
                 </Card>
 
-                <Card className="mt-4">
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle>Delivery Service</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {deliveryServiceName.name} | {deliveryServiceName.email}
+                    {deliveryServiceData.name} | {deliveryServiceData.email}
                   </CardContent>
                 </Card>
 
-                <Card className="mt-4">
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle>Payment</CardTitle>
                   </CardHeader>
@@ -203,9 +229,17 @@ export function ConfirmationPane({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleOrder}>
+          <Button
+            onClick={() => {
+              setShowToast(false);
+              handleOrder();
+              toast({
+                description: "Order Placed. Thank you!",
+              });
+            }}
+          >
             Place Order
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

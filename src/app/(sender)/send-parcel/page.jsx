@@ -157,6 +157,17 @@ export default function Forms() {
     }));
   };
 
+  const clearData = () => {
+    form.reset({
+      receiverName: "",
+      receiverEmail: "",
+      receiverAddress1: "",
+      receiverAddress2: "",
+    });
+    setItems([]);
+    setValue("");
+  };
+
   const handleItem = (e) => {
     e.preventDefault();
 
@@ -414,9 +425,10 @@ export default function Forms() {
           <ConfirmationPane
             formData={form.getValues()}
             item={items}
-            deliveryServiceName={selectedOption}
+            deliveryServiceData={selectedOption}
             isFormComplete={isFormComplete}
             sessionEmail={session?.user.email}
+            clearData={clearData}
           />
         </div>
       </Card>
