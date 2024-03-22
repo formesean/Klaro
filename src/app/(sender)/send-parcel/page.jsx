@@ -211,227 +211,233 @@ export default function Forms() {
 
   return (
     <>
-      <Card className="mx-12 my-7 p-8 flex flex-col gap-5">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(processOrder)}>
-            <div className="grid grid-cols-5 grid-rows-1 max-xl:flex max-xl:flex-col gap-5">
-              <Card className="row-span-1 col-span-4 w-full">
-                <CardHeader>Recipient Information</CardHeader>
-                <CardContent>
-                  <div className="flex max-md:flex-col gap-5">
-                    <FormField
-                      control={form.control}
-                      name="receiverName"
-                      render={({ field }) => (
-                        <>
-                          <FormItem className="w-full">
-                            <FormLabel>name:</FormLabel>
-                            <FormControl>
-                              <Input type="string" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        </>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="receiverEmail"
-                      render={({ field }) => (
-                        <>
-                          <FormItem className="w-full">
-                            <FormLabel>email:</FormLabel>
-                            <FormControl>
-                              <Input type="string" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        </>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="receiverAddress1"
-                      render={({ field }) => (
-                        <>
-                          <FormItem className="w-full">
-                            <FormLabel>address:</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Street Name, Building, House No."
-                                type="string"
-                                {...field}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        </>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="receiverAddress2"
-                      render={({ field }) => (
-                        <>
-                          <FormItem className="w-full">
-                            <FormLabel className="text-transparent select-none">
-                              address:
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Barangay, City, Province, Region"
-                                type="string"
-                                {...field}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        </>
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="row-span-1 col-span-1 w-full">
-                <CardHeader>Delivery Service</CardHeader>
-                <CardContent>
-                  <Popover open={open} onOpenChange={handlePopOver}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        disabled={open}
-                        className="w-full justify-between mt-8 max-lg:mt-0"
-                      >
-                        {value
-                          ? options.find((option) => option.name === value)
-                              ?.name
-                          : "Options"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Search delivery service" />
-                        <CommandEmpty>No delivery service found.</CommandEmpty>
-                        <CommandList>
-                          {options.map((option) => (
-                            <CommandItem
-                              key={option.name}
-                              value={option.name}
-                              onSelect={(currentValue) => {
-                                setValue(
-                                  currentValue === value ? "" : currentValue
-                                );
-                                setOpen(false);
-                                setSelectedOption(option);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  value === option.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {option.name}
-                            </CommandItem>
-                          ))}
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </CardContent>
-              </Card>
-            </div>
-          </form>
-        </Form>
-
-        <Card>
-          <CardHeader>Order Contents</CardHeader>
-          <div className="flex justify-between py-4 mx-3 max-md:flex-col">
-            <div className="mx-3 w-screen max-md:w-full max-md:pe-3">
-              <Label htmlFor="itemName">item:</Label>
-              <Input
-                type="text"
-                id="itemName"
-                value={itemData.itemName}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="mx-3  w-screen max-md:w-full max-md:pe-3">
-              <Label htmlFor="quantity">quantity:</Label>
-              <Input
-                type="number"
-                id="itemQuantity"
-                value={itemData.itemQuantity}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="mx-3  w-screen max-md:w-full max-md:pe-3">
-              <Label htmlFor="price">price:</Label>
-              <Input
-                type="number"
-                id="itemPrice"
-                value={itemData.itemPrice}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end mr-6 mb-3 max-md:mr-4">
-            <Button onClick={handleItem}>Add Item</Button>
-          </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Item</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.itemName}</TableCell>
-                  <TableCell>{item.itemQuantity}</TableCell>
-                  <TableCell className="text-right">{item.itemPrice}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => handleRemoveItem(item)}
+      <div className="py-7 px-10">
+        <Card className="p-8 flex flex-col gap-5">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(processOrder)}>
+              <div className="grid grid-cols-5 grid-rows-1 max-xl:flex max-xl:flex-col gap-5">
+                <Card className="row-span-1 col-span-4 w-full">
+                  <CardHeader>Recipient Information</CardHeader>
+                  <CardContent>
+                    <div className="flex max-md:flex-col gap-5">
+                      <FormField
+                        control={form.control}
+                        name="receiverName"
+                        render={({ field }) => (
+                          <>
+                            <FormItem className="w-full">
+                              <FormLabel>name:</FormLabel>
+                              <FormControl>
+                                <Input type="string" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          </>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="receiverEmail"
+                        render={({ field }) => (
+                          <>
+                            <FormItem className="w-full">
+                              <FormLabel>email:</FormLabel>
+                              <FormControl>
+                                <Input type="string" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          </>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="receiverAddress1"
+                        render={({ field }) => (
+                          <>
+                            <FormItem className="w-full">
+                              <FormLabel>address:</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Street Name, Building, House No."
+                                  type="string"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          </>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="receiverAddress2"
+                        render={({ field }) => (
+                          <>
+                            <FormItem className="w-full">
+                              <FormLabel className="text-transparent select-none">
+                                address:
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Barangay, City, Province, Region"
+                                  type="string"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          </>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="row-span-1 col-span-1 w-full">
+                  <CardHeader>Delivery Service</CardHeader>
+                  <CardContent>
+                    <Popover open={open} onOpenChange={handlePopOver}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          disabled={open}
+                          className="w-full justify-between mt-8 max-lg:mt-0"
                         >
-                          Delete content
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+                          {value
+                            ? options.find((option) => option.name === value)
+                                ?.name
+                            : "Options"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Search delivery service" />
+                          <CommandEmpty>
+                            No delivery service found.
+                          </CommandEmpty>
+                          <CommandList>
+                            {options.map((option) => (
+                              <CommandItem
+                                key={option.name}
+                                value={option.name}
+                                onSelect={(currentValue) => {
+                                  setValue(
+                                    currentValue === value ? "" : currentValue
+                                  );
+                                  setOpen(false);
+                                  setSelectedOption(option);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    value === option.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {option.name}
+                              </CommandItem>
+                            ))}
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </CardContent>
+                </Card>
+              </div>
+            </form>
+          </Form>
 
-        <div className="flex justify-end">
-          <ConfirmationPane
-            formData={form.getValues()}
-            item={items}
-            deliveryServiceData={selectedOption}
-            isFormComplete={isFormComplete}
-            sessionEmail={session?.user.email}
-            clearData={clearData}
-          />
-        </div>
-      </Card>
+          <Card>
+            <CardHeader>Order Contents</CardHeader>
+            <div className="flex justify-between py-4 mx-3 max-md:flex-col">
+              <div className="mx-3 w-screen max-md:w-full max-md:pe-3">
+                <Label htmlFor="itemName">item:</Label>
+                <Input
+                  type="text"
+                  id="itemName"
+                  value={itemData.itemName}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="mx-3  w-screen max-md:w-full max-md:pe-3">
+                <Label htmlFor="quantity">quantity:</Label>
+                <Input
+                  type="number"
+                  id="itemQuantity"
+                  value={itemData.itemQuantity}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="mx-3  w-screen max-md:w-full max-md:pe-3">
+                <Label htmlFor="price">price:</Label>
+                <Input
+                  type="number"
+                  id="itemPrice"
+                  value={itemData.itemPrice}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end mr-6 mb-3 max-md:mr-4">
+              <Button onClick={handleItem}>Add Item</Button>
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead className="text-right">Price</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.itemName}</TableCell>
+                    <TableCell>{item.itemQuantity}</TableCell>
+                    <TableCell className="text-right">
+                      {item.itemPrice}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() => handleRemoveItem(item)}
+                          >
+                            Delete content
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+
+          <div className="flex justify-end">
+            <ConfirmationPane
+              formData={form.getValues()}
+              item={items}
+              deliveryServiceData={selectedOption}
+              isFormComplete={isFormComplete}
+              sessionEmail={session?.user.email}
+              clearData={clearData}
+            />
+          </div>
+        </Card>
+      </div>
     </>
   );
 }

@@ -128,7 +128,7 @@ export function ConfirmationPane({
           Process Order
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="flex flex-col max-md:w-screen">
         <AlertDialogHeader>
           <AlertDialogTitle>Order Checkout</AlertDialogTitle>
           <AlertDialogDescription>
