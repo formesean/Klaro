@@ -170,26 +170,6 @@ export const useDeliveryService = () => {
   };
 
   /**
-   * Updates the parcels field of an existing delivery service by its reference and appends a new parcel.
-   * @param {DocumentReference} deliveryServiceRef - The document reference of the delivery service to update.
-   * @param {Parcel} newParcel - The new parcel to append to the parcels field.
-   * @returns {Promise<void>} - A promise that resolves when the update is successful.
-   */
-  const updateDeliveryServiceParcels = async (
-    deliveryServiceRef: DocumentReference,
-    newParcel: Parcel
-  ): Promise<void> => {
-    try {
-      await updateDoc(deliveryServiceRef, {
-        parcels: arrayUnion(newParcel),
-      });
-    } catch (error) {
-      console.error("Error updating delivery service parcels:", error);
-      throw error;
-    }
-  };
-
-  /**
    * Removes a delivery service by its reference.
    * @param {DocumentReference} deliveryServiceRef - The document reference of the delivery service to remove.
    * @returns {Promise<void>} - A promise that resolves when the removal is successful.
@@ -212,7 +192,6 @@ export const useDeliveryService = () => {
     fetchDeliveryService,
     fetchDeliveryServices,
     updateDeliveryService,
-    updateDeliveryServiceParcels,
     removeDeliveryService,
   };
 };

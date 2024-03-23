@@ -42,12 +42,12 @@ export function ConfirmationPane({
   sessionEmail,
   clearData,
 }) {
-  const { getDocRef, fetchSender, updateSenderParcels } = useSender();
-  const { getDocRefByEmail, updateDeliveryServiceParcels } =
-    useDeliveryService();
+  const { getDocRef, fetchSender } = useSender();
+  const { getDocRefByEmail } = useDeliveryService();
   const { createOrder } = useOrders();
   const { createItem } = useItems();
-  const { createParcel } = useParcels();
+  const { createParcel, updateSenderParcels, updateDeliveryServiceParcels } =
+    useParcels();
 
   const { toast } = useToast();
   const [recipientData, setRecipientData] = useState(formData);

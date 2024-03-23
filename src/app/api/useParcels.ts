@@ -4,6 +4,7 @@ import {
   DocumentSnapshot,
   Timestamp,
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   getDoc,
@@ -126,6 +127,46 @@ export const useParcels = () => {
   };
 
   /**
+   * Updates the parcels field of an existing sender by its reference and appends a new parcel.
+   * @param {DocumentReference} senderRef - The document reference of the sender to update.
+   * @param {Parcel} newParcel - The new parcel to append to the parcels field.
+   * @returns {Promise<void>} - A promise that resolves when the update is successful.
+   */
+  const updateSenderParcels = async (
+    senderRef: DocumentReference,
+    newParcel: Parcel
+  ): Promise<void> => {
+    try {
+      await updateDoc(senderRef, {
+        parcels: arrayUnion(newParcel),
+      });
+    } catch (error) {
+      console.error("Error updating sender parcels:", error);
+      throw error;
+    }
+  };
+
+  /**
+   * Updates the parcels field of an existing delivery service by its reference and appends a new parcel.
+   * @param {DocumentReference} deliveryServiceRef - The document reference of the delivery service to update.
+   * @param {Parcel} newParcel - The new parcel to append to the parcels field.
+   * @returns {Promise<void>} - A promise that resolves when the update is successful.
+   */
+  const updateDeliveryServiceParcels = async (
+    deliveryServiceRef: DocumentReference,
+    newParcel: Parcel
+  ): Promise<void> => {
+    try {
+      await updateDoc(deliveryServiceRef, {
+        parcels: arrayUnion(newParcel),
+      });
+    } catch (error) {
+      console.error("Error updating delivery service parcels:", error);
+      throw error;
+    }
+  };
+
+  /**
    * Removes a parcel.
    * @param {DocumentReference} orderRef - The reference to the parcel document to be removed.
    * @returns {Promise<void>} A Promise that resolves when the removal is successful.
@@ -145,6 +186,8 @@ export const useParcels = () => {
     fetchParcels,
     fetchParcelByRTN,
     updateParcel,
+    updateSenderParcels,
+    updateDeliveryServiceParcels,
     removeParcel,
   };
 };
