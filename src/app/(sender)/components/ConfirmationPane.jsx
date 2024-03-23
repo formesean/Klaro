@@ -42,8 +42,9 @@ export function ConfirmationPane({
   sessionEmail,
   clearData,
 }) {
-  const { getDocRef, fetchSender } = useSender();
-  const { getDocRefByEmail } = useDeliveryService();
+  const { getDocRef, fetchSender, updateSenderParcels } = useSender();
+  const { getDocRefByEmail, updateDeliveryServiceParcels } =
+    useDeliveryService();
   const { createOrder } = useOrders();
   const { createItem } = useItems();
   const { createParcel } = useParcels();
@@ -113,7 +114,10 @@ export function ConfirmationPane({
       currentLocation: currentLocation,
       deliveryDate: deliveryDate,
     };
-    await createParcel(parcelData);
+    const parcelRef = await createParcel(parcelData);
+
+    await updateSenderParcels(senderRef, parcelRef);
+    await updateDeliveryServiceParcels(deliveryServiceRef, parcelRef);
     await clearData();
   };
 

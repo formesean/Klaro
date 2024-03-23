@@ -4,6 +4,7 @@ import {
   DocumentSnapshot,
   Timestamp,
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -115,6 +116,26 @@ export const useSender = () => {
   };
 
   /**
+   * Updates the parcels field of an existing sender by its reference and appends a new parcel.
+   * @param {DocumentReference} senderRef - The document reference of the sender to update.
+   * @param {Parcel} newParcel - The new parcel to append to the parcels field.
+   * @returns {Promise<void>} - A promise that resolves when the update is successful.
+   */
+  const updateSenderParcels = async (
+    senderRef: DocumentReference,
+    newParcel: Parcel
+  ): Promise<void> => {
+    try {
+      await updateDoc(senderRef, {
+        parcels: arrayUnion(newParcel),
+      });
+    } catch (error) {
+      console.error("Error updating sender parcels:", error);
+      throw error;
+    }
+  };
+
+  /**
    * Removes a sender by its reference.
    * @param {DocumentReference} senderRef - The document reference of the sender to remove.
    * @returns {Promise<void>} - A promise that resolves when the removal is successful.
@@ -133,6 +154,7 @@ export const useSender = () => {
     getDocRef,
     fetchSender,
     updateSender,
+    updateSenderParcels,
     removeSender,
   };
 };
