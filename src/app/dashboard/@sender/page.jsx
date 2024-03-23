@@ -33,7 +33,7 @@ import {
   ChevronDown,
   MoreHorizontal,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -51,67 +51,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
-const data = [
-  {
-    rtn: 12345678901,
-    recipient: "Bea Belle Therese B. Caños",
-    status: "Order Placed",
-    deliveryDate: new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
-    ).toLocaleDateString(),
-  },
-  {
-    rtn: 12345678901,
-    recipient: "Sean Karl Tyrese G. Aguilar",
-    status: "In Transit",
-    deliveryDate: new Date().toLocaleDateString(),
-  },
-  {
-    rtn: 12345678901,
-    recipient: "Bea Belle Therese B. Caños",
-    status: "Order Placed",
-    deliveryDate: new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
-    ).toLocaleDateString(),
-  },
-  {
-    rtn: 12345678901,
-    recipient: "Sean Karl Tyrese G. Aguilar",
-    status: "In Transit",
-    deliveryDate: new Date().toLocaleDateString(),
-  },
-  {
-    rtn: 12345678901,
-    recipient: "Bea Belle Therese B. Caños",
-    status: "Order Placed",
-    deliveryDate: new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
-    ).toLocaleDateString(),
-  },
-  {
-    rtn: 12345678901,
-    recipient: "Balay ni Mayang",
-    status: "Order Placed",
-    deliveryDate: new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
-    ).toLocaleDateString(),
-  },
-  {
-    rtn: 12345678901,
-    recipient: "Balay ni Mayang",
-    status: "In Transit",
-    deliveryDate: new Date().toLocaleDateString(),
-  },
-  {
-    rtn: 12345678901,
-    recipient: "Balay ni Mayang",
-    status: "Order Placed",
-    deliveryDate: new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
-    ).toLocaleDateString(),
-  },
-];
+import { useParcels } from "../../api/useParcels";
+import { useOrders } from "../../api/useOrders";
 
 export const columns = [
   {
@@ -124,7 +65,7 @@ export const columns = [
     },
   },
   {
-    accessorKey: "recipient",
+    accessorKey: "receiverName",
     header: ({ column }) => {
       return (
         <Button
@@ -145,13 +86,15 @@ export const columns = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="pl-4">{row.getValue("recipient")}</div>,
+    cell: ({ row }) => (
+      <div className="pl-4">{row.getValue("receiverName")}</div>
+    ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "currentStatus",
     header: "Status",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">{row.getValue("currentStatus")}</div>
     ),
   },
   {
@@ -176,10 +119,19 @@ export const columns = [
         </Button>
       );
     },
-    cell: ({ row }) => (
-      <div className="pl-4">{row.getValue("deliveryDate")}</div>
-    ),
+    cell: ({ row }) => {
+      const deliveryDateObj = row.getValue("deliveryDate");
+      if (!deliveryDateObj || typeof deliveryDateObj.seconds !== "number") {
+        return <div className="pl-4">Invalid Date</div>; // Handle case where deliveryDateObj is undefined or has invalid format
+      }
+      const formattedDeliveryDate = new Date(deliveryDateObj.seconds * 1000); // Assuming deliveryDateObj.seconds contains seconds since epoch
+      const formattedDeliveryDateString =
+        formattedDeliveryDate.toLocaleDateString();
+
+      return <div className="pl-4">{formattedDeliveryDateString}</div>;
+    },
   },
+
   {
     id: "actions",
     enableHiding: false,
@@ -210,6 +162,8 @@ export const columns = [
 ];
 
 export default function Dashboard() {
+  const { fetchParcels } = useParcels();
+  const { fetchOrder } = useOrders();
   const { data: session } = useSession();
   const [copied, setCopied] = useState(false);
   const [sorting, setSorting] = useState([]);
@@ -217,6 +171,61 @@ export default function Dashboard() {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [pageView, setPageView] = useState(0);
+  const [parcels, setParcels] = useState([]);
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedParcels = await fetchParcels();
+        setParcels(fetchedParcels);
+
+        const orderPromises = fetchedParcels.map(async (parcel) => {
+          const orderRef = parcel.orderRef;
+          const order = await fetchOrder(orderRef);
+          return { ...parcel, receiverName: order.receiverName };
+        });
+        const updatedParcels = await Promise.all(orderPromises);
+        setParcels(updatedParcels);
+
+        // const orderRefs = fetchedParcels.map((parcel) => parcel.orderRef);
+        // console.log(orderRefs);
+        // // const fetchedOrders = await fetchOrder(orderRefs);
+        // // console.log(fetchedOrders);
+        // // setOrders(fetchedOrders);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // console.log(parcels);
+  // console.log(orders);
+
+  const table = useReactTable({
+    data: parcels,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      pagination: {
+        pageIndex: pageView,
+        pageSize: 5,
+      },
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+  });
 
   if (!session && session?.user.role !== "sender") {
     return redirect("/");
@@ -232,29 +241,6 @@ export default function Dashboard() {
       })
       .catch((err) => console.error("Failed to copy:", err));
   };
-
-  const table = useReactTable({
-    data,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      pagination: {
-        pageIndex: pageView,
-        pageSize: 5,
-      },
-    },
-  });
 
   return (
     <>
@@ -444,15 +430,17 @@ export default function Dashboard() {
               <CardTitle>Order History</CardTitle>
               <CardDescription>1234 Orders</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="-mt-4">
               <div className="w-full">
                 <div className="flex items-center py-4">
                   <Input
                     placeholder="Filter recipient..."
-                    value={table.getColumn("recipient")?.getFilterValue() ?? ""}
+                    value={
+                      table.getColumn("receiverName")?.getFilterValue() ?? ""
+                    }
                     onChange={(event) =>
                       table
-                        .getColumn("recipient")
+                        .getColumn("receiverName")
                         ?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
@@ -509,10 +497,6 @@ export default function Dashboard() {
                   </Table>
                 </div>
                 <div className="flex items-center justify-end space-x-2 py-4">
-                  {/* <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
-                  </div> */}
                   <div className="space-x-2">
                     <Button
                       variant="outline"
