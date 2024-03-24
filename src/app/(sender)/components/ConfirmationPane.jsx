@@ -20,12 +20,12 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
+import { Separator } from "../../../components/ui/separator";
 import { useToast } from "../../../components/ui/use-toast";
 import { useOrders } from "../../api/useOrders";
 import { useItems } from "../../api/useItems";
@@ -140,17 +140,35 @@ export function ConfirmationPane({
               <CardContent className="flex flex-col gap-5 max-h-[500px] w-full p-5 overflow-y-auto scrollbar-thin">
                 <Card className="w-full">
                   <CardHeader>
-                    <CardTitle>Delivery Information</CardTitle>
+                    <CardTitle>Information</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {recipientData && (
-                      <p>
-                        {recipientData.receiverName} |{" "}
-                        {recipientData.receiverEmail} |{" "}
-                        {recipientData.receiverAddress1} <span>, </span>{" "}
-                        {recipientData.receiverAddress2}
+                    <div className="flex flex-col gap-2 pb-4">
+                      <p className="text-sm text-muted-foreground">
+                        Recipient Information
                       </p>
-                    )}
+                      <Separator />
+                      {recipientData && (
+                        <p>
+                          {recipientData.receiverName} |{" "}
+                          {recipientData.receiverEmail} |{" "}
+                          {recipientData.receiverAddress1},{" "}
+                          {recipientData.receiverAddress2}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2 pb-4">
+                      <p className="text-sm text-muted-foreground">
+                        Delivery Service Information
+                      </p>
+                      <Separator />
+                      {deliveryServiceData && (
+                        <p>
+                          {deliveryServiceData.name} |{" "}
+                          {deliveryServiceData.email}
+                        </p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -173,24 +191,15 @@ export function ConfirmationPane({
                           itemsData.map((item, index) => (
                             <TableRow key={index}>
                               <TableCell>{item.itemName}</TableCell>
-                              <TableCell>{item.itemPrice}</TableCell>
+                              <TableCell>₱{item.itemPrice}</TableCell>
                               <TableCell>{item.itemQuantity}</TableCell>
                               <TableCell>
-                                {item.itemPrice * item.itemQuantity}
+                                ₱{item.itemPrice * item.itemQuantity}
                               </TableCell>
                             </TableRow>
                           ))}
                       </TableBody>
                     </Table>
-                  </CardContent>
-                </Card>
-
-                <Card className="w-full">
-                  <CardHeader>
-                    <CardTitle>Delivery Service</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {deliveryServiceData.name} | {deliveryServiceData.email}
                   </CardContent>
                 </Card>
 

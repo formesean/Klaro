@@ -66,23 +66,6 @@ export const useParcels = () => {
   };
 
   /**
-   * Fetches all parcels.
-   * @returns {Promise<Parcel[] | undefined>} A Promise resolving to an array of fetched parcel objects, or undefined if an error occurs.
-   */
-  const fetchParcels = async (): Promise<Parcel[] | undefined> => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "parcels"));
-      const items: Parcel[] = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-      })) as Parcel[];
-      return items;
-    } catch (error) {
-      console.error("Error getting parcels:", error);
-      return undefined;
-    }
-  };
-
-  /**
    * Returns the document reference for the parcel with the given Return Tracking Number (RTN).
    * @param {string} rtn - The Return Tracking Number (RTN) of the parcel to search for.
    * @returns {Promise<DocumentReference | undefined>} A Promise resolving to the document reference of the parcel with the given RTN, or undefined if not found.
@@ -91,19 +74,42 @@ export const useParcels = () => {
     rtn: string
   ): Promise<DocumentReference | undefined> => {
     try {
-      // Querying parcels collection where rtn matches the provided value
-      const q = query(collection(db, "parcels"), where("rtn", "==", rtn));
+      const q = query(
+        collection(db, "parcels"),
+        where("rtn", "==", parseInt(rtn))
+      );
       const snapshot = await getDocs(q);
 
       if (!snapshot.empty) {
-        // Assuming there's only one parcel with a unique RTN, return its document reference
         return snapshot.docs[0].ref;
       } else {
-        // No parcel found with the given RTN
         return undefined;
       }
     } catch (error) {
       console.error("Error getting parcel by RTN:", error);
+      return undefined;
+    }
+  };
+
+  /**
+   * Returns all the document references in the parcels field of the sender.
+   * @param {DocumentReference} senderRef - The document reference of the sender.
+   * @returns {Promise<DocumentReference[] | undefined>} A Promise resolving to an array of document references in the parcels field, or undefined if an error occurs.
+   */
+  const fetchSenderParcels = async (
+    senderRef: DocumentReference
+  ): Promise<DocumentReference[] | undefined> => {
+    try {
+      const docSnapshot: DocumentSnapshot = await getDoc(senderRef);
+      if (docSnapshot.exists()) {
+        const senderData = docSnapshot.data();
+        if (senderData && senderData.parcels) {
+          return senderData.parcels;
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error("Error getting sender parcel references:", error);
       return undefined;
     }
   };
@@ -183,8 +189,8 @@ export const useParcels = () => {
   return {
     createParcel,
     fetchParcel,
-    fetchParcels,
     fetchParcelByRTN,
+    fetchSenderParcels,
     updateParcel,
     updateSenderParcels,
     updateDeliveryServiceParcels,
