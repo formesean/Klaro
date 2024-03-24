@@ -4,6 +4,7 @@ import {
   DocumentSnapshot,
   Timestamp,
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -19,30 +20,6 @@ interface DeliveryService {
   parcels: Parcel[];
 }
 
-interface Sender {
-  id: DocumentReference;
-  email: string;
-  name: string;
-  address: string;
-  parcels: Parcel[];
-}
-
-interface Order {
-  id: DocumentReference;
-  sender: DocumentReference;
-  deliveryService: DocumentReference;
-  items: DocumentReference[];
-  senderName: string;
-  senderAddress: string;
-  receiverName: string;
-  receiverAddress: string;
-  receiverEmail: string;
-  deliveryServiceName: string;
-  totalQuantity: number;
-  totalPrice: number;
-  dateIssued: Timestamp;
-}
-
 interface Parcel {
   id: DocumentReference;
   rtn: string;
@@ -50,13 +27,6 @@ interface Parcel {
   currentStatus: string;
   currentLocation: string;
   deliveryDate: Date;
-}
-
-interface Item {
-  id: DocumentReference;
-  name: string;
-  price: number;
-  quantity: number;
 }
 
 export const useDeliveryService = () => {

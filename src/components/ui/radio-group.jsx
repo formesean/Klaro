@@ -52,10 +52,10 @@ const RadioGroupItemWithIcons = React.forwardRef(
       case "option-hub":
         icon = <Warehouse className="w-10 h-10" />;
         break;
-      case "option-transit":
+      case "option-intransit":
         icon = <Truck className="w-10 h-10" />;
         break;
-      case "option-partner":
+      case "option-center":
         icon = <PackagePlus className="w-10 h-10" />;
         break;
       case "option-order":

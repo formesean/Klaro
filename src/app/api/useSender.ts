@@ -2,11 +2,9 @@ import { db } from "../firebase/config";
 import {
   DocumentReference,
   DocumentSnapshot,
-  Timestamp,
   addDoc,
   collection,
   deleteDoc,
-  doc,
   getDoc,
   getDocs,
   updateDoc,
