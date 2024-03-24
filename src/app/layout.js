@@ -6,8 +6,6 @@ import NavBar from "../components/NavBar";
 import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
 import { authOptions } from "../lib/auth";
-import { Suspense } from "react";
-import Loading from "./loading";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -23,10 +21,13 @@ export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
 
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className="scroll-smooth scrollbar-thin scrollbar-thumb-white scrollbar-track-green-500"
+    >
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "max-h-screen bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
@@ -38,9 +39,7 @@ export default async function RootLayout({ children }) {
         >
           <SessionProvider session={session}>
             <NavBar />
-            {/* <Suspense fallback={<Loading />}> */}
             {children}
-            {/* </Suspense> */}
           </SessionProvider>
         </ThemeProvider>
       </body>
