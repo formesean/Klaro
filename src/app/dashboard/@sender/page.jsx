@@ -188,9 +188,28 @@ export default function Dashboard() {
   });
   const [showParcelDetails, setShowParcelDetails] = useState(false);
 
-  if (!session && session?.user.role !== "sender") {
-    return redirect("/");
-  }
+  const table = useReactTable({
+    data: parcels,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      pagination: {
+        pageIndex: pageView,
+        pageSize: 5,
+      },
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -213,7 +232,7 @@ export default function Dashboard() {
           }
 
           if (parcelSnapshot.currentStatus === "Returned") {
-            setDelivered(returned + 1);
+            setReturned(returned + 1);
           }
 
           parcelsData.push(parcelSnapshot);
@@ -237,28 +256,9 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  const table = useReactTable({
-    data: parcels,
-    columns,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      pagination: {
-        pageIndex: pageView,
-        pageSize: 5,
-      },
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-  });
+  if (!session && session?.user.role !== "sender") {
+    return redirect("/");
+  }
 
   const copyText = () => {
     const textToCopy = document.getElementById("textToCopy").innerText;
