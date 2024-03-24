@@ -1,18 +1,17 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -21,25 +20,12 @@ import {
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Separator } from "../../../components/ui/separator";
-import { Label } from "../../../components/ui/label";
-import {
-  RadioGroup,
-  RadioGroupItemWithIcons,
-} from "../../../components/ui/radio-group";
-import {
-  Copy,
-  Check,
-  ArrowUpDown,
-  ChevronDown,
-  MoreHorizontal,
-} from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
@@ -53,6 +39,22 @@ import {
 } from "@tanstack/react-table";
 import { useParcels } from "../../api/useParcels";
 import { useOrders } from "../../api/useOrders";
+import { useSender } from "../../api/useSender";
+import Loader from "./components/Loader";
+const DeliveryStatus = dynamic(
+  () => import("./components/DeliveryStatus").then((mod) => mod.DeliveryStatus),
+  {
+    loading: () => (
+      <Loader className="items-center justify-center" big={true} />
+    ),
+  }
+);
+const ViewDetails = dynamic(
+  () => import("./components/ViewDetails").then((mod) => mod.ViewDetails),
+  {
+    loading: () => <Loader className="items-center justify-center" />,
+  }
+);
 
 export const columns = [
   {
@@ -122,21 +124,20 @@ export const columns = [
     cell: ({ row }) => {
       const deliveryDateObj = row.getValue("deliveryDate");
       if (!deliveryDateObj || typeof deliveryDateObj.seconds !== "number") {
-        return <div className="pl-4">Invalid Date</div>; // Handle case where deliveryDateObj is undefined or has invalid format
+        return <div className="pl-4">Invalid Date</div>;
       }
-      const formattedDeliveryDate = new Date(deliveryDateObj.seconds * 1000); // Assuming deliveryDateObj.seconds contains seconds since epoch
+      const formattedDeliveryDate = new Date(deliveryDateObj.seconds * 1000);
       const formattedDeliveryDateString =
         formattedDeliveryDate.toLocaleDateString();
 
       return <div className="pl-4">{formattedDeliveryDateString}</div>;
     },
   },
-
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const RTN = row.original;
+      const docRef = row.original;
 
       return (
         <DropdownMenu>
@@ -148,12 +149,12 @@ export const columns = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(RTN.id)}
+              onClick={() => navigator.clipboard.writeText(docRef.rtn)}
             >
-              Copy RTN ID
+              Copy RTN
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View order details</DropdownMenuItem>
+            <ViewDetails docRef={docRef} />
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -162,9 +163,11 @@ export const columns = [
 ];
 
 export default function Dashboard() {
-  const { fetchParcels } = useParcels();
-  const { fetchOrder } = useOrders();
   const { data: session } = useSession();
+  const { fetchSenderParcels, fetchParcel, fetchParcelByRTN } = useParcels();
+  const { fetchOrder } = useOrders();
+  const { getDocRef } = useSender();
+  const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
@@ -172,15 +175,51 @@ export default function Dashboard() {
   const [rowSelection, setRowSelection] = useState({});
   const [pageView, setPageView] = useState(0);
   const [parcels, setParcels] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [parcelData, setParcelData] = useState();
+  const [orderData, setOrderData] = useState();
+  const [inTransit, setInTransit] = useState(0);
+  const [delivered, setDelivered] = useState(0);
+  const [returned, setReturned] = useState(0);
+  const [details, setDetails] = useState({
+    currentStatus: "",
+    hubLocation: "",
+    centerLocation: "",
+    orderPlacedDate: null,
+  });
+  const [showParcelDetails, setShowParcelDetails] = useState(false);
+
+  if (!session && session?.user.role !== "sender") {
+    return redirect("/");
+  }
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedParcels = await fetchParcels();
-        setParcels(fetchedParcels);
+        const parcelsData = [];
 
-        const orderPromises = fetchedParcels.map(async (parcel) => {
+        const parcelsRef = await fetchSenderParcels(
+          await getDocRef(session?.user.email)
+        );
+
+        for (const parcelRef of parcelsRef) {
+          const parcelSnapshot = await fetchParcel(parcelRef);
+
+          if (parcelSnapshot.currentStatus === "In Transit") {
+            setInTransit(inTransit + 1);
+          }
+
+          if (parcelSnapshot.currentStatus === "Delivered") {
+            setDelivered(delivered + 1);
+          }
+
+          if (parcelSnapshot.currentStatus === "Returned") {
+            setDelivered(returned + 1);
+          }
+
+          parcelsData.push(parcelSnapshot);
+        }
+
+        const orderPromises = parcelsData.map(async (parcel) => {
           const orderRef = parcel.orderRef;
           const order = await fetchOrder(orderRef);
           return { ...parcel, receiverName: order.receiverName };
@@ -188,21 +227,15 @@ export default function Dashboard() {
         const updatedParcels = await Promise.all(orderPromises);
         setParcels(updatedParcels);
 
-        // const orderRefs = fetchedParcels.map((parcel) => parcel.orderRef);
-        // console.log(orderRefs);
-        // // const fetchedOrders = await fetchOrder(orderRefs);
-        // // console.log(fetchedOrders);
-        // // setOrders(fetchedOrders);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
+    setIsLoading(true);
     fetchData();
   }, []);
-
-  // console.log(parcels);
-  // console.log(orders);
 
   const table = useReactTable({
     data: parcels,
@@ -227,10 +260,6 @@ export default function Dashboard() {
     onRowSelectionChange: setRowSelection,
   });
 
-  if (!session && session?.user.role !== "sender") {
-    return redirect("/");
-  }
-
   const copyText = () => {
     const textToCopy = document.getElementById("textToCopy").innerText;
     navigator.clipboard
@@ -240,6 +269,45 @@ export default function Dashboard() {
         setTimeout(() => setCopied(false), 2000);
       })
       .catch((err) => console.error("Failed to copy:", err));
+  };
+
+  const handleTrackRTN = async () => {
+    setShowParcelDetails(false);
+    const rtnInput = document.getElementById("rtn-input").value;
+
+    if (rtnInput) {
+      const parcelRef = await fetchParcelByRTN(rtnInput);
+      const parcelData = await fetchParcel(parcelRef);
+      const orderData = await fetchOrder(parcelData.orderRef);
+      setParcelData(parcelData);
+      setOrderData(orderData);
+
+      const hubLocation = orderData.receiverAddress
+        .split(",")
+        .slice(1)
+        .join(",")
+        .trim();
+      const centerLocation = orderData.senderAddress
+        .split(",")
+        .slice(1)
+        .join(",")
+        .trim();
+      const orderPlacedDate = new Date(orderData.dateIssued.seconds * 1000);
+
+      setDetails({
+        currentStatus: parcelData.currentStatus,
+        hubLocation: hubLocation,
+        centerLocation: centerLocation,
+        orderPlacedDate: orderPlacedDate,
+      });
+
+      setShowParcelDetails(true);
+      document.getElementById("rtn-input").value = "";
+    }
+  };
+
+  const handleHideDetail = () => {
+    setShowParcelDetails(false);
   };
 
   return (
@@ -252,176 +320,50 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <div className="flex flex-col gap-4">
-                <Input type="number" id="number-input" placeholder="RTN" />
-                <Button>Track</Button>
+                <Input type="number" id="rtn-input" placeholder="RTN" />
+                <Button onClick={handleTrackRTN}>Track</Button>
               </div>
 
               <Separator className="my-3" />
 
-              <div className="flex items-center">
-                <div className="mr-40">
-                  <p className="font-bold text-lg">Parcel Details</p>
-                  <p className="font-bold font text-sm text-[#808080]">
-                    Bea Belle Therese B. Caños
-                  </p>
-                  <div className="flex gap-1">
-                    <p
-                      id="textToCopy"
-                      className="font-bold font text-sm text-[#808080]"
-                    >
-                      1234578901
-                    </p>
-                    <button
-                      onClick={copyText}
-                      disabled={copied}
-                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 z-10 h-5 w-5 text-zinc-50 hover:bg-zinc-700 hover:text-zinc-50"
-                    >
-                      <span className="sr-only">Copy</span>
-                      {copied ? (
-                        <Check className="w-3 h-3" />
-                      ) : (
-                        <Copy className="w-3 h-3" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
+              {showParcelDetails && (
+                <DeliveryStatus
+                  parcelData={parcelData}
+                  copied={copied}
+                  copyText={copyText}
+                  orderData={orderData}
+                  details={details}
+                  handleHideDetail={handleHideDetail}
+                />
+              )}
             </CardContent>
-            <CardFooter>
-              <RadioGroup defaultValue="option-order" className="gap-8">
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    <RadioGroupItemWithIcons
-                      value="option-delivered"
-                      id="option-delivered"
-                      selected="option-delivered"
-                      className="w-16 h-16"
-                    />
-                    <Label htmlFor="option-delivered">
-                      <div className="flex flex-col justify-center pl-2">
-                        <div className="flex justify-start items-center gap-4">
-                          <h1 className="font-bold text-base">Delivered</h1>
-                          <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
-                        </div>
-                        <p className="text-[#ffffffdb]">
-                          Parcel has been delivered
-                        </p>
-                      </div>
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    <RadioGroupItemWithIcons
-                      value="option-hub"
-                      id="option-hub"
-                      selected="option-hub"
-                      className="w-16 h-16"
-                    />
-                    <Label htmlFor="option-hub">
-                      <div className="flex flex-col justify-center pl-2">
-                        <div className="flex justify-start items-center gap-4">
-                          <h1 className="font-bold text-base">
-                            Arrived at the Logistics Hub
-                          </h1>
-                          <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
-                        </div>
-                        <p className="text-[#ffffffdb]">
-                          &lt;Location of Logistics Facility&gt;
-                        </p>
-                      </div>
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    <RadioGroupItemWithIcons
-                      value="option-transit"
-                      id="option-transit"
-                      selected="option-transit"
-                      className="w-16 h-16"
-                    />
-                    <Label htmlFor="option-transit">
-                      <div className="flex flex-col justify-center pl-2">
-                        <div className="flex justify-start items-center gap-4">
-                          <h1 className="font-bold text-base">In Transit</h1>
-                          <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
-                        </div>
-                        <p className="text-[#ffffffdb]">
-                          On its way to the next logistics facility
-                        </p>
-                      </div>
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    <RadioGroupItemWithIcons
-                      value="option-partner"
-                      id="option-partner"
-                      selected="option-partner"
-                      className="w-16 h-16"
-                    />
-                    <Label htmlFor="option-partner">
-                      <div className="flex flex-col justify-center pl-2">
-                        <div className="flex justify-start items-center gap-4">
-                          <h1 className="font-bold text-base">
-                            Arrived at Sort Center
-                          </h1>
-                          <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
-                        </div>
-                        <p className="text-[#ffffffdb]">
-                          &lt;Location of Logistics Facility&gt;
-                        </p>
-                      </div>
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    <RadioGroupItemWithIcons
-                      value="option-order"
-                      id="option-order"
-                      selected="option-order"
-                      className="w-16 h-16"
-                    />
-                    <Label htmlFor="option-order">
-                      <div className="flex flex-col justify-center pl-2">
-                        <div className="flex justify-center items-center gap-4">
-                          <h1 className="font-bold text-base">Order Placed</h1>
-                          <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
-                        </div>
-                        <p className="text-[#ffffffdb]">Ready for pick-up</p>
-                      </div>
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
-            </CardFooter>
           </Card>
 
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader>
-              <CardTitle className="text-4xl">69</CardTitle>
-              <CardDescription className="text-lg">En Route</CardDescription>
+              <CardTitle className="text-4xl">
+                {!isLoading ? `${inTransit}` : <Loader big={true} />}
+              </CardTitle>
+              <CardDescription className="text-lg">In Transit</CardDescription>
             </CardHeader>
           </Card>
 
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader>
-              <CardTitle className="text-4xl">325</CardTitle>
+              <CardTitle className="text-4xl">
+                {!isLoading ? `${delivered}` : <Loader big={true} />}
+              </CardTitle>
               <CardDescription className="text-lg">Delivered</CardDescription>
             </CardHeader>
           </Card>
 
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader>
-              <CardTitle className="text-4xl">43</CardTitle>
-              <CardDescription className="text-lg">Pending</CardDescription>
+              <CardTitle className="text-4xl">
+                {" "}
+                {!isLoading ? `${returned}` : <Loader big={true} />}
+              </CardTitle>
+              <CardDescription className="text-lg">Returned</CardDescription>
             </CardHeader>
           </Card>
 
@@ -434,7 +376,7 @@ export default function Dashboard() {
               <div className="w-full">
                 <div className="flex items-center py-4">
                   <Input
-                    placeholder="Filter recipient..."
+                    placeholder="Search recipient"
                     value={
                       table.getColumn("receiverName")?.getFilterValue() ?? ""
                     }
@@ -489,7 +431,11 @@ export default function Dashboard() {
                             colSpan={columns.length}
                             className="h-24 text-center"
                           >
-                            No results.
+                            {!isLoading ? (
+                              "No results."
+                            ) : (
+                              <Loader className="items-center justify-center" />
+                            )}
                           </TableCell>
                         </TableRow>
                       )}
