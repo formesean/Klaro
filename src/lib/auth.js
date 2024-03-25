@@ -3,8 +3,6 @@ import { FirestoreAdapter } from "@auth/firebase-adapter";
 import { cert } from "firebase-admin/app";
 import { useUsers } from "../app/api/useUsers";
 
-const { checkRole } = useUsers();
-
 export const authOptions = {
   // Configure one or more authentication providers
   providers: [
@@ -12,7 +10,7 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       async profile(profile) {
-        const isDeliveryAcc = await checkRole(profile.email);
+        const isDeliveryAcc = await useUsers.checkRole(profile.email);
 
         return {
           id: profile.sub,

@@ -224,15 +224,15 @@ export default function Dashboard() {
           const parcelSnapshot = await fetchParcel(parcelRef);
 
           if (parcelSnapshot.currentStatus === "In Transit") {
-            setInTransit(inTransit + 1);
+            setInTransit((prevState) => prevState + 1);
           }
 
           if (parcelSnapshot.currentStatus === "Delivered") {
-            setDelivered(delivered + 1);
+            setDelivered((prevState) => prevState + 1);
           }
 
           if (parcelSnapshot.currentStatus === "Returned") {
-            setReturned(returned + 1);
+            setReturned((prevState) => prevState + 1);
           }
 
           parcelsData.push(parcelSnapshot);
@@ -254,7 +254,16 @@ export default function Dashboard() {
 
     setIsLoading(true);
     fetchData();
-  }, []);
+  }, [
+    delivered,
+    fetchOrder,
+    fetchParcel,
+    fetchSenderParcels,
+    getDocRef,
+    inTransit,
+    returned,
+    session,
+  ]);
 
   if (!session && session?.user.role !== "sender") {
     return redirect("/");
