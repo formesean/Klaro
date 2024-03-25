@@ -254,16 +254,7 @@ export default function Dashboard() {
 
     setIsLoading(true);
     fetchData();
-  }, [
-    delivered,
-    fetchOrder,
-    fetchParcel,
-    fetchSenderParcels,
-    getDocRef,
-    inTransit,
-    returned,
-    session,
-  ]);
+  }, []);
 
   if (!session && session?.user.role !== "sender") {
     return redirect("/");

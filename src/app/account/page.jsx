@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter, redirect } from "next/navigation";
-import { useUsers } from "../api/useUsers";
+import { checkRole } from "../api/useUsers";
 import { useSender } from "../api/useSender";
 
 const formSchema = z.object({
@@ -37,7 +37,6 @@ const formSchema = z.object({
 
 export default function CompleteAccount() {
   const { data: session } = useSession();
-  const { checkRole } = useUsers();
   const { createSender } = useSender();
   const router = useRouter();
   const form = useForm({

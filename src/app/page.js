@@ -1,11 +1,10 @@
 "use client";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useUsers } from "./api/useUsers";
+import { senderExists } from "./api/useUsers";
 
 export default function Home() {
   const { data: session } = useSession();
-  const { senderExists } = useUsers();
 
   const userExists = async (sessionEmail) => {
     return await senderExists(sessionEmail);
