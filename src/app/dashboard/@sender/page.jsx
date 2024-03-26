@@ -312,8 +312,8 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="py-7 px-10">
-        <div className="max-w-screen max-sm:m-3">
+      <div className="py-7 px-10 max-sm:px-4 max-sm:py-4">
+        <div className="max-w-screen">
           <div className="grid grid-rows-5 grid-cols-5 max-xl:grid-rows-9 max-xl:grid-cols-3 gap-4">
             <Card className="row-span-5 col-span-2 max-xl:row-span-4 max-xl:col-span-3">
               <CardHeader>
@@ -341,32 +341,36 @@ export default function Dashboard() {
             </Card>
 
             <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
-              <CardHeader>
+              <CardHeader className="max-md:p-2">
                 <CardTitle className="text-4xl">
                   {!isLoading ? `${inTransit}` : <Loader big={true} />}
                 </CardTitle>
-                <CardDescription className="text-lg">
+                <CardDescription className="text-lg max-md:text-base">
                   In Transit
                 </CardDescription>
               </CardHeader>
             </Card>
 
             <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
-              <CardHeader>
+              <CardHeader className="max-md:p-2">
                 <CardTitle className="text-4xl">
                   {!isLoading ? `${delivered}` : <Loader big={true} />}
                 </CardTitle>
-                <CardDescription className="text-lg">Delivered</CardDescription>
+                <CardDescription className="text-lg max-md:text-base">
+                  Delivered
+                </CardDescription>
               </CardHeader>
             </Card>
 
             <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
-              <CardHeader>
+              <CardHeader className="max-md:p-2">
                 <CardTitle className="text-4xl">
                   {" "}
                   {!isLoading ? `${returned}` : <Loader big={true} />}
                 </CardTitle>
-                <CardDescription className="text-lg">Returned</CardDescription>
+                <CardDescription className="text-lg max-md:text-base">
+                  Returned
+                </CardDescription>
               </CardHeader>
             </Card>
 

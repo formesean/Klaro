@@ -74,13 +74,13 @@ export function ViewDetails({ docRef }) {
       >
         View Details
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="flex flex-col max-md:w-full">
         <DialogHeader>
           <DialogTitle className="pb-4">Parcel Details</DialogTitle>
           <DialogDescription>
             <Card>
               <CardContent className="flex flex-col gap-5 max-h-[500px] w-full p-5 overflow-y-auto scrollbar-thin">
-                <Card>
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle className="text-xl">Information</CardTitle>
                   </CardHeader>
@@ -100,7 +100,7 @@ export function ViewDetails({ docRef }) {
                             {orderData?.receiverAddress}
                           </p>
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 pb-4">
                           <p className="text-sm text-muted-foreground">
                             Delivery Service Information
                           </p>
@@ -115,7 +115,7 @@ export function ViewDetails({ docRef }) {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle className="text-xl">Contents</CardTitle>
                   </CardHeader>
@@ -150,7 +150,7 @@ export function ViewDetails({ docRef }) {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="w-full">
                   <CardHeader>
                     <CardTitle className="text-xl">Payment</CardTitle>
                   </CardHeader>
