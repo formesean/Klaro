@@ -4,6 +4,7 @@ import {
   DocumentSnapshot,
   Timestamp,
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -19,30 +20,6 @@ interface DeliveryService {
   parcels: Parcel[];
 }
 
-interface Sender {
-  id: DocumentReference;
-  email: string;
-  name: string;
-  address: string;
-  parcels: Parcel[];
-}
-
-interface Order {
-  id: DocumentReference;
-  sender: DocumentReference;
-  deliveryService: DocumentReference;
-  items: DocumentReference[];
-  senderName: string;
-  senderAddress: string;
-  receiverName: string;
-  receiverAddress: string;
-  receiverEmail: string;
-  deliveryServiceName: string;
-  totalQuantity: number;
-  totalPrice: number;
-  dateIssued: Timestamp;
-}
-
 interface Parcel {
   id: DocumentReference;
   rtn: string;
@@ -50,13 +27,6 @@ interface Parcel {
   currentStatus: string;
   currentLocation: string;
   deliveryDate: Date;
-}
-
-interface Item {
-  id: DocumentReference;
-  name: string;
-  price: number;
-  quantity: number;
 }
 
 export const useDeliveryService = () => {
@@ -97,6 +67,34 @@ export const useDeliveryService = () => {
         return senderDoc.ref;
       } else {
         console.error("Sender document not found for email:", sessionEmail);
+        return undefined;
+      }
+    } catch (error) {
+      console.error(
+        "Error getting delivery service document reference:",
+        error
+      );
+      return undefined;
+    }
+  };
+
+  /**
+   * Retrieves the document reference of a delivery service based on the provided email.
+   * @param {string} email - The email of the delivery service whose document reference is to be retrieved.
+   * @returns {Promise<DocumentReference | undefined>} - A promise that resolves with the document reference of the delivery service or undefined if not found.
+   */
+  const getDocRefByEmail = async (
+    email: string
+  ): Promise<DocumentReference | undefined> => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "deliveryAccounts"));
+      const senderDoc = querySnapshot.docs.find(
+        (doc) => doc.data().email === email
+      );
+      if (senderDoc) {
+        return senderDoc.ref;
+      } else {
+        console.error("Sender document not found for email:", email);
         return undefined;
       }
     } catch (error) {
@@ -190,6 +188,7 @@ export const useDeliveryService = () => {
   return {
     createDeliveryService,
     getDocRef,
+    getDocRefByEmail,
     fetchDeliveryService,
     fetchDeliveryServices,
     updateDeliveryService,
