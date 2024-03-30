@@ -1,30 +1,28 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { senderExists } from "./api/handleUser";
+import { senderExists } from "./api/useUsers";
 
-export default async function Home() {
+export default function Home() {
   const { data: session } = useSession();
-  const router = useRouter();
 
-  useEffect(() => {
-    async function redirectUser() {
-      if (session) {
-        if (session.user.role === "deliveryService") {
-          router.replace("/dashboard");
-        } else if (session.user.role === "sender") {
-          if (!(await senderExists(session.user.email))) {
-            router.replace("/account");
-          } else {
-            router.replace("/dashboard");
-          }
-        }
-      }
+  const userExists = async (sessionEmail) => {
+    return await senderExists(sessionEmail);
+  };
+
+  if (session && session?.user.role === "deliveryService") {
+    return redirect("/dashboard");
+  }
+
+  if (session && session?.user.role === "sender") {
+    const exists = userExists(session.user.email);
+
+    if (!exists) {
+      return redirect("/account");
+    } else {
+      return redirect("/dashboard");
     }
-
-    redirectUser();
-  }, [session, router]);
+  }
 
   return (
     <div className="flex flex-col items-center justify-center py-2">
@@ -32,71 +30,3 @@ export default async function Home() {
     </div>
   );
 }
-
-// "use client";
-// import { useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import { useSession } from "next-auth/react";
-// import { senderExists } from "./api/handleUser";
-// import { Button } from "../components/ui/button";
-// import { useDeliveryService } from "./api/useDeliveryService";
-
-// export default function Home() {
-//   const { data: session } = useSession();
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     async function redirectUser() {
-//       if (session) {
-//         if (session.user.role === "deliveryService") {
-//           router.replace("/dashboard");
-//         } else if (session.user.role === "sender") {
-//           if (!(await senderExists(session.user.email))) {
-//             router.replace("/account");
-//           } else {
-//             router.replace("/dashboard");
-//           }
-//         }
-//       }
-//     }
-
-//     redirectUser();
-//   }, [session, router]);
-
-//   const {
-//     createDeliveryService,
-//     fetchDeliveryService,
-//     updateDeliveryService,
-//     removeDeliveryService,
-//   } = useDeliveryService();
-
-//   const data = {
-//     email: "seanaguilar698@gmail.com",
-//     name: "SA Express",
-//     parcels: [],
-//   };
-
-//   async function handleSubmit() {
-//     const print = await createDeliveryService(data);
-//     console.log(print);
-//     console.log(await fetchDeliveryService(print));
-
-//     const updatedData = {
-//       name: "SKA Express",
-//     };
-
-//     await updateDeliveryService(print, updatedData);
-//     console.log(await fetchDeliveryService(print));
-
-//     await removeDeliveryService(print);
-//     console.log(await fetchDeliveryService(print));
-//   }
-
-//   return (
-//     <div className="flex flex-col items-center justify-center py-2 gap-5">
-//       <Button onClick={handleSubmit}>
-//         Create, then Read, then Update, then Read seanaguilar698@gmail.com
-//       </Button>
-//     </div>
-//   );
-// }

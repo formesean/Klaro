@@ -111,7 +111,7 @@ export default function Forms() {
       items.length > 0;
 
     setIsFormComplete(complete);
-  }, [form.watch(), items]);
+  }, [form, items]);
 
   useEffect(() => {
     const cachedFormData = localStorage.getItem("formData");
@@ -131,11 +131,11 @@ export default function Forms() {
       const parsedData = JSON.parse(cachedItems);
       setItems(parsedData);
     }
-  }, []);
+  }, [form]);
 
   useEffect(() => {
     localStorage.setItem("formData", JSON.stringify(form.getValues()));
-  }, [form.getValues()]);
+  }, [form]);
 
   useEffect(() => {
     localStorage.setItem("itemData", JSON.stringify(itemData));
