@@ -6,6 +6,7 @@ import NavBar from "../components/NavBar";
 import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
 import { authOptions } from "../lib/auth";
+import { Toaster } from "../components/ui/toaster";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -37,6 +38,7 @@ export default async function RootLayout({ children }) {
           <SessionProvider session={session}>
             <NavBar />
             {children}
+            <Toaster />
           </SessionProvider>
         </ThemeProvider>
       </body>
