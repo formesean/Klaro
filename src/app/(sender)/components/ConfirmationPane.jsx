@@ -33,6 +33,7 @@ import { useSender } from "../../api/useSender";
 import { useDeliveryService } from "../../api/useDeliveryService";
 import { useParcels } from "../../api/useParcels";
 import { Timestamp } from "firebase/firestore";
+import emailjs from "@emailjs/browser";
 
 export function ConfirmationPane({
   formData,
@@ -118,6 +119,23 @@ export function ConfirmationPane({
 
     await updateSenderParcels(senderRef, parcelRef);
     await updateDeliveryServiceParcels(deliveryServiceRef, parcelRef);
+
+    const emailParams = {
+      subject: `Your order ${rtn} has been placed`,
+      message: `Hello ${recipientData.receiverName} (${recipientData.receiverEmail}), \n Your order ${rtn} has been placed`,
+      deliveryServiceName: deliveryServiceData.name,
+      items: itemsData.map((item) => item.itemName).join(", "),
+      totalAmount: totalPayment,
+      to_email: recipientData.receiverEmail,
+    };
+
+    emailjs.send(
+      process.env.NEXT_PUBLIC_SERVICE_ID,
+      process.env.NEXT_PUBLIC_TEMPLATE_ID,
+      emailParams,
+      process.env.NEXT_PUBLIC_EMAILJS
+    );
+
     await clearData();
   };
 
