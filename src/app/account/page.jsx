@@ -48,19 +48,22 @@ export default function CompleteAccount() {
     },
   });
 
-  const userRole = async (sessionEmail) => {
-    return await checkRole(sessionEmail);
-  };
-
-  if (session) {
-    const role = userRole(session?.user.email);
-
-    if (role || session?.user.role === "deliveryService") {
-      return redirect("/dashboard");
+  (async () => {
+    if (session) {
+      try {
+        if (
+          (await checkRole(session?.user.email)) ||
+          session?.user.role === "deliveryService"
+        ) {
+          router.replace("/dashboard");
+        }
+      } catch (error) {
+        console.error(error);
+      }
     } else {
-      return redirect("/");
+      router.replace("/");
     }
-  }
+  })();
 
   async function onSubmit(data) {
     try {

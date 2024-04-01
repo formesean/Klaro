@@ -1,28 +1,30 @@
 "use client";
-import { redirect } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { senderExists } from "./api/useUsers";
 
-export default function Home() {
+export default async function Home() {
   const { data: session } = useSession();
+  const router = useRouter();
 
-  const userExists = async (sessionEmail) => {
-    return await senderExists(sessionEmail);
-  };
-
-  if (session && session?.user.role === "deliveryService") {
-    return redirect("/dashboard");
-  }
-
-  if (session && session?.user.role === "sender") {
-    const exists = userExists(session.user.email);
-
-    if (!exists) {
-      return redirect("/account");
-    } else {
-      return redirect("/dashboard");
+  useEffect(() => {
+    async function redirectUser() {
+      if (session) {
+        if (session.user.role === "deliveryService") {
+          router.replace("/dashboard");
+        } else if (session.user.role === "sender") {
+          if (!(await senderExists(session.user.email))) {
+            router.replace("/account");
+          } else {
+            router.replace("/dashboard");
+          }
+        }
+      }
     }
-  }
+
+    redirectUser();
+  }, [session, router]);
 
   return (
     <div className="flex flex-col items-center justify-center py-2">
