@@ -17,22 +17,17 @@ function AuthButton({ user }) {
   return <Button onClick={() => signIn("google")}>Sign in</Button>;
 }
 
-function NavLink({ item, currentPath, theme, onClick }) {
-  const activeLink =
-    theme === "dark"
-      ? "text-center px-4 py-2 mx-2 border-b-2 border-white transition-all duration-300"
-      : "text-center px-4 py-2 mx-2 border-b-2 border-black transition-all duration-300";
-  const staticLink =
-    theme === "dark"
-      ? "text-center px-4 py-2 mx-2 border-b-2 border-transparent hover:border-white white transition-all duration-300"
-      : "text-center px-4 py-2 mx-2 border-b-2 border-transparent hover:border-black white transition-all duration-300";
-
+function NavLink({ item, currentPath, onClick }) {
   return (
     <Link href={item.path}>
       <p
         key={item.title}
         href={item.path}
-        className={`${currentPath === item.path ? activeLink : staticLink}`}
+        className={`${
+          currentPath === item.path
+            ? "text-center px-4 py-2 mx-2 border-b-2 border-black dark:border-white transition-all duration-300"
+            : "text-center px-4 py-2 mx-2 border-b-2 border-transparent hover:border-black dark:hover:border-white white transition-all duration-300"
+        }`}
         onClick={onClick}
       >
         {item.title}
@@ -60,7 +55,7 @@ export default function NavBar() {
   };
 
   return (
-    <div className={`sticky left-0 top-0 z-50 bg-inherit shadow`}>
+    <div className="sticky left-0 top-0 z-50 bg-inherit shadow dark:shadow-neutral-500">
       <div className="flex justify-between items-center py-2 px-4">
         <div className="flex items-center gap-10">
           <h1 className="text-2xl font-bold">Klaro</h1>
@@ -85,8 +80,8 @@ export default function NavBar() {
         <div className="flex items-center gap-6">
           <ModeToggle />
           <button
-            className={`block sm:hidden focus:outline-none ${
-              showMenu ? (theme === "dark" ? "text-white" : "text-black") : ""
+            className={`block sm:hidden focus:outline-none text-black dark:text-white ${
+              !showMenu && ""
             }`}
             onClick={() => setShowMenu(!showMenu)}
           >
