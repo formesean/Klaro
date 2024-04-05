@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { BarChart } from "@tremor/react";
+import { useEffect, useState } from "react";
 
 const chartdata = [
   {
@@ -66,6 +67,21 @@ const dataFormatter = (number) =>
 
 export default function Dashboard() {
   const { data: session } = useSession();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 650);
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   if (!session && session?.user.role !== "deliveryService") {
     return redirect("/");
@@ -74,7 +90,7 @@ export default function Dashboard() {
   return (
     <div className="py-7 px-10 max-sm:px-4 max-sm:py-4">
       <div className="max-w-screen">
-        <div className="grid grid-rows-5 grid-cols-3 max-xl:grid-rows-9 max-xl:grid-cols-3 gap-4">
+        <div className="grid grid-rows-4 grid-cols-3 gap-4">
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
               <CardTitle className="text-4xl">0</CardTitle>
@@ -102,7 +118,7 @@ export default function Dashboard() {
             </CardHeader>
           </Card>
 
-          <Card className="relative row-span-4 col-span-3 max-xl:row-span-4 max-xl:col-span-3 z-10">
+          <Card className="relative row-span-3 col-span-3 max-xl:row-span-3 max-xl:col-span-3 z-10">
             <CardContent className="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
               <BarChart
                 data={chartdata}
@@ -110,6 +126,7 @@ export default function Dashboard() {
                 categories={["Number of parcels delivered"]}
                 colors={["green"]}
                 valueFormatter={dataFormatter}
+                layout={isMobile ? "vertical" : "horizontal"}
                 yAxisWidth={48}
                 onValueChange={(v) => console.log(v)}
               />
