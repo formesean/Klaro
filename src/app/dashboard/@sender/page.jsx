@@ -224,15 +224,15 @@ export default function Dashboard() {
           const parcelSnapshot = await fetchParcel(parcelRef);
 
           if (parcelSnapshot.currentStatus === "In Transit") {
-            setInTransit(inTransit + 1);
+            setInTransit((prevState) => prevState + 1);
           }
 
           if (parcelSnapshot.currentStatus === "Delivered") {
-            setDelivered(delivered + 1);
+            setDelivered((prevState) => prevState + 1);
           }
 
           if (parcelSnapshot.currentStatus === "Returned") {
-            setReturned(returned + 1);
+            setReturned((prevState) => prevState + 1);
           }
 
           parcelsData.push(parcelSnapshot);
@@ -312,165 +312,173 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="max-w-screen mx-12 my-8 max-sm:m-3">
-        <div className="grid grid-rows-5 grid-cols-5 max-xl:grid-rows-9 max-xl:grid-cols-3 gap-4">
-          <Card className="row-span-5 col-span-2 max-xl:row-span-4 max-xl:col-span-3">
-            <CardHeader>
-              <CardTitle>Track a Package</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              <div className="flex flex-col gap-4">
-                <Input type="number" id="rtn-input" placeholder="RTN" />
-                <Button onClick={handleTrackRTN}>Track</Button>
-              </div>
+      <div className="py-7 px-10 max-sm:px-4 max-sm:py-4">
+        <div className="max-w-screen">
+          <div className="grid grid-rows-5 grid-cols-5 max-xl:grid-rows-9 max-xl:grid-cols-3 gap-4">
+            <Card className="row-span-5 col-span-2 max-xl:row-span-4 max-xl:col-span-3">
+              <CardHeader>
+                <CardTitle>Track a Package</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
+                  <Input type="number" id="rtn-input" placeholder="RTN" />
+                  <Button onClick={handleTrackRTN}>Track</Button>
+                </div>
 
-              <Separator className="my-3" />
+                <Separator className="my-3" />
 
-              {showParcelDetails && (
-                <DeliveryStatus
-                  parcelData={parcelData}
-                  copied={copied}
-                  copyText={copyText}
-                  orderData={orderData}
-                  details={details}
-                  handleHideDetail={handleHideDetail}
-                />
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-4xl">
-                {!isLoading ? `${inTransit}` : <Loader big={true} />}
-              </CardTitle>
-              <CardDescription className="text-lg">In Transit</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-4xl">
-                {!isLoading ? `${delivered}` : <Loader big={true} />}
-              </CardTitle>
-              <CardDescription className="text-lg">Delivered</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-4xl">
-                {" "}
-                {!isLoading ? `${returned}` : <Loader big={true} />}
-              </CardTitle>
-              <CardDescription className="text-lg">Returned</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="row-span-4 col-span-3 max-xl:row-span-4 max-xl:col-span-3">
-            <CardHeader>
-              <CardTitle>Order History</CardTitle>
-              <CardDescription>1234 Orders</CardDescription>
-            </CardHeader>
-            <CardContent className="-mt-4">
-              <div className="w-full">
-                <div className="flex items-center py-4">
-                  <Input
-                    placeholder="Search recipient"
-                    value={
-                      table.getColumn("receiverName")?.getFilterValue() ?? ""
-                    }
-                    onChange={(event) =>
-                      table
-                        .getColumn("receiverName")
-                        ?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
+                {showParcelDetails && (
+                  <DeliveryStatus
+                    parcelData={parcelData}
+                    copied={copied}
+                    copyText={copyText}
+                    orderData={orderData}
+                    details={details}
+                    handleHideDetail={handleHideDetail}
                   />
-                </div>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => {
-                            return (
-                              <TableHead key={header.id}>
-                                {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                      header.column.columnDef.header,
-                                      header.getContext()
-                                    )}
-                              </TableHead>
-                            );
-                          })}
-                        </TableRow>
-                      ))}
-                    </TableHeader>
-                    <TableBody>
-                      {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                          <TableRow
-                            key={row.id}
-                            data-state={row.getIsSelected() && "selected"}
-                          >
-                            {row.getVisibleCells().map((cell) => (
-                              <TableCell key={cell.id}>
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )}
-                              </TableCell>
-                            ))}
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
+              <CardHeader className="max-md:p-2">
+                <CardTitle className="text-4xl">
+                  {!isLoading ? `${inTransit}` : <Loader big={true} />}
+                </CardTitle>
+                <CardDescription className="text-lg max-md:text-base">
+                  In Transit
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
+              <CardHeader className="max-md:p-2">
+                <CardTitle className="text-4xl">
+                  {!isLoading ? `${delivered}` : <Loader big={true} />}
+                </CardTitle>
+                <CardDescription className="text-lg max-md:text-base">
+                  Delivered
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
+              <CardHeader className="max-md:p-2">
+                <CardTitle className="text-4xl">
+                  {" "}
+                  {!isLoading ? `${returned}` : <Loader big={true} />}
+                </CardTitle>
+                <CardDescription className="text-lg max-md:text-base">
+                  Returned
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="row-span-4 col-span-3 max-xl:row-span-4 max-xl:col-span-3">
+              <CardHeader>
+                <CardTitle>Order History</CardTitle>
+                <CardDescription>1234 Orders</CardDescription>
+              </CardHeader>
+              <CardContent className="-mt-4">
+                <div className="w-full">
+                  <div className="flex items-center py-4">
+                    <Input
+                      placeholder="Search recipient"
+                      value={
+                        table.getColumn("receiverName")?.getFilterValue() ?? ""
+                      }
+                      onChange={(event) =>
+                        table
+                          .getColumn("receiverName")
+                          ?.setFilterValue(event.target.value)
+                      }
+                      className="max-w-sm"
+                    />
+                  </div>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                          <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => {
+                              return (
+                                <TableHead key={header.id}>
+                                  {header.isPlaceholder
+                                    ? null
+                                    : flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext()
+                                      )}
+                                </TableHead>
+                              );
+                            })}
                           </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            {!isLoading ? (
-                              "No results."
-                            ) : (
-                              <Loader className="items-center justify-center" />
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                <div className="flex items-center justify-end space-x-2 py-4">
-                  <div className="space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        table.previousPage();
-                        setPageView(pageView - 1);
-                      }}
-                      disabled={!table.getCanPreviousPage()}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        table.nextPage();
-                        setPageView(pageView + 1);
-                      }}
-                      disabled={!table.getCanNextPage()}
-                    >
-                      Next
-                    </Button>
+                        ))}
+                      </TableHeader>
+                      <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                          table.getRowModel().rows.map((row) => (
+                            <TableRow
+                              key={row.id}
+                              data-state={row.getIsSelected() && "selected"}
+                            >
+                              {row.getVisibleCells().map((cell) => (
+                                <TableCell key={cell.id}>
+                                  {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
+                                  )}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell
+                              colSpan={columns.length}
+                              className="h-24 text-center"
+                            >
+                              {!isLoading ? (
+                                "No results."
+                              ) : (
+                                <Loader className="items-center justify-center" />
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex items-center justify-end space-x-2 py-4">
+                    <div className="space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          table.previousPage();
+                          setPageView(pageView - 1);
+                        }}
+                        disabled={!table.getCanPreviousPage()}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          table.nextPage();
+                          setPageView(pageView + 1);
+                        }}
+                        disabled={!table.getCanNextPage()}
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </>
