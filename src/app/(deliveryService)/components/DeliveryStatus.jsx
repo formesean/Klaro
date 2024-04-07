@@ -45,21 +45,22 @@ export function DeliveryStatus({
         </div>
       </div>
       <div>
-        {/* <RadioGroup
+        <RadioGroup
           disabled
-          defaultValue={
-            details.currentStatus === "Order Placed"
-              ? "option-order"
-              : details.currentStatus === "Arrived at Sort Center"
-              ? "option-center"
-              : details.currentStatus === "In Transit"
-              ? "option-intransit"
-              : details.currentStatus === "Arrived at the Logistics Hub"
-              ? "option-hub"
-              : details.currentStatus === "Delivered"
-              ? "option-delivered"
-              : ""
-          }
+          defaultValue="Order Placed"
+          // defaultValue={
+          //   details.currentStatus === "Order Placed"
+          //     ? "option-order"
+          //     : details.currentStatus === "Arrived at Sort Center"
+          //     ? "option-center"
+          //     : details.currentStatus === "In Transit"
+          //     ? "option-intransit"
+          //     : details.currentStatus === "Arrived at the Logistics Hub"
+          //     ? "option-hub"
+          //     : details.currentStatus === "Delivered"
+          //     ? "option-delivered"
+          //     : ""
+          // }
           className="gap-5"
         >
           <div className="flex items-center space-x-2">
@@ -68,11 +69,14 @@ export function DeliveryStatus({
                 value="option-delivered"
                 id="option-delivered"
                 selected="option-delivered"
-                className={`w-16 h-16 ${
-                  details.currentStatus === "Delivered"
-                    ? ""
-                    : "border-slate-600"
-                }`}
+                className={
+                  `w-16 h-16`
+                  // ${
+                  //   details.currentStatus === "Delivered"
+                  //     ? ""
+                  //     : "border-slate-600"
+                  // }`
+                }
               />
               <Label htmlFor="option-delivered">
                 <div className="flex flex-col justify-center pl-2">
@@ -92,12 +96,15 @@ export function DeliveryStatus({
                 value="option-hub"
                 id="option-hub"
                 selected="option-hub"
-                className={`w-16 h-16 ${
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? ""
-                    : "border-slate-600"
-                }`}
+                className={
+                  `w-16 h-16`
+                  //  ${
+                  //   details.currentStatus === "Arrived at the Logistics Hub" ||
+                  //   details.currentStatus === "Delivered"
+                  //     ? ""
+                  //     : "border-slate-600"
+                  // }`
+                }
               />
               <Label htmlFor="option-hub">
                 <div className="flex flex-col justify-center pl-2">
@@ -108,7 +115,8 @@ export function DeliveryStatus({
                     <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
                   </div>
                   <p className="text-[#ffffffdb]">
-                    Logistics Facility: {details.hubLocation}
+                    Logistics Facility:
+                    {/* {details.hubLocation} */}
                   </p>
                 </div>
               </Label>
@@ -121,13 +129,16 @@ export function DeliveryStatus({
                 value="option-intransit"
                 id="option-intransit"
                 selected="option-intransit"
-                className={`w-16 h-16 ${
-                  details.currentStatus === "In Transit" ||
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? ""
-                    : "border-slate-600"
-                }`}
+                className={
+                  `w-16 h-16`
+                  //  ${
+                  //   details.currentStatus === "In Transit" ||
+                  //   details.currentStatus === "Arrived at the Logistics Hub" ||
+                  //   details.currentStatus === "Delivered"
+                  //     ? ""
+                  //     : "border-slate-600"
+                  // }`
+                }
               />
               <Label htmlFor="option-intransit">
                 <div className="flex flex-col justify-center pl-2">
@@ -151,15 +162,18 @@ export function DeliveryStatus({
                 value="option-center"
                 id="option-center"
                 selected="option-center"
-                className={`w-16 h-16 ${
-                  (details.currentStatus === details.currentStatus) ===
-                    "Arrived at Sort Center" ||
-                  details.currentStatus === "In Transit" ||
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? ""
-                    : "border-slate-600"
-                }`}
+                className={
+                  `w-16 h-16`
+                  //  ${
+                  //   (details.currentStatus === details.currentStatus) ===
+                  //     "Arrived at Sort Center" ||
+                  //   details.currentStatus === "In Transit" ||
+                  //   details.currentStatus === "Arrived at the Logistics Hub" ||
+                  //   details.currentStatus === "Delivered"
+                  //     ? ""
+                  //     : "border-slate-600"
+                  // }`
+                }
               />
               <Label htmlFor="option-center">
                 <div className="flex flex-col justify-center pl-2">
@@ -170,7 +184,8 @@ export function DeliveryStatus({
                     <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
                   </div>
                   <p className="text-[#ffffffdb]">
-                    Logistics Facility: {details.centerLocation}
+                    Logistics Facility:
+                    {/* {details.centerLocation} */}
                   </p>
                 </div>
               </Label>
@@ -183,22 +198,25 @@ export function DeliveryStatus({
                 value="option-order"
                 id="option-order"
                 selected="option-order"
-                className={`w-16 h-16 ${
-                  details.currentStatus === "Order Placed" ||
-                  details.currentStatus === "Arrived at Sort Center" ||
-                  details.currentStatus === "In Transit" ||
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? ""
-                    : "border-slate-600"
-                }`}
+                className={
+                  `w-16 h-16`
+                  //  ${
+                  //   details.currentStatus === "Order Placed" ||
+                  //   details.currentStatus === "Arrived at Sort Center" ||
+                  //   details.currentStatus === "In Transit" ||
+                  //   details.currentStatus === "Arrived at the Logistics Hub" ||
+                  //   details.currentStatus === "Delivered"
+                  //     ? ""
+                  //     : "border-slate-600"
+                  // }`
+                }
               />
               <Label htmlFor="option-order">
                 <div className="flex flex-col justify-center pl-2">
                   <div className="flex justify-center items-center gap-4">
                     <h1 className="font-bold text-base">Order Placed</h1>
                     <p className="text-sm text-[#808080]">
-                      {details.orderPlacedDate.toLocaleDateString()}
+                      {/* {details.orderPlacedDate.toLocaleDateString()} */}
                     </p>
                   </div>
                   <p className="text-[#ffffffdb]">Ready for pick-up</p>
@@ -206,7 +224,7 @@ export function DeliveryStatus({
               </Label>
             </div>
           </div>
-        </RadioGroup> */}
+        </RadioGroup>
       </div>
       <div className="flex flex-col gap-4 w-full">
         <Button onClick={handleHideDetail}>Hide</Button>
