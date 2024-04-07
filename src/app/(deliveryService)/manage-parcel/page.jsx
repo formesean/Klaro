@@ -38,6 +38,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Loader from "../components/Loader";
+import Link from "next/link";
 const DeliveryStatus = dynamic(
   () =>
     import("../components/DeliveryStatus").then((mod) => mod.DeliveryStatus),
@@ -180,7 +181,6 @@ const columns = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const router = useRouter();
       const docRef = row.original;
 
       return (
@@ -198,10 +198,10 @@ const columns = [
               Copy RTN
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => router.push("/manage-parcel/documentId")}
-            >
-              View Details
+            <DropdownMenuItem>
+              <Link href={"/manage-parcel/" + "documentId"}>
+                Parcel Details
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
