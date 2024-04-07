@@ -99,7 +99,7 @@ const data = [
   },
 ];
 
-export const columns = [
+const columns = [
   {
     accessorKey: "rtn",
     header: () => <div className="text-left">RTN</div>,
@@ -213,10 +213,6 @@ export default function ManageParcel() {
   const [rowSelection, setRowSelection] = useState({});
   const [pageView, setPageView] = useState(0);
 
-  if (!session && session?.user.role !== "sender") {
-    return redirect("/");
-  }
-
   const table = useReactTable({
     data,
     columns,
@@ -239,6 +235,10 @@ export default function ManageParcel() {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
   });
+
+  if (!session && session?.user.role !== "sender") {
+    return redirect("/");
+  }
 
   return (
     <>
