@@ -4,7 +4,7 @@ import {
 } from "../../../../components/ui/radio-group";
 import { Label } from "../../../../components/ui/label";
 import { Button } from "../../../../components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, X } from "lucide-react";
 
 export function DeliveryStatus({
   parcelData,
@@ -16,8 +16,8 @@ export function DeliveryStatus({
 }) {
   return (
     <div className="flex flex-col gap-5 w-full">
-      <div className="flex items-center">
-        <div className="mr-40">
+      <div className="flex justify-between">
+        <div>
           <p className="font-bold text-lg">Delivery Status</p>
           <p className="font-bold font text-sm text-[#808080]">
             {orderData.receiverName}
@@ -42,6 +42,15 @@ export function DeliveryStatus({
               )}
             </button>
           </div>
+        </div>
+        <div>
+          <Button
+            className="px-3 -py-3 rounded-full"
+            variant="ghost"
+            onClick={handleHideDetail}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
       <div>
@@ -68,9 +77,9 @@ export function DeliveryStatus({
                 value="option-delivered"
                 id="option-delivered"
                 selected="option-delivered"
-                className={`w-16 h-16 ${
+                className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "Delivered"
-                    ? ""
+                    ? "bg-green-500 text-background"
                     : "border-slate-600"
                 }`}
               />
@@ -92,10 +101,10 @@ export function DeliveryStatus({
                 value="option-hub"
                 id="option-hub"
                 selected="option-hub"
-                className={`w-16 h-16 ${
+                className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? ""
+                    ? "bg-green-500 text-background"
                     : "border-slate-600"
                 }`}
               />
@@ -121,11 +130,11 @@ export function DeliveryStatus({
                 value="option-intransit"
                 id="option-intransit"
                 selected="option-intransit"
-                className={`w-16 h-16 ${
+                className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? ""
+                    ? "bg-green-500 text-background"
                     : "border-slate-600"
                 }`}
               />
@@ -151,13 +160,13 @@ export function DeliveryStatus({
                 value="option-center"
                 id="option-center"
                 selected="option-center"
-                className={`w-16 h-16 ${
+                className={`w-16 h-16 disabled:opacity-100 ${
                   (details.currentStatus === details.currentStatus) ===
                     "Arrived at Sort Center" ||
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? ""
+                    ? "bg-green-500 text-background"
                     : "border-slate-600"
                 }`}
               />
@@ -183,13 +192,13 @@ export function DeliveryStatus({
                 value="option-order"
                 id="option-order"
                 selected="option-order"
-                className={`w-16 h-16 ${
+                className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "Order Placed" ||
                   details.currentStatus === "Arrived at Sort Center" ||
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? ""
+                    ? "bg-green-500 text-background"
                     : "border-slate-600"
                 }`}
               />
@@ -207,9 +216,6 @@ export function DeliveryStatus({
             </div>
           </div>
         </RadioGroup>
-      </div>
-      <div className="flex flex-col gap-4 w-full">
-        <Button onClick={handleHideDetail}>Hide</Button>
       </div>
     </div>
   );
