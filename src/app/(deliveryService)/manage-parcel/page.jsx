@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   Card,
@@ -180,6 +180,7 @@ const columns = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
+      const router = useRouter();
       const docRef = row.original;
 
       return (
@@ -197,6 +198,11 @@ const columns = [
               Copy RTN
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => router.push("/manage-parcel/documentId")}
+            >
+              View Details
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
