@@ -44,7 +44,7 @@ export function ConfirmationPane({
   clearData,
 }) {
   const { getDocRef, fetchSender } = useSender();
-  const { getDocRefByEmail } = useDeliveryService();
+  // const { getDocRef } = useDeliveryService();
   const { createOrder } = useOrders();
   const { createItem } = useItems();
   const { createParcel, updateSenderParcels, updateDeliveryServiceParcels } =
@@ -74,7 +74,7 @@ export function ConfirmationPane({
     const itemsRef = [];
     const senderRef = await getDocRef(sessionEmail);
     const senderData = await fetchSender(senderRef);
-    const deliveryServiceRef = await getDocRefByEmail(
+    const deliveryServiceRef = await useDeliveryService().getDocRef(
       deliveryServiceData.email
     );
     for (const itemObject of itemsData) {
