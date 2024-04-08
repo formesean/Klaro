@@ -320,7 +320,7 @@ export default function Dashboard() {
                 <CardTitle>Track a Package</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                <div className="flex flex-col gap-4">
+                <div className="  flex flex-col gap-4">
                   <Input type="number" id="rtn-input" placeholder="RTN" />
                   <Button onClick={handleTrackRTN}>Track</Button>
                 </div>
@@ -340,7 +340,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
+              <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
               <CardHeader className="max-md:p-2">
                 <CardTitle className="text-4xl">
                   {!isLoading ? `${inTransit}` : <Loader big={true} />}
