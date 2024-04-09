@@ -15,57 +15,6 @@ import { useOrders } from "../../api/useOrders";
 import { useDeliveryService } from "../../api/useDeliveryService";
 import Loader from "./components/Loader";
 
-const chartdata = [
-  {
-    month: "Jan",
-    "Number of parcels delivered": 20,
-  },
-  {
-    month: "Feb",
-    "Number of parcels delivered": 10,
-  },
-  {
-    month: "Mar",
-    "Number of parcels delivered": 5,
-  },
-  {
-    month: "Apr",
-    "Number of parcels delivered": 3,
-  },
-  {
-    month: "May",
-    "Number of parcels delivered": 7,
-  },
-  {
-    month: "Jun",
-    "Number of parcels delivered": 8,
-  },
-  {
-    month: "Jul",
-    "Number of parcels delivered": 9,
-  },
-  {
-    month: "Aug",
-    "Number of parcels delivered": 12,
-  },
-  {
-    month: "Sept",
-    "Number of parcels delivered": 6,
-  },
-  {
-    month: "Oct",
-    "Number of parcels delivered": 9,
-  },
-  {
-    month: "Nov",
-    "Number of parcels delivered": 23,
-  },
-  {
-    month: "Dec",
-    "Number of parcels delivered": 3,
-  },
-];
-
 const dataFormatter = (number) =>
   Intl.NumberFormat("us").format(number).toString();
 
@@ -80,14 +29,47 @@ export default function Dashboard() {
   const { fetchOrder } = useOrders();
   const { getDeliveryServiceDocRef } = useDeliveryService();
   const [isLoading, setIsLoading] = useState(true);
-  const [inTransit, setInTransit] = useState(0);
-  const [delivered, setDelivered] = useState(0);
-  const [returned, setReturned] = useState(0);
+  // const [inTransit, setInTransit] = useState(0);
+  // const [delivered, setDelivered] = useState(0);
+  // const [returned, setReturned] = useState(0);
+  // const [jan, setJan] = useState(0);
+  // const [feb, setFeb] = useState(0);
+  // const [mar, setMar] = useState(0);
+  // const [apr, setApr] = useState(0);
+  // const [may, setMay] = useState(0);
+  // const [jun, setJun] = useState(0);
+  // const [jul, setJul] = useState(0);
+  // const [aug, setAug] = useState(0);
+  // const [sep, setSep] = useState(0);
+  // const [oct, setOct] = useState(0);
+  // const [nov, setNov] = useState(0);
+  // const [dec, setDec] = useState(0);
+  const [stat, setStat] = useState({
+    inTransit: 0,
+    delivered: 0,
+    returned: 0,
+  });
+  const [months, setMonths] = useState({
+    jan: 0,
+    feb: 0,
+    mar: 0,
+    apr: 0,
+    may: 0,
+    jun: 0,
+    jul: 0,
+    aug: 0,
+    sep: 0,
+    oct: 0,
+    nov: 0,
+    dec: 0,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const parcelsData = [];
+        const updatedMonths = { ...months };
+        const updatedStats = { ...stat };
 
         const parcelsRef = await fetchDeliveryServiceParcels(
           await getDeliveryServiceDocRef(session?.user.email)
@@ -96,21 +78,23 @@ export default function Dashboard() {
         for (const parcelRef of parcelsRef) {
           const parcelSnapshot = await fetchParcel(parcelRef);
 
-          if (parcelSnapshot.currentStatus === "In Transit") {
-            setInTransit((prevState) => prevState + 1);
-          }
+          updatedStats.inTransit +=
+            parcelSnapshot.currentStatus === "In Transit" ? 1 : 0;
+          updatedStats.delivered +=
+            parcelSnapshot.currentStatus === "Delivered" ? 1 : 0;
+          updatedStats.returned +=
+            parcelSnapshot.currentStatus === "Returned" ? 1 : 0;
 
           if (parcelSnapshot.currentStatus === "Delivered") {
-            setDelivered((prevState) => prevState + 1);
-          }
-
-          if (parcelSnapshot.currentStatus === "Returned") {
-            setReturned((prevState) => prevState + 1);
+            const month = parcelSnapshot.deliveryDate.toDate().getMonth();
+            updatedMonths[Object.keys(updatedMonths)[month]]++;
           }
 
           parcelsData.push(parcelSnapshot);
         }
 
+        setStat(updatedStats);
+        setMonths(updatedMonths);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -133,6 +117,11 @@ export default function Dashboard() {
     };
   }, []);
 
+  const monthData = Object.entries(months).map(([month, count]) => ({
+    month,
+    "Number of parcels delivered": count,
+  }));
+
   if (!session && session?.user.role !== "deliveryService") {
     return redirect("/");
   }
@@ -144,7 +133,7 @@ export default function Dashboard() {
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
               <CardTitle className="text-4xl">
-                {!isLoading ? `${inTransit}` : <Loader big={true} />}
+                {!isLoading ? `${stat.inTransit}` : <Loader big={true} />}
               </CardTitle>
               <CardDescription className="text-lg max-md:text-base">
                 In Transit
@@ -155,7 +144,7 @@ export default function Dashboard() {
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
               <CardTitle className="text-4xl">
-                {!isLoading ? `${delivered}` : <Loader big={true} />}
+                {!isLoading ? `${stat.delivered}` : <Loader big={true} />}
               </CardTitle>
 
               <CardDescription className="text-lg max-md:text-base">
@@ -167,7 +156,7 @@ export default function Dashboard() {
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
               <CardTitle className="text-4xl">
-                {!isLoading ? `${returned}` : <Loader big={true} />}
+                {!isLoading ? `${stat.returned}` : <Loader big={true} />}
               </CardTitle>
               <CardDescription className="text-lg max-md:text-base">
                 Returned
@@ -178,7 +167,7 @@ export default function Dashboard() {
           <Card className="relative row-span-3 col-span-3 max-xl:row-span-3 max-xl:col-span-3 z-10">
             <CardContent className="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
               <BarChart
-                data={chartdata}
+                data={monthData}
                 index="month"
                 categories={["Number of parcels delivered"]}
                 colors={["green"]}
