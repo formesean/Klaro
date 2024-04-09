@@ -52,7 +52,7 @@ const DeliveryStatus = dynamic(
   }
 );
 
-export const columns = [
+const columns = [
   {
     accessorKey: "rtn",
     header: () => <div className="text-left">RTN</div>,
@@ -209,21 +209,6 @@ export default function ManageParcel() {
     onRowSelectionChange: setRowSelection,
   });
 
-  if (!session && session?.user.role !== "sender") {
-    return redirect("/");
-  }
-
-  const copyText = () => {
-    const textToCopy = document.getElementById("textToCopy").innerText;
-    navigator.clipboard
-      .writeText(textToCopy)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch((err) => console.error("Failed to copy:", err));
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -256,6 +241,21 @@ export default function ManageParcel() {
     setIsLoading(true);
     fetchData();
   }, []);
+
+  if (!session && session?.user.role !== "sender") {
+    return redirect("/");
+  }
+
+  const copyText = () => {
+    const textToCopy = document.getElementById("textToCopy").innerText;
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => console.error("Failed to copy:", err));
+  };
 
   const handleTrackRTN = async () => {
     setShowParcelDetails(false);
