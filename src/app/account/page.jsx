@@ -19,28 +19,32 @@ import { Input } from "../../components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { createSender, senderExists } from "../api/handleUser";
-import { useRouter } from "next/navigation";
-import { createOrder, getOrder, getSenderAccount } from "../api/test";
-import { collection } from "firebase/firestore";
+import { useRouter, redirect } from "next/navigation";
+import { checkRole } from "../api/useUsers";
+import { useSender } from "../api/useSender";
 
 const formSchema = z.object({
-  fullName: z.string().min(2, {
-    message: "Full Name must be at least 2 characters.",
+  fullName: z.string().min(3, {
+    message: "Name must be at least 3 characters.",
   }),
-  address: z.string().min(2, {
-    message: "Address must be at least 2 characters.",
+  address1: z.string().min(3, {
+    message: "Address must be at least 3 characters.",
+  }),
+  address2: z.string().min(3, {
+    message: "Address must be at least 3 characters.",
   }),
 });
 
 export default function CompleteAccount() {
   const { data: session } = useSession();
+  const { createSender } = useSender();
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
-      address: "",
+      address1: "",
+      address2: "",
     },
   });
 
@@ -48,7 +52,7 @@ export default function CompleteAccount() {
     if (session) {
       try {
         if (
-          (await senderExists(session?.user.email)) ||
+          (await checkRole(session?.user.email)) ||
           session?.user.role === "deliveryService"
         ) {
           router.replace("/dashboard");
@@ -66,7 +70,7 @@ export default function CompleteAccount() {
       const userData = {
         email: session?.user.email,
         fullName: data.fullName,
-        address: data.address,
+        address: data.address1 + ", " + data.address2,
         parcels: [],
       };
       
@@ -90,7 +94,7 @@ export default function CompleteAccount() {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
+                className="space-y-2"
               >
                 <FormField
                   control={form.control}
@@ -107,12 +111,30 @@ export default function CompleteAccount() {
                 />
                 <FormField
                   control={form.control}
-                  name="address"
+                  name="address1"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="123 Street" {...field} />
+                        <Input
+                          placeholder="Street Name, Building, House No."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="Barangay, City, Province, Region"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

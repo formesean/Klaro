@@ -4,10 +4,12 @@ import {
   DocumentSnapshot,
   Timestamp,
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   updateDoc,
 } from "firebase/firestore";
 
@@ -18,30 +20,6 @@ interface DeliveryService {
   parcels: Parcel[];
 }
 
-interface Sender {
-  id: DocumentReference;
-  email: string;
-  name: string;
-  address: string;
-  parcels: Parcel[];
-}
-
-interface Order {
-  id: DocumentReference;
-  sender: DocumentReference;
-  deliveryService: DocumentReference;
-  items: DocumentReference[];
-  senderName: string;
-  senderAddress: string;
-  receiverName: string;
-  receiverAddress: string;
-  receiverEmail: string;
-  deliveryServiceName: string;
-  totalQuantity: number;
-  totalPrice: number;
-  dateIssued: Timestamp;
-}
-
 interface Parcel {
   id: DocumentReference;
   rtn: string;
@@ -49,13 +27,6 @@ interface Parcel {
   currentStatus: string;
   currentLocation: string;
   deliveryDate: Date;
-}
-
-interface Item {
-  id: DocumentReference;
-  name: string;
-  price: number;
-  quantity: number;
 }
 
 export const useDeliveryService = () => {
@@ -80,6 +51,62 @@ export const useDeliveryService = () => {
   };
 
   /**
+   * Retrieves the document reference of a delivery service based on the provided email.
+   * @param {string} sessionEmail - The email of the delivery service whose document reference is to be retrieved.
+   * @returns {Promise<DocumentReference | undefined>} - A promise that resolves with the document reference of the delivery service or undefined if not found.
+   */
+  const getDocRef = async (
+    sessionEmail: string
+  ): Promise<DocumentReference | undefined> => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "deliveryAccounts"));
+      const senderDoc = querySnapshot.docs.find(
+        (doc) => doc.data().email === sessionEmail
+      );
+      if (senderDoc) {
+        return senderDoc.ref;
+      } else {
+        console.error("Sender document not found for email:", sessionEmail);
+        return undefined;
+      }
+    } catch (error) {
+      console.error(
+        "Error getting delivery service document reference:",
+        error
+      );
+      return undefined;
+    }
+  };
+
+  /**
+   * Retrieves the document reference of a delivery service based on the provided email.
+   * @param {string} email - The email of the delivery service whose document reference is to be retrieved.
+   * @returns {Promise<DocumentReference | undefined>} - A promise that resolves with the document reference of the delivery service or undefined if not found.
+   */
+  const getDocRefByEmail = async (
+    email: string
+  ): Promise<DocumentReference | undefined> => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "deliveryAccounts"));
+      const senderDoc = querySnapshot.docs.find(
+        (doc) => doc.data().email === email
+      );
+      if (senderDoc) {
+        return senderDoc.ref;
+      } else {
+        console.error("Sender document not found for email:", email);
+        return undefined;
+      }
+    } catch (error) {
+      console.error(
+        "Error getting delivery service document reference:",
+        error
+      );
+      return undefined;
+    }
+  };
+
+  /**
    * Retrieves a delivery service by its document reference.
    * @param {DocumentReference} deliveryServiceRef - The document reference of the delivery service to retrieve.
    * @returns {Promise<DeliveryService | undefined>} - A promise that resolves with the retrieved delivery service data or undefined if not found.
@@ -100,6 +127,27 @@ export const useDeliveryService = () => {
     } catch (error) {
       console.error("Error getting delivery service:", error);
       throw error;
+    }
+  };
+
+  /**
+   * Fetches delivery services from Firestore.
+   * @returns {Promise<DeliveryService[] | undefined>} A Promise resolving to an array of DeliveryService objects, or undefined if an error occurs.
+   */
+  const fetchDeliveryServices = async (): Promise<
+    DeliveryService[] | undefined
+  > => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "deliveryAccounts"));
+      const deliveryServices: DeliveryService[] = querySnapshot.docs.map(
+        (doc) => ({
+          ...doc.data(),
+        })
+      ) as DeliveryService[];
+      return deliveryServices;
+    } catch (error) {
+      console.error("Error getting delivery services:", error);
+      return undefined;
     }
   };
 
@@ -139,7 +187,10 @@ export const useDeliveryService = () => {
 
   return {
     createDeliveryService,
+    getDocRef,
+    getDocRefByEmail,
     fetchDeliveryService,
+    fetchDeliveryServices,
     updateDeliveryService,
     removeDeliveryService,
   };

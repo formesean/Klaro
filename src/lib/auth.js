@@ -1,7 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import { FirestoreAdapter } from "@auth/firebase-adapter";
 import { cert } from "firebase-admin/app";
-import { checkRole } from "../app/api/handleUser";
+import { checkRole } from "../app/api/useUsers";
 
 export const authOptions = {
   // Configure one or more authentication providers
