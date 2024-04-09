@@ -37,6 +37,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useParcels } from "../../api/useParcels";
+import { useOrders } from "../../api/useOrders";
+import { useDeliveryService } from "../../api/useDeliveryService";
 import Loader from "../components/Loader";
 import Link from "next/link";
 const DeliveryStatus = dynamic(
@@ -48,57 +51,6 @@ const DeliveryStatus = dynamic(
     ),
   }
 );
-
-const data = [
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-  {
-    rtn: 9529661493,
-    receiverName: "Bea Caños",
-    currentStatus: "In Transit",
-    deliveryDate: "April 8, 2024 at 11:50:59 PM UTC+8",
-  },
-];
 
 const columns = [
   {
@@ -212,15 +164,30 @@ const columns = [
 
 export default function ManageParcel() {
   const { data: session } = useSession();
+  const { getDeliveryServiceDocRef } = useDeliveryService();
+  const { fetchDeliveryServiceParcels, fetchParcel, fetchParcelByRTN } =
+    useParcels();
+  const { fetchOrder } = useOrders();
   const [isLoading, setIsLoading] = useState(false);
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [pageView, setPageView] = useState(0);
+  const [parcels, setParcels] = useState([]);
+  const [parcelData, setParcelData] = useState();
+  const [copied, setCopied] = useState(false);
+  const [orderData, setOrderData] = useState();
+  const [details, setDetails] = useState({
+    currentStatus: "",
+    hubLocation: "",
+    centerLocation: "",
+    orderPlacedDate: null,
+  });
+  const [showParcelDetails, setShowParcelDetails] = useState(false);
 
   const table = useReactTable({
-    data,
+    data: parcels,
     columns,
     state: {
       sorting,
@@ -242,9 +209,92 @@ export default function ManageParcel() {
     onRowSelectionChange: setRowSelection,
   });
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const parcelsData = [];
+
+        const parcelsRef = await fetchDeliveryServiceParcels(
+          await getDeliveryServiceDocRef(session?.user.email)
+        );
+
+        for (const parcelRef of parcelsRef) {
+          const parcelSnapshot = await fetchParcel(parcelRef);
+          parcelsData.push(parcelSnapshot);
+        }
+
+        const orderPromises = parcelsData.map(async (parcel) => {
+          const orderRef = parcel.orderRef;
+          const order = await fetchOrder(orderRef);
+          return { ...parcel, receiverName: order.receiverName };
+        });
+
+        const updatedParcels = await Promise.all(orderPromises);
+        setParcels(updatedParcels);
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error", error);
+      }
+    };
+
+    setIsLoading(true);
+    fetchData();
+  }, []);
+
   if (!session && session?.user.role !== "sender") {
     return redirect("/");
   }
+
+  const copyText = () => {
+    const textToCopy = document.getElementById("textToCopy").innerText;
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => console.error("Failed to copy:", err));
+  };
+
+  const handleTrackRTN = async () => {
+    setShowParcelDetails(false);
+    const rtnInput = document.getElementById("rtn-input").value;
+
+    if (rtnInput) {
+      const parcelRef = await fetchParcelByRTN(rtnInput);
+      const parcelData = await fetchParcel(parcelRef);
+      const orderData = await fetchOrder(parcelData.orderRef);
+      setParcelData(parcelData);
+      setOrderData(orderData);
+
+      const hubLocation = orderData.receiverAddress
+        .split(",")
+        .slice(1)
+        .join(",")
+        .trim();
+      const centerLocation = orderData.senderAddress
+        .split(",")
+        .slice(1)
+        .join(",")
+        .trim();
+      const orderPlacedDate = new Date(orderData.dateIssued.seconds * 1000);
+
+      setDetails({
+        currentStatus: parcelData.currentStatus,
+        hubLocation: hubLocation,
+        centerLocation: centerLocation,
+        orderPlacedDate: orderPlacedDate,
+      });
+
+      setShowParcelDetails(true);
+      document.getElementById("rtn-input").value = "";
+    }
+  };
+
+  const handleHideDetail = () => {
+    setShowParcelDetails(false);
+  };
 
   return (
     <>
@@ -258,12 +308,21 @@ export default function ManageParcel() {
               <CardContent className="flex flex-col gap-3">
                 <div className="flex flex-col gap-4">
                   <Input type="number" id="rtn-input" placeholder="RTN" />
-                  <Button>Track</Button>
+                  <Button onClick={handleTrackRTN}>Track</Button>
                 </div>
 
                 <Separator className="my-3" />
 
-                <DeliveryStatus />
+                {showParcelDetails && (
+                  <DeliveryStatus
+                    parcelData={parcelData}
+                    copied={copied}
+                    copyText={copyText}
+                    orderData={orderData}
+                    details={details}
+                    handleHideDetail={handleHideDetail}
+                  />
+                )}
               </CardContent>
             </Card>
 

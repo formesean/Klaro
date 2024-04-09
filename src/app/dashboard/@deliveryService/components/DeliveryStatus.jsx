@@ -1,10 +1,10 @@
 import {
   RadioGroup,
   RadioGroupItemWithIcons,
-} from "../../../components/ui/radio-group";
-import { Label } from "../../../components/ui/label";
-import { Button } from "../../../components/ui/button";
-import { Copy, Check } from "lucide-react";
+} from "../../../../components/ui/radio-group";
+import { Label } from "../../../../components/ui/label";
+import { Button } from "../../../../components/ui/button";
+import { Copy, Check, X } from "lucide-react";
 
 export function DeliveryStatus({
   parcelData,
@@ -16,8 +16,8 @@ export function DeliveryStatus({
 }) {
   return (
     <div className="flex flex-col gap-5 w-full">
-      <div className="flex items-center">
-        <div className="mr-40">
+      <div className="flex justify-between">
+        <div>
           <p className="font-bold text-lg">Delivery Status</p>
           <p className="font-bold font text-sm text-[#808080]">
             {orderData.receiverName}
@@ -42,6 +42,15 @@ export function DeliveryStatus({
               )}
             </button>
           </div>
+        </div>
+        <div>
+          <Button
+            className="px-3 -py-3 rounded-full"
+            variant="ghost"
+            onClick={handleHideDetail}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
       <div>
@@ -108,8 +117,7 @@ export function DeliveryStatus({
                     <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
                   </div>
                   <p className="text-[#ffffffdb]">
-                    Logistics Facility:
-                    {details.hubLocation}
+                    Logistics Facility: {details.hubLocation}
                   </p>
                 </div>
               </Label>
@@ -171,8 +179,7 @@ export function DeliveryStatus({
                     <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
                   </div>
                   <p className="text-[#ffffffdb]">
-                    Logistics Facility:
-                    {details.centerLocation}
+                    Logistics Facility: {details.centerLocation}
                   </p>
                 </div>
               </Label>
@@ -209,9 +216,6 @@ export function DeliveryStatus({
             </div>
           </div>
         </RadioGroup>
-      </div>
-      <div className="flex flex-col gap-4 w-full">
-        <Button onClick={handleHideDetail}>Hide</Button>
       </div>
     </div>
   );
