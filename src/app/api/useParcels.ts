@@ -2,7 +2,6 @@ import { db } from "../firebase/config";
 import {
   DocumentReference,
   DocumentSnapshot,
-  Timestamp,
   addDoc,
   arrayUnion,
   collection,
@@ -115,6 +114,29 @@ export const useParcels = () => {
   };
 
   /**
+   * Returns all the document references in the parcels field of the delivery service.
+   * @param {DocumentReference} deliverServiceRef - The document reference of the delivery service.
+   * @returns {Promise<DocumentReference[] | undefined>} A Promise resolving to an array of document references in the parcels field, or undefined if an error occurs.
+   */
+  const fetchDeliveryServiceParcels = async (
+    deliverServiceRef: DocumentReference
+  ): Promise<DocumentReference[] | undefined> => {
+    try {
+      const docSnapshot: DocumentSnapshot = await getDoc(deliverServiceRef);
+      if (docSnapshot.exists()) {
+        const deliveryServiceData = docSnapshot.data();
+        if (deliveryServiceData && deliveryServiceData.parcels) {
+          return deliveryServiceData.parcels;
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error("Error getting deliver service parcel references:", error);
+      return undefined;
+    }
+  };
+
+  /**
    * Updates an existing parcel.
    * @param {DocumentReference} orderRef - The reference to the parcel document to be updated.
    * @param {Partial<Parcel>} data - The partial data to update the parcel with.
@@ -191,6 +213,7 @@ export const useParcels = () => {
     fetchParcel,
     fetchParcelByRTN,
     fetchSenderParcels,
+    fetchDeliveryServiceParcels,
     updateParcel,
     updateSenderParcels,
     updateDeliveryServiceParcels,
