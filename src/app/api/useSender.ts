@@ -50,7 +50,7 @@ export const useSender = () => {
    * @param {string} sessionEmail - The email of the sender whose document reference is to be retrieved.
    * @returns {Promise<DocumentReference | undefined>} - A promise that resolves with the document reference of the sender or undefined if not found.
    */
-  const getDocRef = async (
+  const getSenderDocRef = async (
     sessionEmail: string
   ): Promise<DocumentReference | undefined> => {
     try {
@@ -128,7 +128,7 @@ export const useSender = () => {
 
   return {
     createSender,
-    getDocRef,
+    getSenderDocRef,
     fetchSender,
     updateSender,
     removeSender,
