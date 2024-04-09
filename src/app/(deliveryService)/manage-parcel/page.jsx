@@ -39,7 +39,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import { DeliveryStatus } from "../@sender/components/DeliveryStatus";
+import { DeliveryStatus } from "../../dashboard/@sender/components/DeliveryStatus";
 import {
   RadioGroup,
   RadioGroupItemWithIcons,
@@ -238,7 +238,9 @@ export default function Dashboard() {
                 <CardTitle>Item Ordered</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 grid-rows-1"></div>
+                <div className="grid grid-cols-3 grid-rows-1">
+                  
+                </div>
               </CardContent>
             </Card>
           </div>
