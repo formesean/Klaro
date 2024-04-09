@@ -11,16 +11,11 @@ import {
 import { BarChart } from "@tremor/react";
 import { useEffect, useState } from "react";
 import { useParcels } from "../../api/useParcels";
-import { useOrders } from "../../api/useOrders";
 import { useDeliveryService } from "../../api/useDeliveryService";
 import Loader from "./components/Loader";
 
-const dataFormatter = (number) =>
-  Intl.NumberFormat("us").format(number).toString();
-
 export default function Dashboard() {
   const { data: session } = useSession();
-  const [isMobile, setIsMobile] = useState(false);
   const { fetchDeliveryServiceParcels, fetchParcel } = useParcels();
   const { getDeliveryServiceDocRef } = useDeliveryService();
   const [isLoading, setIsLoading] = useState(true);
@@ -58,16 +53,20 @@ export default function Dashboard() {
         for (const parcelRef of parcelsRef) {
           const parcelSnapshot = await fetchParcel(parcelRef);
 
-          updatedStats.inTransit +=
-            parcelSnapshot.currentStatus === "In Transit" ? 1 : 0;
-          updatedStats.delivered +=
-            parcelSnapshot.currentStatus === "Delivered" ? 1 : 0;
-          updatedStats.returned +=
-            parcelSnapshot.currentStatus === "Returned" ? 1 : 0;
-
-          if (parcelSnapshot.currentStatus === "Delivered") {
-            const month = parcelSnapshot.deliveryDate.toDate().getMonth();
-            updatedMonths[Object.keys(updatedMonths)[month]]++;
+          switch (parcelSnapshot.currentStatus) {
+            case "In Transit":
+              updatedStats.inTransit++;
+              break;
+            case "Delivered":
+              updatedStats.delivered++;
+              const month = parcelSnapshot.deliveryDate.toDate().getMonth();
+              updatedMonths[Object.keys(updatedMonths)[month]]++;
+              break;
+            case "Returned":
+              updatedStats.returned++;
+              break;
+            default:
+              break;
           }
 
           parcelsData.push(parcelSnapshot);
@@ -83,18 +82,6 @@ export default function Dashboard() {
 
     setIsLoading(true);
     fetchData();
-
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 650);
-    };
-
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
   }, []);
 
   const monthData = Object.entries(months).map(([month, count]) => ({
@@ -151,9 +138,8 @@ export default function Dashboard() {
                 index="month"
                 categories={["Number of parcels delivered"]}
                 colors={["green"]}
-                valueFormatter={dataFormatter}
-                layout={isMobile ? "vertical" : "horizontal"}
                 yAxisWidth={48}
+                showXAxis={true}
                 onValueChange={(v) => console.log(v)}
               />
             </CardContent>
