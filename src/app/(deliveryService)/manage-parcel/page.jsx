@@ -45,8 +45,6 @@ import {
   RadioGroupItemWithIcons,
 } from "../../../components/ui/radio-group";
 
-
-
 export default function Dashboard() {
   const { data: session } = useSession();
 
@@ -55,9 +53,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div class="py-40 pr-20 pl-20">
+    <div class="flex max-sm:px-4 max-sm:py-4 py-40 pr-20 pl-20">
       <Card className="">
-        <CardHeader className="flex">
+        <CardHeader className="">
           <CardTitle> Parcel Tracking Number </CardTitle>
           <CardDescription> RTN: #123456789 </CardDescription>
           <h3>Order Status: In Transit</h3>
@@ -65,7 +63,7 @@ export default function Dashboard() {
         <Separator className="my-3" />
         <CardContent className="p-6">
           <div className="rounded-lg border grid grid-cols-4 grid-rows-2">
-            <Card className="col-span-1 rounded-tl-lg">
+            <Card className="col-span-1 rounded-tl-lg max-xl:col-span-4">
               <CardHeader>
                 <CardTitle>Delivery Address</CardTitle>
               </CardHeader>
@@ -80,12 +78,12 @@ export default function Dashboard() {
                 </h2>
               </CardContent>
             </Card>
-            <Card className="col-span-3 rounded-tr-lg">
+            <Card className="col-span-3 rounded-tr-lg max-xl:col-span-4">
               <CardContent>
                 <div className="my-10 grid grid-cols-5 grid-row-2">
-                  <div className="flex col-span-5 pt-5">
-                    <RadioGroup className="flex space-x-20 m-10">
-                      <div className="flex-col">
+                  <div className="max-xl:flex-col flex col-span-5 pt-5">
+                    <RadioGroup className="md:flex gap-5 m-10 flex-auto justify-evenly">
+                      <div className="">
                         <div className="">
                           <RadioGroupItemWithIcons
                             value="option-order"
@@ -113,7 +111,7 @@ export default function Dashboard() {
                           </Label>
                         </div>
                       </div>
-                      <div className="flex-col">
+                      <div className="">
                         <div className="">
                           <RadioGroupItemWithIcons
                             value="option-center"
@@ -126,22 +124,22 @@ export default function Dashboard() {
                           <Label
                             htmlFor="option-center"
                             className="justify-self-center"
-                          > 
+                          >
                             <div className="flex flex-col justify-center pl-2">
                               <p className="text-sm text-[#808080]">
                                 mm/dd/yyyy
                               </p>
                               <h1 className="font-bold text-base border-slate-600">
-                                Arrived at Sorting Center
+                                Arrived at Sort Center
                               </h1>
                               <p className="text-[#ffffffdb] text-sm">
-                                Logistics Facility: Central Nigeria
+                                Logistics Facility:
                               </p>
                             </div>
                           </Label>
                         </div>
                       </div>
-                      <div className="flex-col">
+                      <div className="">
                         <div className="">
                           <RadioGroupItemWithIcons
                             value="option-intransit"
@@ -154,7 +152,7 @@ export default function Dashboard() {
                           <Label
                             htmlFor="option-intransit"
                             className="justify-self-center"
-                          > 
+                          >
                             <div className="flex flex-col justify-center pl-2">
                               <p className="text-sm text-[#808080]">
                                 mm/dd/yyyy
@@ -169,7 +167,7 @@ export default function Dashboard() {
                           </Label>
                         </div>
                       </div>
-                      <div className="flex-col">
+                      <div className="">
                         <div className="">
                           <RadioGroupItemWithIcons
                             value="option-hub"
@@ -182,7 +180,7 @@ export default function Dashboard() {
                           <Label
                             htmlFor="option-hub"
                             className="justify-self-center"
-                          > 
+                          >
                             <div className="flex flex-col justify-center pl-2">
                               <p className="text-sm text-[#808080]">
                                 mm/dd/yyyy
@@ -191,13 +189,13 @@ export default function Dashboard() {
                                 Arrived at the Logistics Hub
                               </h1>
                               <p className="text-[#ffffffdb] text-sm">
-                                Logistics Facility: NASA Headquarters
+                                Logistics Facility:
                               </p>
                             </div>
                           </Label>
                         </div>
                       </div>
-                      <div className="flex-col">
+                      <div className="">
                         <div className="">
                           <RadioGroupItemWithIcons
                             value="option-delivered"
@@ -210,7 +208,7 @@ export default function Dashboard() {
                           <Label
                             htmlFor="option-delivered"
                             className="justify-self-center"
-                          > 
+                          >
                             <div className="flex flex-col justify-center pl-2">
                               <p className="text-sm text-[#808080]">
                                 mm/dd/yyyy
@@ -227,19 +225,46 @@ export default function Dashboard() {
                       </div>
                     </RadioGroup>
                   </div>
-                  <div className="my-20 row-span-5 col-start-5 flex justify-end pr-2">
+                  <div className=" row-span-5 col-start-5 flex justify-end pr-2">
                     <Button className="height-30px">Confirm</Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="col-span-4 rounded-b-lg">
+            <Card className="col-span-4 rounded-b-md">
               <CardHeader>
                 <CardTitle>Item Ordered</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 grid-rows-1">
-                  
+                <div className="flex justify-around max-xl:flex-col ">
+                  <div className="">
+                    <br />
+                    <h3 className="text-base border-slate-600">Sender:</h3>
+                    <h3 className="text-base border-slate-600">
+                      Sender Location:
+                    </h3>
+                    <br />
+                    <h1 className="text-[#ffffffdb] text-sm">
+                      Knee Cap Replacements
+                    </h1>
+                    <h3 className="text-base border-slate-600">
+                      Item Quantity:
+                    </h3>
+                  </div>
+                  <div className="">
+                    <Label>
+                      <br />
+                      <h3 className="font-bold text-base border-slate-600">
+                        Merchandise Subtotal:
+                      </h3>
+                      <h3 className="text-base border-slate-600">
+                        Shipping Total:
+                      </h3>
+                      <h3 className="text-base border-slate-600">
+                        Total Payment:
+                      </h3>
+                    </Label>
+                  </div>
                 </div>
               </CardContent>
             </Card>
