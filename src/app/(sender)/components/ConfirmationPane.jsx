@@ -43,13 +43,12 @@ export function ConfirmationPane({
   sessionEmail,
   clearData,
 }) {
-  const { getDocRef, fetchSender } = useSender();
-  // const { getDocRef } = useDeliveryService();
+  const { getSenderDocRef, fetchSender } = useSender();
   const { createOrder } = useOrders();
   const { createItem } = useItems();
   const { createParcel, updateSenderParcels, updateDeliveryServiceParcels } =
     useParcels();
-
+  const { getDeliveryServiceDocRef } = useDeliveryService();
   const { toast } = useToast();
   const [recipientData, setRecipientData] = useState(formData);
   const [itemsData, setItemsData] = useState(item);
@@ -72,9 +71,9 @@ export function ConfirmationPane({
 
   const handleOrder = async () => {
     const itemsRef = [];
-    const senderRef = await getDocRef(sessionEmail);
+    const senderRef = await getSenderDocRef(sessionEmail);
     const senderData = await fetchSender(senderRef);
-    const deliveryServiceRef = await useDeliveryService().getDocRef(
+    const deliveryServiceRef = await getDeliveryServiceDocRef(
       deliveryServiceData.email
     );
     for (const itemObject of itemsData) {

@@ -55,7 +55,7 @@ export const useDeliveryService = () => {
    * @param {string} sessionEmail - The email of the delivery service whose document reference is to be retrieved.
    * @returns {Promise<DocumentReference | undefined>} - A promise that resolves with the document reference of the delivery service or undefined if not found.
    */
-  const getDocRef = async (
+  const getDeliveryServiceDocRef = async (
     sessionEmail: string
   ): Promise<DocumentReference | undefined> => {
     try {
@@ -159,7 +159,7 @@ export const useDeliveryService = () => {
 
   return {
     createDeliveryService,
-    getDocRef,
+    getDeliveryServiceDocRef,
     fetchDeliveryService,
     fetchDeliveryServices,
     updateDeliveryService,
