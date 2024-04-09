@@ -21,47 +21,27 @@ const dataFormatter = (number) =>
 export default function Dashboard() {
   const { data: session } = useSession();
   const [isMobile, setIsMobile] = useState(false);
-  const {
-    fetchDeliveryServiceParcels,
-    // fetchSenderParcels,
-    fetchParcel,
-  } = useParcels();
-  const { fetchOrder } = useOrders();
+  const { fetchDeliveryServiceParcels, fetchParcel } = useParcels();
   const { getDeliveryServiceDocRef } = useDeliveryService();
   const [isLoading, setIsLoading] = useState(true);
-  // const [inTransit, setInTransit] = useState(0);
-  // const [delivered, setDelivered] = useState(0);
-  // const [returned, setReturned] = useState(0);
-  // const [jan, setJan] = useState(0);
-  // const [feb, setFeb] = useState(0);
-  // const [mar, setMar] = useState(0);
-  // const [apr, setApr] = useState(0);
-  // const [may, setMay] = useState(0);
-  // const [jun, setJun] = useState(0);
-  // const [jul, setJul] = useState(0);
-  // const [aug, setAug] = useState(0);
-  // const [sep, setSep] = useState(0);
-  // const [oct, setOct] = useState(0);
-  // const [nov, setNov] = useState(0);
-  // const [dec, setDec] = useState(0);
   const [stat, setStat] = useState({
     inTransit: 0,
     delivered: 0,
     returned: 0,
   });
   const [months, setMonths] = useState({
-    jan: 0,
-    feb: 0,
-    mar: 0,
-    apr: 0,
-    may: 0,
-    jun: 0,
-    jul: 0,
-    aug: 0,
-    sep: 0,
-    oct: 0,
-    nov: 0,
-    dec: 0,
+    Jan: 0,
+    Feb: 0,
+    Mar: 0,
+    Apr: 0,
+    May: 0,
+    Jun: 0,
+    Jul: 0,
+    Aug: 0,
+    Sep: 0,
+    Oct: 0,
+    Nov: 0,
+    Dec: 0,
   });
 
   useEffect(() => {
