@@ -10,6 +10,10 @@ import {
 } from "../../../components/ui/card";
 import { BarChart } from "@tremor/react";
 import { useEffect, useState } from "react";
+import { useParcels } from "../../api/useParcels";
+import { useOrders } from "../../api/useOrders";
+import { useDeliveryService } from "../../api/useDeliveryService";
+import Loader from "./components/Loader";
 
 const chartdata = [
   {
@@ -68,8 +72,54 @@ const dataFormatter = (number) =>
 export default function Dashboard() {
   const { data: session } = useSession();
   const [isMobile, setIsMobile] = useState(false);
+  const {
+    fetchDeliveryServiceParcels,
+    // fetchSenderParcels,
+    fetchParcel,
+  } = useParcels();
+  const { fetchOrder } = useOrders();
+  const { getDeliveryServiceDocRef } = useDeliveryService();
+  const [isLoading, setIsLoading] = useState(true);
+  const [inTransit, setInTransit] = useState(0);
+  const [delivered, setDelivered] = useState(0);
+  const [returned, setReturned] = useState(0);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const parcelsData = [];
+
+        const parcelsRef = await fetchDeliveryServiceParcels(
+          await getDeliveryServiceDocRef(session?.user.email)
+        );
+
+        for (const parcelRef of parcelsRef) {
+          const parcelSnapshot = await fetchParcel(parcelRef);
+
+          if (parcelSnapshot.currentStatus === "In Transit") {
+            setInTransit((prevState) => prevState + 1);
+          }
+
+          if (parcelSnapshot.currentStatus === "Delivered") {
+            setDelivered((prevState) => prevState + 1);
+          }
+
+          if (parcelSnapshot.currentStatus === "Returned") {
+            setReturned((prevState) => prevState + 1);
+          }
+
+          parcelsData.push(parcelSnapshot);
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    setIsLoading(true);
+    fetchData();
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 650);
     };
@@ -93,7 +143,9 @@ export default function Dashboard() {
         <div className="grid grid-rows-4 grid-cols-3 gap-4">
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
-              <CardTitle className="text-4xl">0</CardTitle>
+              <CardTitle className="text-4xl">
+                {!isLoading ? `${inTransit}` : <Loader big={true} />}
+              </CardTitle>
               <CardDescription className="text-lg max-md:text-base">
                 In Transit
               </CardDescription>
@@ -102,7 +154,10 @@ export default function Dashboard() {
 
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
-              <CardTitle className="text-4xl">0</CardTitle>
+              <CardTitle className="text-4xl">
+                {!isLoading ? `${delivered}` : <Loader big={true} />}
+              </CardTitle>
+
               <CardDescription className="text-lg max-md:text-base">
                 Delivered
               </CardDescription>
@@ -111,7 +166,9 @@ export default function Dashboard() {
 
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
-              <CardTitle className="text-4xl">0</CardTitle>
+              <CardTitle className="text-4xl">
+                {!isLoading ? `${returned}` : <Loader big={true} />}
+              </CardTitle>
               <CardDescription className="text-lg max-md:text-base">
                 Returned
               </CardDescription>

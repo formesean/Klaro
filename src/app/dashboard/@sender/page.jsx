@@ -166,7 +166,7 @@ export default function Dashboard() {
   const { data: session } = useSession();
   const { fetchSenderParcels, fetchParcel, fetchParcelByRTN } = useParcels();
   const { fetchOrder } = useOrders();
-  const { getDocRef } = useSender();
+  const { getSenderDocRef } = useSender();
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [sorting, setSorting] = useState([]);
@@ -217,7 +217,7 @@ export default function Dashboard() {
         const parcelsData = [];
 
         const parcelsRef = await fetchSenderParcels(
-          await getDocRef(session?.user.email)
+          await getSenderDocRef(session?.user.email)
         );
 
         for (const parcelRef of parcelsRef) {
