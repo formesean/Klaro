@@ -151,9 +151,7 @@ const columns = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href={"/manage-parcel/" + "documentId"}>
-                Parcel Details
-              </Link>
+              <Link href={`/manage-parcel/${docRef.rtn}`}>Parcel Details</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

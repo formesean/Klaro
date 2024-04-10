@@ -16,8 +16,16 @@ import {
   RadioGroup,
   RadioGroupItemWithIcons,
 } from "../../../components/ui/radio-group";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../components/ui/table";
 
-export default function Dashboard() {
+export default function UpdateParcel({ params }) {
   const { data: session } = useSession();
 
   if (!session && session?.user.role !== "deliveryService") {
@@ -36,7 +44,7 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Separator className="mt-5 mb-10" />
+            <Separator className="-mt-2 mb-5" />
 
             <Card className="border-0">
               <CardContent className="p-0 grid grid-cols-4 grid-rows-2 max-lg:grid-cols-3 max-lg:grid-rows-4 gap-3">
@@ -182,30 +190,55 @@ export default function Dashboard() {
                   <CardHeader>
                     <CardTitle>Item Ordered</CardTitle>
                   </CardHeader>
-                  <CardContent className="flex justify-around max-xl:flex-col">
-                    <Label>
-                      <h3 className="text-base border-slate-600">Sender:</h3>
-                      <h3 className="text-base border-slate-600">
-                        Sender Location:
-                      </h3>
-                      <h1 className="text-[#ffffffdb] text-sm">
-                        Knee Cap Replacements
-                      </h1>
-                      <h3 className="text-base border-slate-600">
-                        Item Quantity:
-                      </h3>
-                    </Label>
-                    <Label>
-                      <h3 className="font-bold text-base border-slate-600">
-                        Merchandise Subtotal: ₱10,949.99
-                      </h3>
-                      <h3 className="text-base border-slate-600">
-                        Shipping Total: ₱50.00
-                      </h3>
-                      <h3 className="text-base border-slate-600">
-                        Total Payment: ₱10,999.99
-                      </h3>
-                    </Label>
+                  <CardContent className="flex flex-col gap-3">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Item</TableHead>
+                          <TableHead>Unit Price</TableHead>
+                          <TableHead>Quantity</TableHead>
+                          <TableHead>Item Subtotal</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Hanni</TableCell>
+                          <TableCell>₱10,999.99</TableCell>
+                          <TableCell>1</TableCell>
+                          <TableCell>₱10,999.99</TableCell>
+                        </TableRow>
+                        {/* {itemsData &&
+                          itemsData.map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{item.itemName}</TableCell>
+                              <TableCell>₱{item.itemPrice}</TableCell>
+                              <TableCell>{item.itemQuantity}</TableCell>
+                              <TableCell>
+                                ₱{item.itemPrice * item.itemQuantity}
+                              </TableCell>
+                            </TableRow>
+                          ))} */}
+                      </TableBody>
+                    </Table>
+                    <div className="flex flex-col justify-end max-xl:flex-col">
+                      <Label>
+                        <h3 className="text-base border-slate-600">Sender:</h3>
+                        <h3 className="text-base border-slate-600">
+                          Sender Location:
+                        </h3>
+                      </Label>
+                      <Label>
+                        <h3 className="font-bold text-base border-slate-600">
+                          Merchandise Subtotal: ₱10,949.99
+                        </h3>
+                        <h3 className="text-base border-slate-600">
+                          Shipping Total: ₱50.00
+                        </h3>
+                        <h3 className="text-base border-slate-600">
+                          Total Payment: ₱10,999.99
+                        </h3>
+                      </Label>
+                    </div>
                   </CardContent>
                 </Card>
               </CardContent>
