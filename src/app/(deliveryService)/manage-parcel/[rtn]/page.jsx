@@ -47,7 +47,7 @@ export default function UpdateParcel({ params }) {
       <div className="py-7 px-10 max-sm:px-4 max-sm:py-4">
         <Card>
           <CardHeader>
-            <CardTitle>RTN: {params.id}</CardTitle>
+            <CardTitle>RTN: {params.rtn}</CardTitle>
           </CardHeader>
           <CardContent>
             <Card className="border-0">
@@ -56,15 +56,24 @@ export default function UpdateParcel({ params }) {
                   <CardHeader>
                     <CardTitle>Information Details</CardTitle>
                   </CardHeader>
-                  <CardContent className="flex flex-col gap-10">
-                    <div className="flex flex-col gap-2">
+                  <CardContent className="flex flex-col gap-5">
+                    <div className="flex flex-col">
                       <p className="text-base text-muted-foreground">
                         Recipient Information
                       </p>
                       <Separator />
                       <p>Bea Belle | vaebelle@gmail.com | USC TC</p>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col">
+                      <p className="text-base text-muted-foreground">
+                        Sender Information
+                      </p>
+                      <Separator />
+                      <p>
+                        Sean Aguilar | seanaguilar698@gmail.com | Balay niya
+                      </p>
+                    </div>
+                    <div className="flex flex-col">
                       <p className="text-base text-muted-foreground">
                         Delivery Service Information
                       </p>
