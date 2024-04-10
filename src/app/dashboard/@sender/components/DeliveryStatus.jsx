@@ -79,8 +79,8 @@ export function DeliveryStatus({
                 selected="option-delivered"
                 className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-delivered">
@@ -104,8 +104,8 @@ export function DeliveryStatus({
                 className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-hub">
@@ -134,8 +134,8 @@ export function DeliveryStatus({
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-intransit">
@@ -166,8 +166,8 @@ export function DeliveryStatus({
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-center">
@@ -198,8 +198,8 @@ export function DeliveryStatus({
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-order">
