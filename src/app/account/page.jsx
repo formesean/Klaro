@@ -73,14 +73,15 @@ export default function CompleteAccount() {
         address: data.address1 + ", " + data.address2,
         parcels: [],
       };
-
+      
       await createSender(userData);
+
 
       router.replace("/dashboard");
     } catch (error) {
       console.error("Error submitting form:", error);
     }
-  }
+  }   
 
   return (
     <div className="fixed top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4">

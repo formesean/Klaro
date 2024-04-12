@@ -185,6 +185,10 @@ export default function Dashboard() {
     hubLocation: "",
     centerLocation: "",
     orderPlacedDate: null,
+    centerDate: null,
+    inTransitDate: null,
+    hubDate: null,
+    deliveryDate: null,
   });
   const [showParcelDetails, setShowParcelDetails] = useState(false);
 
@@ -292,13 +296,31 @@ export default function Dashboard() {
         .slice(1)
         .join(",")
         .trim();
+
       const orderPlacedDate = new Date(orderData.dateIssued.seconds * 1000);
+      const centerDate =
+        parcelData.centerDate === undefined
+          ? null
+          : new Date(parcelData.centerDate?.seconds * 1000);
+      const inTransitDate =
+        parcelData.inTransitDate === undefined
+          ? null
+          : new Date(parcelData.inTransitDate?.seconds * 1000);
+      const hubDate =
+        parcelData.hubDate === undefined
+          ? null
+          : new Date(parcelData.hubDate?.seconds * 1000);
+      const deliveryDate = new Date(parcelData.deliveryDate.seconds * 1000);
 
       setDetails({
         currentStatus: parcelData.currentStatus,
         hubLocation: hubLocation,
         centerLocation: centerLocation,
         orderPlacedDate: orderPlacedDate,
+        centerDate: centerDate,
+        inTransitDate: inTransitDate,
+        hubDate: hubDate,
+        deliveryDate: deliveryDate,
       });
 
       setShowParcelDetails(true);
@@ -320,7 +342,7 @@ export default function Dashboard() {
                 <CardTitle>Track a Package</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                <div className="flex flex-col gap-4">
+                <div className="  flex flex-col gap-4">
                   <Input type="number" id="rtn-input" placeholder="RTN" />
                   <Button onClick={handleTrackRTN}>Track</Button>
                 </div>

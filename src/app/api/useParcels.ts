@@ -2,6 +2,7 @@ import { db } from "../firebase/config";
 import {
   DocumentReference,
   DocumentSnapshot,
+  Timestamp,
   addDoc,
   arrayUnion,
   collection,
@@ -19,7 +20,10 @@ interface Parcel {
   order: DocumentReference;
   currentStatus: string;
   currentLocation: string;
-  deliveryDate: Date;
+  deliveryDate: Timestamp;
+  centerDate: Timestamp;
+  inTransitDate: Timestamp;
+  hubDate: Timestamp;
 }
 
 export const useParcels = () => {
