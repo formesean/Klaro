@@ -4,7 +4,7 @@ import {
 } from "../../../../components/ui/radio-group";
 import { Label } from "../../../../components/ui/label";
 import { Button } from "../../../../components/ui/button";
-import { Copy, Check, X } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 
 export function DeliveryStatus({
   parcelData,
@@ -16,8 +16,8 @@ export function DeliveryStatus({
 }) {
   return (
     <div className="flex flex-col gap-5 w-full">
-      <div className="flex justify-between">
-        <div>
+      <div className="flex items-center">
+        <div className="mr-40">
           <p className="font-bold text-lg">Delivery Status</p>
           <p className="font-bold font text-sm text-[#808080]">
             {orderData.receiverName}
@@ -42,15 +42,6 @@ export function DeliveryStatus({
               )}
             </button>
           </div>
-        </div>
-        <div>
-          <Button
-            className="px-3 -py-3 rounded-full"
-            variant="ghost"
-            onClick={handleHideDetail}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
       </div>
       <div>
@@ -79,15 +70,17 @@ export function DeliveryStatus({
                 selected="option-delivered"
                 className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-delivered">
                 <div className="flex flex-col justify-center pl-2">
                   <div className="flex justify-start items-center gap-4">
                     <h1 className="font-bold text-base">Delivered</h1>
-                    <p className="text-sm text-[#808080]">{}</p>
+                    <p className="text-sm text-[#808080]">
+                      {details.deliveryDate.toLocaleDateString()}
+                    </p>
                   </div>
                   <p className="text-[#ffffffdb]">Parcel has been delivered</p>
                 </div>
@@ -104,8 +97,8 @@ export function DeliveryStatus({
                 className={`w-16 h-16 disabled:opacity-100 ${
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-hub">
@@ -114,10 +107,15 @@ export function DeliveryStatus({
                     <h1 className="font-bold text-base">
                       Arrived at the Logistics Hub
                     </h1>
-                    <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
+                    <p className="text-sm text-[#808080]">
+                      {details?.hubDate !== null
+                        ? details?.hubDate?.toLocaleDateString()
+                        : ""}
+                    </p>
                   </div>
                   <p className="text-[#ffffffdb]">
-                    Logistics Facility: {details.hubLocation}
+                    Logistics Facility:
+                    {details.hubLocation}
                   </p>
                 </div>
               </Label>
@@ -134,8 +132,8 @@ export function DeliveryStatus({
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-intransit">
@@ -144,7 +142,11 @@ export function DeliveryStatus({
                     <h1 className="font-bold text-base border-slate-600">
                       In Transit
                     </h1>
-                    <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
+                    <p className="text-sm text-[#808080]">
+                      {details?.inTransitDate !== null
+                        ? details?.inTransitDate?.toLocaleDateString()
+                        : ""}
+                    </p>
                   </div>
                   <p className="text-[#ffffffdb]">
                     On its way to the next logistics facility
@@ -161,13 +163,12 @@ export function DeliveryStatus({
                 id="option-center"
                 selected="option-center"
                 className={`w-16 h-16 disabled:opacity-100 ${
-                  (details.currentStatus === details.currentStatus) ===
-                    "Arrived at Sort Center" ||
+                  details.currentStatus === "Arrived at Sort Center" ||
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-center">
@@ -176,10 +177,15 @@ export function DeliveryStatus({
                     <h1 className="font-bold text-base">
                       Arrived at Sort Center
                     </h1>
-                    <p className="text-sm text-[#808080]">mm/dd/yyyy</p>
+                    <p className="text-sm text-[#808080]">
+                      {details?.centerDate !== null
+                        ? details?.centerDate?.toLocaleDateString()
+                        : ""}
+                    </p>
                   </div>
                   <p className="text-[#ffffffdb]">
-                    Logistics Facility: {details.centerLocation}
+                    Logistics Facility:
+                    {details.centerLocation}
                   </p>
                 </div>
               </Label>
@@ -198,8 +204,8 @@ export function DeliveryStatus({
                   details.currentStatus === "In Transit" ||
                   details.currentStatus === "Arrived at the Logistics Hub" ||
                   details.currentStatus === "Delivered"
-                    ? "bg-green-500 text-background"
-                    : "border-slate-600"
+                    ? "bg-green-500 border-green-500 text-secondary"
+                    : "border-border"
                 }`}
               />
               <Label htmlFor="option-order">
@@ -216,6 +222,9 @@ export function DeliveryStatus({
             </div>
           </div>
         </RadioGroup>
+      </div>
+      <div className="flex flex-col gap-4 w-full">
+        <Button onClick={handleHideDetail}>Hide</Button>
       </div>
     </div>
   );

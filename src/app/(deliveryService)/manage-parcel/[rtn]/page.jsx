@@ -41,6 +41,7 @@ import { useOrders } from "../../../api/useOrders";
 import { useParcels } from "../../../api/useParcels";
 import { Label } from "../../../../components/ui/label";
 import Loader from "../../components/Loader";
+import { Timestamp } from "firebase/firestore";
 
 export default function UpdateParcel({ params }) {
   const { data: session } = useSession();
@@ -58,11 +59,19 @@ export default function UpdateParcel({ params }) {
     hubLocation: "",
     centerLocation: "",
     orderPlacedDate: null,
+    centerDate: null,
+    inTransitDate: null,
+    hubDate: null,
   });
   const [status, setStatus] = useState();
   const [merchandiseSubtotal, setMerchandiseSubtotal] = useState(0);
   const [shippingTotal, setShippingTotal] = useState(0);
   const [totalPayment, setTotalPayment] = useState(0);
+  const [hubDate, setHubDate] = useState();
+  const [inTransitDate, setInTransitDate] = useState();
+  const [centerDate, setCenterDate] = useState();
+  const [deliveryDate, setDeliveryDate] = useState();
+  const [data, setData] = useState();
 
   useEffect(() => {
     setIsClient(true);
@@ -74,7 +83,6 @@ export default function UpdateParcel({ params }) {
         const parcelData = await fetchParcel(parcelsRef);
         const orderData = await fetchOrder(parcelData.orderRef);
         setParcelRef(parcelsRef);
-        console.log(orderData);
 
         if (parcelsRef) {
           const parcelDetail = await fetchParcel(parcelsRef);
@@ -110,14 +118,32 @@ export default function UpdateParcel({ params }) {
           .trim();
 
         const orderPlacedDate = new Date(orderData.dateIssued.seconds * 1000);
+        const centerDate =
+          parcelData.centerDate === undefined
+            ? null
+            : new Date(parcelData.centerDate?.seconds * 1000);
+        const inTransitDate =
+          parcelData.inTransitDate === undefined
+            ? null
+            : new Date(parcelData.inTransitDate?.seconds * 1000);
+        const hubDate =
+          parcelData.hubDate === undefined
+            ? null
+            : new Date(parcelData.hubDate?.seconds * 1000);
 
         setDetails({
           currentStatus: parcelData.currentStatus,
           hubLocation: hubLocation,
           centerLocation: centerLocation,
           orderPlacedDate: orderPlacedDate,
+          centerDate: centerDate,
+          inTransitDate: inTransitDate,
+          hubDate: hubDate,
         });
 
+        const deliveryDate = new Date(parcelData.deliveryDate.seconds * 1000);
+
+        setDeliveryDate(deliveryDate);
         setIsLoading(false);
       } catch (error) {
         console.error("Error", error);
@@ -133,25 +159,53 @@ export default function UpdateParcel({ params }) {
     return redirect("/");
   }
 
+  const handleChange = (status) => {
+    setStatus(status);
+    const timestamp = Timestamp.now();
+    const timestampString = new Date(timestamp.seconds * 1000);
+
+    if (status == "Arrived at Sort Center") {
+      setCenterDate(timestampString);
+    }
+
+    if (status == "In Transit") {
+      setInTransitDate(timestampString);
+    }
+
+    if (status == "Arrived at the Logistics Hub") {
+      setHubDate(timestampString);
+    }
+  };
+
   const handleStatusUpdate = async () => {
     try {
-      if (status != "Delivered") {
-        await updateParcel(parcelRef, { currentStatus: status });
-        console.log("Parcel status updated successfully!");
+      if (status !== "Delivered") {
+        const updatedData = { currentStatus: status };
+
+        if (centerDate !== undefined) {
+          updatedData.centerDate = centerDate;
+        }
+        if (inTransitDate !== undefined) {
+          updatedData.inTransitDate = inTransitDate;
+        }
+        if (hubDate !== undefined) {
+          updatedData.hubDate = hubDate;
+        }
+
+        await updateParcel(parcelRef, updatedData);
       }
     } catch (error) {
       console.error("Error", error);
     }
   };
 
-  console.log("trial: ", status);
-
   return (
     <>
       {isLoading ? (
-        <div className="flex justify-center items-center h-screen">
-          <Loader />
-        </div>
+        <Loader
+          className="flex justify-center items-center h-screen"
+          big={true}
+        />
       ) : (
         <div className="py-7 px-10 max-sm:px-4 max-sm:py-4">
           {isClient && (
@@ -232,7 +286,7 @@ export default function UpdateParcel({ params }) {
                                   "Arrived at the Logistics Hub" ||
                                 details.currentStatus === "Delivered"
                               }
-                              onClick={() => setStatus("Order Placed")}
+                              onClick={() => handleChange("Order Placed")}
                               value="option-order"
                               id="option-order"
                               selected={"option-order"}
@@ -265,13 +319,12 @@ export default function UpdateParcel({ params }) {
                                   Ready for pick up
                                 </p>
                                 <p className="text-sm text-[#808080]">
-                                  {details.orderPlacedDate
-                                    ? details.orderPlacedDate.toLocaleDateString()
-                                    : ""}
+                                  {details?.orderPlacedDate?.toLocaleDateString()}
                                 </p>
                               </div>
                             </Label>
                           </div>
+
                           <div className="flex flex-col max-lg:flex-row max-lg:items-center">
                             <RadioGroupItemWithIcons
                               disabled={
@@ -280,9 +333,11 @@ export default function UpdateParcel({ params }) {
                                   "Arrived at the Logistics Hub" ||
                                 details.currentStatus === "Delivered"
                               }
-                              onClick={() =>
-                                setStatus("Arrived at Sort Center")
-                              }
+                              onClick={() => {
+                                {
+                                  handleChange("Arrived at Sort Center");
+                                }
+                              }}
                               value="option-center"
                               id="option-center"
                               selected="option-center"
@@ -310,14 +365,20 @@ export default function UpdateParcel({ params }) {
                                   Arrived at Sort Center
                                 </h1>
                                 <p className="text-[#ffffffdb] text-sm">
-                                  Logistics Facility:
+                                  <span className="block">
+                                    Logistics Facility:
+                                  </span>{" "}
+                                  {details.centerLocation}
                                 </p>
                                 <p className="text-sm text-[#808080]">
-                                  mm/dd/yyyy
+                                  {details?.centerDate !== null
+                                    ? details?.centerDate?.toLocaleDateString()
+                                    : ""}
                                 </p>
                               </div>
                             </Label>
                           </div>
+
                           <div className="flex flex-col max-lg:flex-row max-lg:items-center">
                             <RadioGroupItemWithIcons
                               disabled={
@@ -325,7 +386,11 @@ export default function UpdateParcel({ params }) {
                                   "Arrived at the Logistics Hub" ||
                                 details.currentStatus === "Delivered"
                               }
-                              onClick={() => setStatus("In Transit")}
+                              onClick={() => {
+                                {
+                                  handleChange("In Transit");
+                                }
+                              }}
                               value="option-intransit"
                               id="option-intransit"
                               selected="option-intransit"
@@ -353,17 +418,22 @@ export default function UpdateParcel({ params }) {
                                   On its way to the next logistics facility
                                 </p>
                                 <p className="text-sm text-[#808080]">
-                                  mm/dd/yyyy
+                                  {details?.inTransitDate !== null
+                                    ? details?.inTransitDate?.toLocaleDateString()
+                                    : ""}
                                 </p>
                               </div>
                             </Label>
                           </div>
+
                           <div className="flex flex-col max-lg:flex-row max-lg:items-center">
                             <RadioGroupItemWithIcons
                               disabled={details.currentStatus === "Delivered"}
-                              onClick={() =>
-                                setStatus("Arrived at the Logistics Hub")
-                              }
+                              onClick={() => {
+                                {
+                                  handleChange("Arrived at the Logistics Hub");
+                                }
+                              }}
                               value="option-hub"
                               id="option-hub"
                               selected="option-hub"
@@ -386,17 +456,25 @@ export default function UpdateParcel({ params }) {
                                   Arrived at the Logistics Hub
                                 </h1>
                                 <p className="text-[#ffffffdb] text-sm">
-                                  Logistics Facility:
+                                  <span className="block">
+                                    Logistics Facility:
+                                  </span>{" "}
+                                  {details.hubLocation}
                                 </p>
                                 <p className="text-sm text-[#808080]">
-                                  mm/dd/yyyy
+                                  {details?.hubDate !== null
+                                    ? details?.hubDate?.toLocaleDateString()
+                                    : ""}
                                 </p>
                               </div>
                             </Label>
                           </div>
+
                           <div className="flex flex-col max-lg:flex-row max-lg:items-center">
                             <RadioGroupItemWithIcons
-                              onClick={() => setStatus("Delivered")}
+                              onClick={() => {
+                                handleChange("Delivered");
+                              }}
                               value="option-delivered"
                               id="option-delivered"
                               selected="option-delivered"
@@ -419,14 +497,15 @@ export default function UpdateParcel({ params }) {
                                   Parcel has been delivered
                                 </p>
                                 <p className="text-sm text-[#808080]">
-                                  mm/dd/yyyy
+                                  {deliveryDate?.toLocaleDateString()}
                                 </p>
                               </div>
                             </Label>
                           </div>
                         </RadioGroup>
+
                         <div className="flex justify-end">
-                          <AlertDialog>
+                          <AlertDialog className="flex justify-end">
                             <AlertDialogTrigger>
                               <Button
                                 variant="primary"
@@ -488,20 +567,17 @@ export default function UpdateParcel({ params }) {
                         </Table>
                       </CardContent>
                       <CardFooter className="flex justify-end mr-5">
-                        {itemsData &&
-                          itemsData.map((item, index) => (
-                            <div>
-                              <h3 className="font-bold text-base border-slate-600">
-                                Merchandise Subtotal: {merchandiseSubtotal}
-                              </h3>
-                              <h3 className="text-base border-slate-600">
-                                Shipping Total: {shippingTotal}
-                              </h3>
-                              <h3 className="text-base border-slate-600">
-                                Total Payment: {totalPayment}
-                              </h3>
-                            </div>
-                          ))}
+                        <div>
+                          <h3 className="font-bold text-base border-slate-600">
+                            Merchandise Subtotal: {merchandiseSubtotal}
+                          </h3>
+                          <h3 className="text-base border-slate-600">
+                            Shipping Total: {shippingTotal}
+                          </h3>
+                          <h3 className="text-base border-slate-600">
+                            Total Payment: {totalPayment}
+                          </h3>
+                        </div>
                       </CardFooter>
                     </Card>
                   </CardContent>
