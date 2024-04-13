@@ -121,7 +121,7 @@ export function ConfirmationPane({
 
     const emailParams = {
       subject: `Your order ${rtn} has been placed`,
-      message: `Hello ${recipientData.receiverName} (${recipientData.receiverEmail}), \n Your order ${rtn} has been placed`,
+      message: `Hello ${recipientData.receiverName}, \n Your order ${rtn} has been placed`,
       deliveryServiceName: deliveryServiceData.name,
       items: itemsData.map((item) => item.itemName).join(", "),
       totalAmount: totalPayment,

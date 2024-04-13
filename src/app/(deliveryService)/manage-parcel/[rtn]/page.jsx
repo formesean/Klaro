@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "../../../../components/ui/card";
 import { Separator } from "../../../../components/ui/separator";
-
 import {
   RadioGroup,
   RadioGroupItemWithIcons,
@@ -34,14 +33,14 @@ import {
   AlertDialogTrigger,
 } from "../../../../components/ui/alert-dialog";
 import { Button } from "../../../../components/ui/button";
+import { Label } from "../../../../components/ui/label";
 import { useEffect, useState } from "react";
-
 import { useItems } from "../../../api/useItems";
 import { useOrders } from "../../../api/useOrders";
 import { useParcels } from "../../../api/useParcels";
-import { Label } from "../../../../components/ui/label";
 import Loader from "../../components/Loader";
 import { Timestamp } from "firebase/firestore";
+import emailjs from "@emailjs/browser";
 
 export default function UpdateParcel({ params }) {
   const { data: session } = useSession();
@@ -50,8 +49,8 @@ export default function UpdateParcel({ params }) {
   const { fetchOrder } = useOrders();
   const { fetchItem } = useItems();
   const [isLoading, setIsLoading] = useState(true);
-  const [orders, setOrders] = useState([]);
-  const [deliveryService, setDeliveryService] = useState([]);
+  const [orders, setOrders] = useState({});
+  const [deliveryService, setDeliveryService] = useState({});
   const [itemsData, setItemsData] = useState([]);
   const [parcelRef, setParcelRef] = useState();
   const [details, setDetails] = useState({
@@ -71,7 +70,6 @@ export default function UpdateParcel({ params }) {
   const [inTransitDate, setInTransitDate] = useState();
   const [centerDate, setCenterDate] = useState();
   const [deliveryDate, setDeliveryDate] = useState();
-  const [data, setData] = useState();
 
   useEffect(() => {
     setIsClient(true);
@@ -179,21 +177,41 @@ export default function UpdateParcel({ params }) {
 
   const handleStatusUpdate = async () => {
     try {
+      const updatedData = { currentStatus: status };
+
+      if (centerDate !== undefined) updatedData.centerDate = centerDate;
+      if (inTransitDate !== undefined)
+        updatedData.inTransitDate = inTransitDate;
+      if (hubDate !== undefined) updatedData.hubDate = hubDate;
+
       if (status !== "Delivered") {
-        const updatedData = { currentStatus: status };
-
-        if (centerDate !== undefined) {
-          updatedData.centerDate = centerDate;
-        }
-        if (inTransitDate !== undefined) {
-          updatedData.inTransitDate = inTransitDate;
-        }
-        if (hubDate !== undefined) {
-          updatedData.hubDate = hubDate;
-        }
-
         await updateParcel(parcelRef, updatedData);
       }
+
+      let subject = "";
+      if (status === "Arrived at Sort Center") {
+        subject = `Your order ${params.rtn} has Arrived at Sort Center`;
+      } else if (status === "In Transit") {
+        subject = `Your order ${params.rtn} is now In Transit`;
+      } else if (status === "Arrived at the Logistics Hub") {
+        subject = `Your order ${params.rtn} has Arrived at the Logistics Hub`;
+      }
+
+      const emailParams = {
+        subject,
+        message: `Hello ${orders.receiverName},\n${subject}`,
+        deliveryServiceName: deliveryService.name,
+        items: itemsData.map((item) => item.itemName).join(", "),
+        totalAmount: totalPayment,
+        to_email: orders.receiverEmail,
+      };
+
+      emailjs.send(
+        process.env.NEXT_PUBLIC_SERVICE_ID,
+        process.env.NEXT_PUBLIC_TEMPLATE_ID,
+        emailParams,
+        process.env.NEXT_PUBLIC_EMAILJS
+      );
     } catch (error) {
       console.error("Error", error);
     }
@@ -506,7 +524,7 @@ export default function UpdateParcel({ params }) {
 
                         <div className="flex justify-end">
                           <AlertDialog className="flex justify-end">
-                            <AlertDialogTrigger>
+                            <AlertDialogTrigger asChild>
                               <Button
                                 variant="primary"
                                 className="bg-primary text-white dark:text-black"
@@ -556,10 +574,20 @@ export default function UpdateParcel({ params }) {
                               itemsData.map((item, index) => (
                                 <TableRow key={index}>
                                   <TableCell>{item.itemName}</TableCell>
-                                  <TableCell>₱{item.itemPrice}</TableCell>
+                                  <TableCell>
+                                    {item.itemPrice.toLocaleString("en-PH", {
+                                      style: "currency",
+                                      currency: "PHP",
+                                    })}
+                                  </TableCell>
                                   <TableCell>{item.itemQuantity}</TableCell>
                                   <TableCell>
-                                    ₱{item.itemPrice * item.itemQuantity}
+                                    {(
+                                      item.itemPrice * item.itemQuantity
+                                    ).toLocaleString("en-PH", {
+                                      style: "currency",
+                                      currency: "PHP",
+                                    })}
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -569,13 +597,25 @@ export default function UpdateParcel({ params }) {
                       <CardFooter className="flex justify-end mr-5">
                         <div>
                           <h3 className="font-bold text-base border-slate-600">
-                            Merchandise Subtotal: {merchandiseSubtotal}
+                            Merchandise Subtotal:{" "}
+                            {merchandiseSubtotal.toLocaleString("en-PH", {
+                              style: "currency",
+                              currency: "PHP",
+                            })}
                           </h3>
                           <h3 className="text-base border-slate-600">
-                            Shipping Total: {shippingTotal}
+                            Shipping Total:{" "}
+                            {shippingTotal.toLocaleString("en-PH", {
+                              style: "currency",
+                              currency: "PHP",
+                            })}
                           </h3>
                           <h3 className="text-base border-slate-600">
-                            Total Payment: {totalPayment}
+                            Total Payment:{" "}
+                            {totalPayment.toLocaleString("en-PH", {
+                              style: "currency",
+                              currency: "PHP",
+                            })}
                           </h3>
                         </div>
                       </CardFooter>
