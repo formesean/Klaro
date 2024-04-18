@@ -293,10 +293,8 @@ export default function UpdateParcel({ params }) {
                             <Separator
                               orientation="vertical"
                               className={`h-10 w-[5px] ml-[30px] -mt-4 ${
-                                details.currentStatus === "In Transit" ||
-                                details.currentStatus ===
-                                  "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered"
+                                details.currentStatus === "Delivered" ||
+                                status === "Delivered"
                                   ? "bg-green-500"
                                   : "border-border"
                               }`}
@@ -351,10 +349,11 @@ export default function UpdateParcel({ params }) {
                             <Separator
                               orientation="vertical"
                               className={`h-10 w-[5px] ml-[30px] -mt-4 ${
-                                details.currentStatus === "In Transit" ||
                                 details.currentStatus ===
                                   "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered"
+                                details.currentStatus === "Delivered" ||
+                                status === "Arrived at the Logistics Hub" ||
+                                status === "Delivered"
                                   ? "bg-green-500"
                                   : "border-border"
                               }`}
@@ -416,7 +415,10 @@ export default function UpdateParcel({ params }) {
                                 details.currentStatus === "In Transit" ||
                                 details.currentStatus ===
                                   "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered"
+                                details.currentStatus === "Delivered" ||
+                                status === "In Transit" ||
+                                status === "Arrived at the Logistics Hub" ||
+                                status === "Delivered"
                                   ? "bg-green-500"
                                   : "border-border"
                               }`}
@@ -481,8 +483,14 @@ export default function UpdateParcel({ params }) {
                               className={`h-10 w-[5px] ml-[30px] -mt-4 ${
                                 details.currentStatus === "In Transit" ||
                                 details.currentStatus ===
+                                  "Arrived at Sort Center" ||
+                                details.currentStatus ===
                                   "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered"
+                                details.currentStatus === "Delivered" ||
+                                status === "Arrived at Sort Center" ||
+                                status === "In Transit" ||
+                                status === "Arrived at the Logistics Hub" ||
+                                status === "Delivered"
                                   ? "bg-green-500"
                                   : "border-border"
                               }`}
