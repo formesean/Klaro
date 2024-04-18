@@ -7,6 +7,8 @@ import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
 import { authOptions } from "../lib/auth";
 import { Toaster } from "../components/ui/toaster";
+import bg from "../../public/bg_image.jpg";
+import Image from "next/image";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -29,6 +31,11 @@ export default async function RootLayout({ children }) {
           fontSans.variable
         )}
       >
+        <Image
+          src={bg}
+          fill
+          className="absolute blur-[2px] object-contain object-top -z-10"
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
