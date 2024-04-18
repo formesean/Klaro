@@ -184,10 +184,6 @@ export default function UpdateParcel({ params }) {
         updatedData.inTransitDate = inTransitDate;
       if (hubDate !== undefined) updatedData.hubDate = hubDate;
 
-      if (status !== "Delivered") {
-        await updateParcel(parcelRef, updatedData);
-      }
-
       let subject = "";
       if (status === "Arrived at Sort Center") {
         subject = `Your order ${params.rtn} has Arrived at Sort Center`;
@@ -195,6 +191,8 @@ export default function UpdateParcel({ params }) {
         subject = `Your order ${params.rtn} is now In Transit`;
       } else if (status === "Arrived at the Logistics Hub") {
         subject = `Your order ${params.rtn} has Arrived at the Logistics Hub`;
+      } else if (status === "Delivered") {
+        subject = `Your order ${params.rtn} has been Delivered`;
       }
 
       const emailParams = {
@@ -206,6 +204,7 @@ export default function UpdateParcel({ params }) {
         to_email: orders.receiverEmail,
       };
 
+      await updateParcel(parcelRef, updatedData);
       emailjs.send(
         process.env.NEXT_PUBLIC_SERVICE_ID,
         process.env.NEXT_PUBLIC_TEMPLATE_ID,

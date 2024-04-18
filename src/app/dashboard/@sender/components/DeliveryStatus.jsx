@@ -5,6 +5,7 @@ import {
 import { Label } from "../../../../components/ui/label";
 import { Button } from "../../../../components/ui/button";
 import { Copy, Check } from "lucide-react";
+import { Separator } from "../../../../components/ui/separator";
 
 export function DeliveryStatus({
   parcelData,
@@ -46,6 +47,7 @@ export function DeliveryStatus({
       </div>
       <div>
         <RadioGroup
+          // className="gap-5"
           disabled
           defaultValue={
             details.currentStatus === "Order Placed"
@@ -60,7 +62,6 @@ export function DeliveryStatus({
               ? "option-delivered"
               : ""
           }
-          className="gap-5"
         >
           <div className="flex items-center space-x-2">
             <div className="flex items-center">
@@ -86,6 +87,13 @@ export function DeliveryStatus({
                 </div>
               </Label>
             </div>
+          </div>
+
+          <div className="flex-grow">
+            <Separator
+              orientation="vertical"
+              className="h-6 w-[5px] ml-[30px] -my-2"
+            />
           </div>
 
           <div className="flex items-center space-x-2">
@@ -122,6 +130,13 @@ export function DeliveryStatus({
             </div>
           </div>
 
+          <div className="flex-grow">
+            <Separator
+              orientation="vertical"
+              className="h-6 w-[5px] ml-[30px] -my-2"
+            />
+          </div>
+
           <div className="flex items-center space-x-2">
             <div className="flex items-center">
               <RadioGroupItemWithIcons
@@ -154,6 +169,13 @@ export function DeliveryStatus({
                 </div>
               </Label>
             </div>
+          </div>
+
+          <div className="flex-grow">
+            <Separator
+              orientation="vertical"
+              className="h-6 w-[5px] ml-[30px] -my-2"
+            />
           </div>
 
           <div className="flex items-center space-x-2">
@@ -190,6 +212,13 @@ export function DeliveryStatus({
                 </div>
               </Label>
             </div>
+          </div>
+
+          <div className="flex-grow">
+            <Separator
+              orientation="vertical"
+              className="h-6 w-[5px] ml-[30px] -my-2"
+            />
           </div>
 
           <div className="flex items-center space-x-2">
