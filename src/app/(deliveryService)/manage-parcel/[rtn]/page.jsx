@@ -232,51 +232,13 @@ export default function UpdateParcel({ params }) {
               </CardHeader>
               <CardContent>
                 <Card className="border-0">
-                  <CardContent className="p-0 grid grid-cols-4 grid-rows-2 max-xl:grid-cols-3 max-xl:grid-rows-4 gap-3">
-                    <Card className="col-span-1 row-span-1 max-xl:col-span-3">
-                      <CardHeader>
-                        <CardTitle>Information Details</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex flex-col gap-5">
-                        <div className="flex flex-col">
-                          <p className="text-base text-muted-foreground">
-                            Recipient Information
-                          </p>
-                          <Separator />
-                          <p>
-                            {orders.receiverName} | {orders.receiverEmail} |{" "}
-                            {orders.receiverAddress}
-                          </p>
-                        </div>
-                        <div className="flex flex-col">
-                          <p className="text-base text-muted-foreground">
-                            Sender Information
-                          </p>
-                          <Separator />
-                          <p>
-                            {orders.senderName} | {orders.senderEmail} |{" "}
-                            {orders.senderAddress}
-                          </p>
-                        </div>
-                        <div className="flex flex-col">
-                          <p className="text-base text-muted-foreground">
-                            Delivery Service Information
-                          </p>
-                          <Separator />
-                          <p>
-                            {deliveryService.name} | {deliveryService.email}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="col-span-3 row-span-1 max-xl:row-span-2">
+                  <CardContent className="p-0 grid grid-cols-5 grid-rows-2 max-xl:grid-cols-2 max-xl:grid-rows-4 gap-3">
+                    <Card className="col-span-2 row-span-2">
                       <CardHeader>
                         <CardTitle>Update Status</CardTitle>
                       </CardHeader>
-                      <CardContent className="flex flex-col gap-10">
+                      <CardContent className="flex flex-col">
                         <RadioGroup
-                          className="flex flex-row max-lg:flex-col justify-evenly max-lg:gap-5"
                           defaultValue={
                             details.currentStatus === "Order Placed"
                               ? "option-order"
@@ -293,268 +255,363 @@ export default function UpdateParcel({ params }) {
                               : ""
                           }
                         >
-                          <div className="flex flex-col max-lg:flex-row max-lg:items-center">
-                            <RadioGroupItemWithIcons
-                              disabled={
-                                details.currentStatus ===
-                                  "Arrived at Sort Center" ||
+                          <div className="flex items-center space-x-2 -mt-4">
+                            <div className="flex items-center">
+                              <RadioGroupItemWithIcons
+                                onClick={() => {
+                                  handleChange("Delivered");
+                                }}
+                                value="option-delivered"
+                                id="option-delivered"
+                                selected="option-delivered"
+                                className={`w-16 h-16 my-2 disabled:opacity-100 ${
+                                  details.currentStatus === "Delivered" ||
+                                  status === "Delivered"
+                                    ? "bg-green-500 border-green-500 text-secondary"
+                                    : "border-border"
+                                }`}
+                              />
+                              <Label htmlFor="option-delivered">
+                                <div className="flex flex-col justify-center pl-2">
+                                  <div className="flex justify-start items-center gap-4">
+                                    <h1 className="font-bold text-base">
+                                      Delivered
+                                    </h1>
+                                    <p className="text-sm text-[#808080]">
+                                      {deliveryDate?.toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  <p className="text-[#ffffffdb]">
+                                    Parcel has been delivered
+                                  </p>
+                                </div>
+                              </Label>
+                            </div>
+                          </div>
+
+                          <div className="flex-grow">
+                            <Separator
+                              orientation="vertical"
+                              className={`h-10 w-[5px] ml-[30px] -mt-4 ${
                                 details.currentStatus === "In Transit" ||
                                 details.currentStatus ===
                                   "Arrived at the Logistics Hub" ||
                                 details.currentStatus === "Delivered"
-                              }
-                              onClick={() => handleChange("Order Placed")}
-                              value="option-order"
-                              id="option-order"
-                              selected={"option-order"}
-                              className={`h-16 w-16 my-2 disabled:opacity-100 ${
-                                details.currentStatus === "Order Placed" ||
-                                details.currentStatus ===
-                                  "Arrived at Sort Center" ||
-                                details.currentStatus === "In Transit" ||
-                                details.currentStatus ===
-                                  "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered" ||
-                                status === "Order Placed" ||
-                                status === "Arrived at Sort Center" ||
-                                status === "In Transit" ||
-                                status === "Arrived at the Logistics Hub" ||
-                                status === "Delivered"
-                                  ? "bg-green-500 border-green-500 text-secondary"
+                                  ? "bg-green-500"
                                   : "border-border"
                               }`}
                             />
-                            <Label
-                              htmlFor="option-order"
-                              className="justify-self-center"
-                            >
-                              <div className="flex flex-col justify-center pl-2">
-                                <h1 className="font-bold text-base border-slate-600">
-                                  Order Placed
-                                </h1>
-                                <p className="text-[#ffffffdb] text-sm">
-                                  Ready for pick up
-                                </p>
-                                <p className="text-sm text-[#808080]">
-                                  {details?.orderPlacedDate?.toLocaleDateString()}
-                                </p>
-                              </div>
-                            </Label>
                           </div>
 
-                          <div className="flex flex-col max-lg:flex-row max-lg:items-center">
-                            <RadioGroupItemWithIcons
-                              disabled={
+                          <div className="flex items-center space-x-2 -mt-4">
+                            <div className="flex items-center">
+                              <RadioGroupItemWithIcons
+                                disabled={details.currentStatus === "Delivered"}
+                                onClick={() => {
+                                  {
+                                    handleChange(
+                                      "Arrived at the Logistics Hub"
+                                    );
+                                  }
+                                }}
+                                value="option-hub"
+                                id="option-hub"
+                                selected="option-hub"
+                                className={`w-16 h-16 my-2 disabled:opacity-100 ${
+                                  details.currentStatus ===
+                                    "Arrived at the Logistics Hub" ||
+                                  details.currentStatus === "Delivered" ||
+                                  status === "Arrived at the Logistics Hub" ||
+                                  status === "Delivered"
+                                    ? "bg-green-500 border-green-500 text-secondary"
+                                    : "border-border"
+                                }`}
+                              />
+                              <Label htmlFor="option-hub">
+                                <div className="flex flex-col justify-center pl-2">
+                                  <div className="flex justify-start items-center gap-4">
+                                    <h1 className="font-bold text-base max-md:leading-4">
+                                      Arrived at the Logistics Hub
+                                    </h1>
+                                    <p className="text-sm text-[#808080]">
+                                      {details?.hubDate !== null
+                                        ? details?.hubDate?.toLocaleDateString()
+                                        : ""}
+                                    </p>
+                                  </div>
+                                  <p className="text-[#ffffffdb]">
+                                    Logistics Facility: {details.hubLocation}
+                                  </p>
+                                </div>
+                              </Label>
+                            </div>
+                          </div>
+
+                          <div className="flex-grow">
+                            <Separator
+                              orientation="vertical"
+                              className={`h-10 w-[5px] ml-[30px] -mt-4 ${
                                 details.currentStatus === "In Transit" ||
                                 details.currentStatus ===
                                   "Arrived at the Logistics Hub" ||
                                 details.currentStatus === "Delivered"
-                              }
-                              onClick={() => {
-                                {
-                                  handleChange("Arrived at Sort Center");
-                                }
-                              }}
-                              value="option-center"
-                              id="option-center"
-                              selected="option-center"
-                              className={`h-16 w-16 my-2 disabled:opacity-100 ${
-                                details.currentStatus ===
-                                  "Arrived at Sort Center" ||
-                                details.currentStatus === "In Transit" ||
-                                details.currentStatus ===
-                                  "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered" ||
-                                status === "Arrived at Sort Center" ||
-                                status === "In Transit" ||
-                                status === "Arrived at the Logistics Hub" ||
-                                status === "Delivered"
-                                  ? "bg-green-500 border-green-500 text-secondary"
+                                  ? "bg-green-500"
                                   : "border-border"
                               }`}
                             />
-                            <Label
-                              htmlFor="option-center"
-                              className="justify-self-center"
-                            >
-                              <div className="flex flex-col justify-center pl-2">
-                                <h1 className="font-bold text-base border-slate-600">
-                                  Arrived at Sort Center
-                                </h1>
-                                <p className="text-[#ffffffdb] text-sm">
-                                  <span className="block">
-                                    Logistics Facility:
-                                  </span>{" "}
-                                  {details.centerLocation}
-                                </p>
-                                <p className="text-sm text-[#808080]">
-                                  {details?.centerDate !== null
-                                    ? details?.centerDate?.toLocaleDateString()
-                                    : ""}
-                                </p>
-                              </div>
-                            </Label>
                           </div>
 
-                          <div className="flex flex-col max-lg:flex-row max-lg:items-center">
-                            <RadioGroupItemWithIcons
-                              disabled={
+                          <div className="flex items-center space-x-2 -mt-4">
+                            <div className="flex items-center">
+                              <RadioGroupItemWithIcons
+                                disabled={
+                                  details.currentStatus ===
+                                    "Arrived at the Logistics Hub" ||
+                                  details.currentStatus === "Delivered"
+                                }
+                                onClick={() => {
+                                  {
+                                    handleChange("In Transit");
+                                  }
+                                }}
+                                value="option-intransit"
+                                id="option-intransit"
+                                selected="option-intransit"
+                                className={`w-16 h-16 my-2 disabled:opacity-100 ${
+                                  details.currentStatus === "In Transit" ||
+                                  details.currentStatus ===
+                                    "Arrived at the Logistics Hub" ||
+                                  details.currentStatus === "Delivered" ||
+                                  status === "In Transit" ||
+                                  status === "Arrived at the Logistics Hub" ||
+                                  status === "Delivered"
+                                    ? "bg-green-500 border-green-500 text-secondary"
+                                    : "border-border"
+                                }`}
+                              />
+                              <Label htmlFor="option-intransit">
+                                <div className="flex flex-col justify-center pl-2">
+                                  <div className="flex justify-start items-center gap-4">
+                                    <h1 className="font-bold text-base border-slate-600">
+                                      In Transit
+                                    </h1>
+                                    <p className="text-sm text-[#808080]">
+                                      {details?.inTransitDate !== null
+                                        ? details?.inTransitDate?.toLocaleDateString()
+                                        : ""}
+                                    </p>
+                                  </div>
+                                  <p className="text-[#ffffffdb]">
+                                    On its way to the next logistics facility
+                                  </p>
+                                </div>
+                              </Label>
+                            </div>
+                          </div>
+
+                          <div className="flex-grow">
+                            <Separator
+                              orientation="vertical"
+                              className={`h-10 w-[5px] ml-[30px] -mt-4 ${
+                                details.currentStatus === "In Transit" ||
                                 details.currentStatus ===
                                   "Arrived at the Logistics Hub" ||
                                 details.currentStatus === "Delivered"
-                              }
-                              onClick={() => {
-                                {
-                                  handleChange("In Transit");
+                                  ? "bg-green-500"
+                                  : "border-border"
+                              }`}
+                            />
+                          </div>
+
+                          <div className="flex items-center space-x-2 -mt-4">
+                            <div className="flex items-center">
+                              <RadioGroupItemWithIcons
+                                disabled={
+                                  details.currentStatus === "In Transit" ||
+                                  details.currentStatus ===
+                                    "Arrived at the Logistics Hub" ||
+                                  details.currentStatus === "Delivered"
                                 }
-                              }}
-                              value="option-intransit"
-                              id="option-intransit"
-                              selected="option-intransit"
-                              className={`w-16 h-16 my-2 disabled:opacity-100 ${
+                                onClick={() => {
+                                  {
+                                    handleChange("Arrived at Sort Center");
+                                  }
+                                }}
+                                value="option-center"
+                                id="option-center"
+                                selected="option-center"
+                                className={`h-16 w-16 my-2 disabled:opacity-100 ${
+                                  details.currentStatus ===
+                                    "Arrived at Sort Center" ||
+                                  details.currentStatus === "In Transit" ||
+                                  details.currentStatus ===
+                                    "Arrived at the Logistics Hub" ||
+                                  details.currentStatus === "Delivered" ||
+                                  status === "Arrived at Sort Center" ||
+                                  status === "In Transit" ||
+                                  status === "Arrived at the Logistics Hub" ||
+                                  status === "Delivered"
+                                    ? "bg-green-500 border-green-500 text-secondary"
+                                    : "border-border"
+                                }`}
+                              />
+                              <Label htmlFor="option-center">
+                                <div className="flex flex-col justify-center pl-2">
+                                  <div className="flex justify-start items-center gap-4">
+                                    <h1 className="font-bold text-base max-md:leading-4">
+                                      Arrived at Sort Center
+                                    </h1>
+                                    <p className="text-sm text-[#808080]">
+                                      {details?.centerDate !== null
+                                        ? details?.centerDate?.toLocaleDateString()
+                                        : ""}
+                                    </p>
+                                  </div>
+                                  <p className="text-[#ffffffdb]">
+                                    Logistics Facility: {details.centerLocation}
+                                  </p>
+                                </div>
+                              </Label>
+                            </div>
+                          </div>
+
+                          <div className="flex-grow">
+                            <Separator
+                              orientation="vertical"
+                              className={`h-10 w-[5px] ml-[30px] -mt-4 ${
                                 details.currentStatus === "In Transit" ||
                                 details.currentStatus ===
                                   "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered" ||
-                                status === "In Transit" ||
-                                status === "Arrived at the Logistics Hub" ||
-                                status === "Delivered"
-                                  ? "bg-green-500 border-green-500 text-secondary"
+                                details.currentStatus === "Delivered"
+                                  ? "bg-green-500"
                                   : "border-border"
                               }`}
                             />
-                            <Label
-                              htmlFor="option-intransit"
-                              className="justify-self-center"
-                            >
-                              <div className="flex flex-col justify-center pl-2">
-                                <h1 className="font-bold text-base border-slate-600">
-                                  In Transit
-                                </h1>
-                                <p className="text-[#ffffffdb] text-sm">
-                                  On its way to the next logistics facility
-                                </p>
-                                <p className="text-sm text-[#808080]">
-                                  {details?.inTransitDate !== null
-                                    ? details?.inTransitDate?.toLocaleDateString()
-                                    : ""}
-                                </p>
-                              </div>
-                            </Label>
                           </div>
 
-                          <div className="flex flex-col max-lg:flex-row max-lg:items-center">
-                            <RadioGroupItemWithIcons
-                              disabled={details.currentStatus === "Delivered"}
-                              onClick={() => {
-                                {
-                                  handleChange("Arrived at the Logistics Hub");
+                          <div className="flex items-center space-x-2 -mt-4">
+                            <div className="flex items-center">
+                              <RadioGroupItemWithIcons
+                                disabled={
+                                  details.currentStatus ===
+                                    "Arrived at Sort Center" ||
+                                  details.currentStatus === "In Transit" ||
+                                  details.currentStatus ===
+                                    "Arrived at the Logistics Hub" ||
+                                  details.currentStatus === "Delivered"
                                 }
-                              }}
-                              value="option-hub"
-                              id="option-hub"
-                              selected="option-hub"
-                              className={`w-16 h-16 my-2 disabled:opacity-100 ${
-                                details.currentStatus ===
-                                  "Arrived at the Logistics Hub" ||
-                                details.currentStatus === "Delivered" ||
-                                status === "Arrived at the Logistics Hub" ||
-                                status === "Delivered"
-                                  ? "bg-green-500 border-green-500 text-secondary"
-                                  : "border-border"
-                              }`}
-                            />
-                            <Label
-                              htmlFor="option-hub"
-                              className="justify-self-center"
-                            >
-                              <div className="flex flex-col justify-center pl-2">
-                                <h1 className="font-bold text-base border-slate-600">
-                                  Arrived at the Logistics Hub
-                                </h1>
-                                <p className="text-[#ffffffdb] text-sm">
-                                  <span className="block">
-                                    Logistics Facility:
-                                  </span>{" "}
-                                  {details.hubLocation}
-                                </p>
-                                <p className="text-sm text-[#808080]">
-                                  {details?.hubDate !== null
-                                    ? details?.hubDate?.toLocaleDateString()
-                                    : ""}
-                                </p>
-                              </div>
-                            </Label>
-                          </div>
-
-                          <div className="flex flex-col max-lg:flex-row max-lg:items-center">
-                            <RadioGroupItemWithIcons
-                              onClick={() => {
-                                handleChange("Delivered");
-                              }}
-                              value="option-delivered"
-                              id="option-delivered"
-                              selected="option-delivered"
-                              className={`w-16 h-16 my-2 disabled:opacity-100 ${
-                                details.currentStatus === "Delivered" ||
-                                status === "Delivered"
-                                  ? "bg-green-500 border-green-500 text-secondary"
-                                  : "border-border"
-                              }`}
-                            />
-                            <Label
-                              htmlFor="option-delivered"
-                              className="justify-self-center"
-                            >
-                              <div className="flex flex-col justify-center pl-2">
-                                <h1 className="font-bold text-base border-slate-600">
-                                  Delivered
-                                </h1>
-                                <p className="text-[#ffffffdb] text-sm">
-                                  Parcel has been delivered
-                                </p>
-                                <p className="text-sm text-[#808080]">
-                                  {deliveryDate?.toLocaleDateString()}
-                                </p>
-                              </div>
-                            </Label>
+                                onClick={() => handleChange("Order Placed")}
+                                value="option-order"
+                                id="option-order"
+                                selected={"option-order"}
+                                className={`h-16 w-16 my-2 disabled:opacity-100 ${
+                                  details.currentStatus === "Order Placed" ||
+                                  details.currentStatus ===
+                                    "Arrived at Sort Center" ||
+                                  details.currentStatus === "In Transit" ||
+                                  details.currentStatus ===
+                                    "Arrived at the Logistics Hub" ||
+                                  details.currentStatus === "Delivered" ||
+                                  status === "Order Placed" ||
+                                  status === "Arrived at Sort Center" ||
+                                  status === "In Transit" ||
+                                  status === "Arrived at the Logistics Hub" ||
+                                  status === "Delivered"
+                                    ? "bg-green-500 border-green-500 text-secondary"
+                                    : "border-border"
+                                }`}
+                              />
+                              <Label htmlFor="option-order">
+                                <div className="flex flex-col justify-center pl-2">
+                                  <div className="flex justify-center items-center gap-4">
+                                    <h1 className="font-bold text-base">
+                                      Order Placed
+                                    </h1>
+                                    <p className="text-sm text-[#808080]">
+                                      {details.orderPlacedDate.toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  <p className="text-[#ffffffdb]">
+                                    Ready for pick-up
+                                  </p>
+                                </div>
+                              </Label>
+                            </div>
                           </div>
                         </RadioGroup>
+                      </CardContent>
+                      <CardFooter className="flex justify-end">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="primary"
+                              className="bg-primary text-white dark:text-black"
+                            >
+                              Update
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Confirm Parcel Status Update
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to update the status of
+                                this parcel to:{" "}
+                                <span className="text-white">{status}</span>
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleStatusUpdate}>
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </CardFooter>
+                    </Card>
 
-                        <div className="flex justify-end">
-                          <AlertDialog className="flex justify-end">
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="primary"
-                                className="bg-primary text-white dark:text-black"
-                              >
-                                Update
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Confirm Parcel Status Update
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to update the status of
-                                  this parcel to:{" "}
-                                  <span className="text-white">{status}</span>
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleStatusUpdate}>
-                                  Continue
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                    <Card className="col-span-3 row-span-1 max-xl:col-span-2">
+                      <CardHeader>
+                        <CardTitle>Information Details</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex flex-col gap-12">
+                        <div className="flex flex-col">
+                          <p className="text-base text-muted-foreground">
+                            Recipient Information
+                          </p>
+                          <Separator />
+                          <p>
+                            {orders.receiverName} | {orders.receiverEmail} |{" "}
+                            {orders.receiverAddress}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col">
+                          <p className="text-base text-muted-foreground">
+                            Sender Information
+                          </p>
+                          <Separator />
+                          <p>
+                            {orders.senderName} | {orders.senderEmail} |{" "}
+                            {orders.senderAddress}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col">
+                          <p className="text-base text-muted-foreground">
+                            Delivery Service Information
+                          </p>
+                          <Separator />
+                          <p>
+                            {deliveryService.name} | {deliveryService.email}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
 
-                    <Card className="col-span-4 row-span-1 max-xl:col-span-3 max-xl:row-span-1">
+                    <Card className="col-span-3 row-span-1 max-xl:col-span-2">
                       <CardHeader>
                         <CardTitle>Item Ordered</CardTitle>
                       </CardHeader>
