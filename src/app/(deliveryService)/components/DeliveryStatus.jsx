@@ -124,7 +124,7 @@ export function DeliveryStatus({
             <Label htmlFor="option-hub">
               <div className="flex flex-col justify-center pl-2">
                 <div className="flex justify-start items-center gap-4">
-                  <h1 className="font-bold text-base">
+                  <h1 className="font-bold text-base max-md:leading-4">
                     Arrived at the Logistics Hub
                   </h1>
                   <p className="text-sm text-[#808080]">
@@ -218,7 +218,7 @@ export function DeliveryStatus({
             <Label htmlFor="option-center">
               <div className="flex flex-col justify-center pl-2">
                 <div className="flex justify-start items-center gap-4">
-                  <h1 className="font-bold text-base">
+                  <h1 className="font-bold text-base max-md:leading-4">
                     Arrived at Sort Center
                   </h1>
                   <p className="text-sm text-[#808080]">
