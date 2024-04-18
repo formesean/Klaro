@@ -21,7 +21,6 @@ import { Separator } from "../components/ui/separator";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -304,7 +303,19 @@ export default async function Home() {
               </div>
             </RadioGroup>
 
-            <Separator />
+            {true ? (
+              <div className="flex gap-3 justify-center items-center">
+                <div className="flex-grow">
+                  <Separator />
+                </div>
+                <Button>Confirm Delivery</Button>
+                <div className="flex-grow">
+                  <Separator />
+                </div>
+              </div>
+            ) : (
+              <Separator />
+            )}
 
             <Table>
               <TableHeader>
