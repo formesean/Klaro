@@ -7,8 +7,10 @@ import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
 import { authOptions } from "../lib/auth";
 import { Toaster } from "../components/ui/toaster";
-import bg from "../../public/bg_image.jpg";
+import bg_black from "../../public/bg_black.jpg";
+import bg_white from "../../public/bg_white.jpg";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -22,6 +24,7 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
+  const { theme } = useTheme();
 
   return (
     <html lang="en" className="scroll-smooth scrollbar-thin">
@@ -31,11 +34,11 @@ export default async function RootLayout({ children }) {
           fontSans.variable
         )}
       >
-        <Image
-          src={bg}
+        {/* <Image
+          src={theme === "dark" ? bg_black : bg_white}
           fill
           className="absolute blur-[2px] object-contain object-top -z-10"
-        />
+        /> */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
