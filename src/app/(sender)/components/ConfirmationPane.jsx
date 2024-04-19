@@ -42,6 +42,7 @@ export function ConfirmationPane({
   isFormComplete,
   sessionEmail,
   clearData,
+  router,
 }) {
   const { getSenderDocRef, fetchSender } = useSender();
   const { createOrder } = useOrders();
@@ -136,6 +137,7 @@ export function ConfirmationPane({
     );
 
     await clearData();
+    router.replace("/dashboard");
   };
 
   return (
