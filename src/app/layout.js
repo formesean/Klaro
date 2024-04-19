@@ -10,7 +10,6 @@ import { Toaster } from "../components/ui/toaster";
 import bg_black from "../../public/bg_black.jpg";
 import bg_white from "../../public/bg_white.jpg";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -24,7 +23,6 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
-  const { theme } = useTheme();
 
   return (
     <html lang="en" className="scroll-smooth scrollbar-thin">
@@ -34,14 +32,19 @@ export default async function RootLayout({ children }) {
           fontSans.variable
         )}
       >
-        {/* <Image
-          src={theme === "dark" ? bg_black : bg_white}
+        <Image
+          src={bg_black}
           fill
-          className="absolute blur-[2px] object-contain object-top -z-10"
-        /> */}
+          className="hidden dark:block absolute blur-[2px] object-contain object-top -z-10"
+        />
+        <Image
+          src={bg_white}
+          fill
+          className="block dark:hidden absolute blur-[2px] object-contain object-top -z-20"
+        />
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
