@@ -197,20 +197,23 @@ export default async function Home() {
                           // : "border-border"
                         }`}
                       />
-                      <Label htmlFor="option-delivered">
-                        <div className="flex flex-col justify-center pl-2">
-                          <div className="flex justify-start items-center gap-4">
-                            <h1 className="font-bold text-base">Delivered</h1>
-                            <p className="text-sm text-[#808080]">
-                              4/20/2024
-                              {/* {details.deliveryDate.toLocaleDateString()} */}
+                      <div className="flex items-center gap-10">
+                        <Label htmlFor="option-delivered">
+                          <div className="flex flex-col justify-center pl-2">
+                            <div className="flex justify-start items-center gap-4">
+                              <h1 className="font-bold text-base">Delivered</h1>
+                              <p className="text-sm text-[#808080]">
+                                4/20/2024
+                                {/* {details.deliveryDate.toLocaleDateString()} */}
+                              </p>
+                            </div>
+                            <p className="text-[#ffffffdb]">
+                              Parcel has been delivered
                             </p>
                           </div>
-                          <p className="text-[#ffffffdb]">
-                            Parcel has been delivered
-                          </p>
-                        </div>
-                      </Label>
+                        </Label>
+                        <Button>Confirm Delivery</Button>
+                      </div>
                     </div>
                   </div>
 
@@ -396,24 +399,19 @@ export default async function Home() {
                           // : "border-border"
                         }`}
                       />
-                      <div className="flex items-center gap-10">
-                        <Label htmlFor="option-order">
-                          <div className="flex flex-col justify-center pl-2">
-                            <div className="flex justify-center items-center gap-4">
-                              <h1 className="font-bold text-base max-md:leading-4">
-                                Order Placed
-                              </h1>
-                              <p className="text-sm text-[#808080]">
-                                {/* {details.orderPlacedDate.toLocaleDateString()} */}
-                              </p>
-                            </div>
-                            <p className="text-[#ffffffdb]">
-                              Ready for pick-up
+                      <Label htmlFor="option-order">
+                        <div className="flex flex-col justify-center pl-2">
+                          <div className="flex justify-center items-center gap-4">
+                            <h1 className="font-bold text-base max-md:leading-4">
+                              Order Placed
+                            </h1>
+                            <p className="text-sm text-[#808080]">
+                              {/* {details.orderPlacedDate.toLocaleDateString()} */}
                             </p>
                           </div>
-                        </Label>
-                        <Button>Confirm Delivery</Button>
-                      </div>
+                          <p className="text-[#ffffffdb]">Ready for pick-up</p>
+                        </div>
+                      </Label>
                     </div>
                   </div>
                 </RadioGroup>
