@@ -64,7 +64,7 @@ export default async function Home() {
           </Button>
         </div>
 
-        {false ? (
+        {true ? (
           <Card className="min-w-full">
             <CardHeader className="text-center font-extrabold text-4xl">
               Welcome to Klaro Parcel Tracking System

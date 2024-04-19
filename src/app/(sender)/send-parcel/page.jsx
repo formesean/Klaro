@@ -400,7 +400,10 @@ export default function Forms() {
                     <TableCell>{item.itemName}</TableCell>
                     <TableCell>{item.itemQuantity}</TableCell>
                     <TableCell className="text-right">
-                      {item.itemPrice}
+                      {item.itemPrice.toLocaleString("en-PH", {
+                        style: "currency",
+                        currency: "PHP",
+                      })}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
