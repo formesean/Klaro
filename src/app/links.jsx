@@ -15,6 +15,11 @@ export const NavItems = [
     for: ["sender"],
   },
   {
+    title: "Manage Parcel",
+    path: "/manage-parcel",
+    for: ["deliveryService"],
+  },
+  {
     title: "About Us",
     path: "/about-us",
     for: "all",
