@@ -21,7 +21,13 @@ import {
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Separator } from "../../../components/ui/separator";
-import { ArrowUpDown, Loader, MoreHorizontal, Radio } from "lucide-react";
+import {
+  ArrowUpDown,
+  Divide,
+  Loader,
+  MoreHorizontal,
+  Radio,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -53,6 +59,6 @@ export default function Dashboard() {
   }
 
   return (
-    <div>THIS IS THE DELIVERY SERVICE DASHBOARD</div>
+  <div>This is the Delivery Service Dashboard</div>
   );
 }

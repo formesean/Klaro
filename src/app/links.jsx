@@ -14,9 +14,9 @@ export const NavItems = [
     path: "/send-parcel",
     for: ["sender"],
   },
-  // {
-  //   title: "About Us",
-  //   path: "/about-us",
-  //   for: "all",
-  // },
+  {
+    title: "About Us",
+    path: "/about-us",
+    for: "all",
+  },
 ];
