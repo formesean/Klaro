@@ -53,8 +53,8 @@ export default async function Home() {
   const { fetchDeliveryService } = useDeliveryService();
   const { fetchParcel, fetchParcelByRTN } = useParcels();
   const { fetchOrder } = useOrders();
-
   const searchParams = useSearchParams();
+  //TODO: load details from searchParam, currently not working
   const searchRTN = searchParams.get("rtn");
   console.log("searchRTN", searchRTN);
 
@@ -131,7 +131,6 @@ export default async function Home() {
     const rtnInput = document.getElementById("rtn-input").value;
     await queryDatabase(rtnInput);
     setShowParcelDetails(true);
-    // document.getElementById("rtn-input").value = "";
   };
 
   return (
