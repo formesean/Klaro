@@ -4,7 +4,8 @@ import {
 } from "../../../../components/ui/radio-group";
 import { Label } from "../../../../components/ui/label";
 import { Button } from "../../../../components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, X } from "lucide-react";
+import { Separator } from "../../../../components/ui/separator";
 
 export function DeliveryStatus({
   parcelData,
@@ -16,8 +17,8 @@ export function DeliveryStatus({
 }) {
   return (
     <div className="flex flex-col gap-5 w-full">
-      <div className="flex items-center">
-        <div className="mr-40">
+      <div className="flex justify-between">
+        <div>
           <p className="font-bold text-lg">Delivery Status</p>
           <p className="font-bold font text-sm text-[#808080]">
             {orderData.receiverName}
@@ -43,189 +44,241 @@ export function DeliveryStatus({
             </button>
           </div>
         </div>
+        <div>
+          <Button
+            className="px-3 -py-3 rounded-full"
+            variant="ghost"
+            onClick={handleHideDetail}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      <div>
-        <RadioGroup
-          disabled
-          defaultValue={
-            details.currentStatus === "Order Placed"
-              ? "option-order"
-              : details.currentStatus === "Arrived at Sort Center"
-              ? "option-center"
-              : details.currentStatus === "In Transit"
-              ? "option-intransit"
-              : details.currentStatus === "Arrived at the Logistics Hub"
-              ? "option-hub"
-              : details.currentStatus === "Delivered"
-              ? "option-delivered"
-              : ""
-          }
-          className="gap-5"
-        >
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <RadioGroupItemWithIcons
-                value="option-delivered"
-                id="option-delivered"
-                selected="option-delivered"
-                className={`w-16 h-16 disabled:opacity-100 ${
-                  details.currentStatus === "Delivered"
-                    ? "bg-green-500 border-green-500 text-secondary"
-                    : "border-border"
-                }`}
-              />
-              <Label htmlFor="option-delivered">
-                <div className="flex flex-col justify-center pl-2">
-                  <div className="flex justify-start items-center gap-4">
-                    <h1 className="font-bold text-base">Delivered</h1>
-                    <p className="text-sm text-[#808080]">
-                      {details.deliveryDate.toLocaleDateString()}
-                    </p>
-                  </div>
-                  <p className="text-[#ffffffdb]">Parcel has been delivered</p>
-                </div>
-              </Label>
-            </div>
-          </div>
 
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <RadioGroupItemWithIcons
-                value="option-hub"
-                id="option-hub"
-                selected="option-hub"
-                className={`w-16 h-16 disabled:opacity-100 ${
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? "bg-green-500 border-green-500 text-secondary"
-                    : "border-border"
-                }`}
-              />
-              <Label htmlFor="option-hub">
-                <div className="flex flex-col justify-center pl-2">
-                  <div className="flex justify-start items-center gap-4">
-                    <h1 className="font-bold text-base">
-                      Arrived at the Logistics Hub
-                    </h1>
-                    <p className="text-sm text-[#808080]">
-                      {details?.hubDate !== null
-                        ? details?.hubDate?.toLocaleDateString()
-                        : ""}
-                    </p>
-                  </div>
-                  <p className="text-[#ffffffdb]">
-                    Logistics Facility:
-                    {details.hubLocation}
+      <RadioGroup
+        disabled
+        defaultValue={
+          details.currentStatus === "Order Placed"
+            ? "option-order"
+            : details.currentStatus === "Arrived at Sort Center"
+            ? "option-center"
+            : details.currentStatus === "In Transit"
+            ? "option-intransit"
+            : details.currentStatus === "Arrived at the Logistics Hub"
+            ? "option-hub"
+            : details.currentStatus === "Delivered"
+            ? "option-delivered"
+            : ""
+        }
+      >
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center">
+            <RadioGroupItemWithIcons
+              value="option-delivered"
+              id="option-delivered"
+              selected="option-delivered"
+              className={`w-16 h-16 disabled:opacity-100 ${
+                details.currentStatus === "Delivered"
+                  ? "bg-green-500 border-green-500 text-secondary"
+                  : "border-border"
+              }`}
+            />
+            <Label htmlFor="option-delivered">
+              <div className="flex flex-col justify-center pl-2">
+                <div className="flex justify-start items-center gap-4">
+                  <h1 className="font-bold text-base">Delivered</h1>
+                  <p className="text-sm text-[#808080]">
+                    {details.deliveryDate.toLocaleDateString()}
                   </p>
                 </div>
-              </Label>
-            </div>
+                <p className="text-[#ffffffdb]">Parcel has been delivered</p>
+              </div>
+            </Label>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <RadioGroupItemWithIcons
-                value="option-intransit"
-                id="option-intransit"
-                selected="option-intransit"
-                className={`w-16 h-16 disabled:opacity-100 ${
-                  details.currentStatus === "In Transit" ||
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? "bg-green-500 border-green-500 text-secondary"
-                    : "border-border"
-                }`}
-              />
-              <Label htmlFor="option-intransit">
-                <div className="flex flex-col justify-center pl-2">
-                  <div className="flex justify-start items-center gap-4">
-                    <h1 className="font-bold text-base border-slate-600">
-                      In Transit
-                    </h1>
-                    <p className="text-sm text-[#808080]">
-                      {details?.inTransitDate !== null
-                        ? details?.inTransitDate?.toLocaleDateString()
-                        : ""}
-                    </p>
-                  </div>
-                  <p className="text-[#ffffffdb]">
-                    On its way to the next logistics facility
+        <div className="flex-grow">
+          <Separator
+            orientation="vertical"
+            className={`h-6 w-[5px] ml-[30px] -my-2 ${
+              details.currentStatus === "Delivered"
+                ? "bg-green-500"
+                : "border-border"
+            }`}
+          />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center">
+            <RadioGroupItemWithIcons
+              value="option-hub"
+              id="option-hub"
+              selected="option-hub"
+              className={`w-16 h-16 disabled:opacity-100 ${
+                details.currentStatus === "Arrived at the Logistics Hub" ||
+                details.currentStatus === "Delivered"
+                  ? "bg-green-500 border-green-500 text-secondary"
+                  : "border-border"
+              }`}
+            />
+            <Label htmlFor="option-hub">
+              <div className="flex flex-col justify-center pl-2">
+                <div className="flex justify-start items-center gap-4">
+                  <h1 className="font-bold text-base max-md:leading-4">
+                    Arrived at the Logistics Hub
+                  </h1>
+                  <p className="text-sm text-[#808080]">
+                    {details?.hubDate !== null
+                      ? details?.hubDate?.toLocaleDateString()
+                      : ""}
                   </p>
                 </div>
-              </Label>
-            </div>
+                <p className="text-[#ffffffdb]">
+                  Logistics Facility: {details.hubLocation}
+                </p>
+              </div>
+            </Label>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <RadioGroupItemWithIcons
-                value="option-center"
-                id="option-center"
-                selected="option-center"
-                className={`w-16 h-16 disabled:opacity-100 ${
-                  details.currentStatus === "Arrived at Sort Center" ||
-                  details.currentStatus === "In Transit" ||
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? "bg-green-500 border-green-500 text-secondary"
-                    : "border-border"
-                }`}
-              />
-              <Label htmlFor="option-center">
-                <div className="flex flex-col justify-center pl-2">
-                  <div className="flex justify-start items-center gap-4">
-                    <h1 className="font-bold text-base">
-                      Arrived at Sort Center
-                    </h1>
-                    <p className="text-sm text-[#808080]">
-                      {details?.centerDate !== null
-                        ? details?.centerDate?.toLocaleDateString()
-                        : ""}
-                    </p>
-                  </div>
-                  <p className="text-[#ffffffdb]">
-                    Logistics Facility:
-                    {details.centerLocation}
+        <div className="flex-grow">
+          <Separator
+            orientation="vertical"
+            className={`h-6 w-[5px] ml-[30px] -my-2 ${
+              details.currentStatus === "Arrived at the Logistics Hub" ||
+              details.currentStatus === "Delivered"
+                ? "bg-green-500"
+                : "border-border"
+            }`}
+          />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center">
+            <RadioGroupItemWithIcons
+              value="option-intransit"
+              id="option-intransit"
+              selected="option-intransit"
+              className={`w-16 h-16 disabled:opacity-100 ${
+                details.currentStatus === "In Transit" ||
+                details.currentStatus === "Arrived at the Logistics Hub" ||
+                details.currentStatus === "Delivered"
+                  ? "bg-green-500 border-green-500 text-secondary"
+                  : "border-border"
+              }`}
+            />
+            <Label htmlFor="option-intransit">
+              <div className="flex flex-col justify-center pl-2">
+                <div className="flex justify-start items-center gap-4">
+                  <h1 className="font-bold text-base border-slate-600">
+                    In Transit
+                  </h1>
+                  <p className="text-sm text-[#808080]">
+                    {details?.inTransitDate !== null
+                      ? details?.inTransitDate?.toLocaleDateString()
+                      : ""}
                   </p>
                 </div>
-              </Label>
-            </div>
+                <p className="text-[#ffffffdb]">
+                  On its way to the next logistics facility
+                </p>
+              </div>
+            </Label>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <RadioGroupItemWithIcons
-                value="option-order"
-                id="option-order"
-                selected="option-order"
-                className={`w-16 h-16 disabled:opacity-100 ${
-                  details.currentStatus === "Order Placed" ||
-                  details.currentStatus === "Arrived at Sort Center" ||
-                  details.currentStatus === "In Transit" ||
-                  details.currentStatus === "Arrived at the Logistics Hub" ||
-                  details.currentStatus === "Delivered"
-                    ? "bg-green-500 border-green-500 text-secondary"
-                    : "border-border"
-                }`}
-              />
-              <Label htmlFor="option-order">
-                <div className="flex flex-col justify-center pl-2">
-                  <div className="flex justify-center items-center gap-4">
-                    <h1 className="font-bold text-base">Order Placed</h1>
-                    <p className="text-sm text-[#808080]">
-                      {details.orderPlacedDate.toLocaleDateString()}
-                    </p>
-                  </div>
-                  <p className="text-[#ffffffdb]">Ready for pick-up</p>
+        <div className="flex-grow">
+          <Separator
+            orientation="vertical"
+            className={`h-6 w-[5px] ml-[30px] -my-2 ${
+              details.currentStatus === "In Transit" ||
+              details.currentStatus === "Arrived at the Logistics Hub" ||
+              details.currentStatus === "Delivered"
+                ? "bg-green-500"
+                : "border-border"
+            }`}
+          />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center">
+            <RadioGroupItemWithIcons
+              value="option-center"
+              id="option-center"
+              selected="option-center"
+              className={`w-16 h-16 disabled:opacity-100 ${
+                details.currentStatus === "Arrived at Sort Center" ||
+                details.currentStatus === "In Transit" ||
+                details.currentStatus === "Arrived at the Logistics Hub" ||
+                details.currentStatus === "Delivered"
+                  ? "bg-green-500 border-green-500 text-secondary"
+                  : "border-border"
+              }`}
+            />
+            <Label htmlFor="option-center">
+              <div className="flex flex-col justify-center pl-2">
+                <div className="flex justify-start items-center gap-4">
+                  <h1 className="font-bold text-base max-md:leading-4">
+                    Arrived at Sort Center
+                  </h1>
+                  <p className="text-sm text-[#808080]">
+                    {details?.centerDate !== null
+                      ? details?.centerDate?.toLocaleDateString()
+                      : ""}
+                  </p>
                 </div>
-              </Label>
-            </div>
+                <p className="text-[#ffffffdb]">
+                  Logistics Facility: {details.centerLocation}
+                </p>
+              </div>
+            </Label>
           </div>
-        </RadioGroup>
-      </div>
-      <div className="flex flex-col gap-4 w-full">
-        <Button onClick={handleHideDetail}>Hide</Button>
-      </div>
+        </div>
+
+        <div className="flex-grow">
+          <Separator
+            orientation="vertical"
+            className={`h-6 w-[5px] ml-[30px] -my-2 ${
+              details.currentStatus === "Arrived at Sort Center" ||
+              details.currentStatus === "In Transit" ||
+              details.currentStatus === "Arrived at the Logistics Hub" ||
+              details.currentStatus === "Delivered"
+                ? "bg-green-500"
+                : "border-border"
+            }`}
+          />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center">
+            <RadioGroupItemWithIcons
+              value="option-order"
+              id="option-order"
+              selected="option-order"
+              className={`w-16 h-16 disabled:opacity-100 ${
+                details.currentStatus === "Order Placed" ||
+                details.currentStatus === "Arrived at Sort Center" ||
+                details.currentStatus === "In Transit" ||
+                details.currentStatus === "Arrived at the Logistics Hub" ||
+                details.currentStatus === "Delivered"
+                  ? "bg-green-500 border-green-500 text-secondary"
+                  : "border-border"
+              }`}
+            />
+            <Label htmlFor="option-order">
+              <div className="flex flex-col justify-center pl-2">
+                <div className="flex justify-center items-center gap-4">
+                  <h1 className="font-bold text-base">Order Placed</h1>
+                  <p className="text-sm text-[#808080]">
+                    {details.orderPlacedDate.toLocaleDateString()}
+                  </p>
+                </div>
+                <p className="text-[#ffffffdb]">Ready for pick-up</p>
+              </div>
+            </Label>
+          </div>
+        </div>
+      </RadioGroup>
     </div>
   );
 }

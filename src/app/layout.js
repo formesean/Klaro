@@ -7,6 +7,7 @@ import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
 import { authOptions } from "../lib/auth";
 import { Toaster } from "../components/ui/toaster";
+import Image from "next/image";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -29,9 +30,21 @@ export default async function RootLayout({ children }) {
           fontSans.variable
         )}
       >
+        <Image
+          priority={true}
+          src={"/bg_black.jpg"}
+          fill
+          className="hidden dark:block absolute blur-[2px] object-contain object-top -z-10"
+        />
+        <Image
+          priority={true}
+          src={"/bg_white.jpg"}
+          fill
+          className="block dark:hidden absolute blur-[2px] object-contain object-top -z-20"
+        />
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
