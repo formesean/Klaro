@@ -16,7 +16,7 @@ import {
 } from "../components/ui/radio-group";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import { Search } from "lucide-react";
+import { Check, Copy, Search } from "lucide-react";
 import { Label } from "../components/ui/label";
 import { Separator } from "../components/ui/separator";
 import {
@@ -46,7 +46,7 @@ export default function Home() {
     hubDate: null,
     deliveryDate: null,
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [showParcelDetails, setShowParcelDetails] = useState(false);
   const [parcelData, setParcelData] = useState();
   const [orderData, setOrderData] = useState();
@@ -54,6 +54,7 @@ export default function Home() {
   const { fetchDeliveryService } = useDeliveryService();
   const { fetchParcel, fetchParcelByRTN } = useParcels();
   const { fetchOrder } = useOrders();
+  const [copied, setCopied] = useState(false);
   const searchParams = useSearchParams();
   const searchRTN = searchParams.get("rtn");
 
@@ -156,6 +157,17 @@ export default function Home() {
     const url = new URL(window.location.href);
     url.searchParams.set("rtn", rtnInput);
     window.history.pushState({ path: url.href }, "", url.href);
+  };
+
+  const copyLink = () => {
+    const textToCopy = document.getElementById("link").value;
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => console.error("Failed to copy:", err));
   };
 
   return (
@@ -556,19 +568,24 @@ export default function Home() {
                     <TableRow>
                       <TableHead>Tracking Link</TableHead>
                       <TableCell>
-                        <div className="flex space-x-2">
+                        <div className="flex items-center space-x-2">
                           <Input
                             className="w-40 h-8"
                             id="link"
-                            value={`https://klaro.vercel.app/?=rtn=${searchRTN}`} // should have a search param
+                            value={`https://klaro.vercel.app/?rtn=${searchRTN}`}
                             readOnly
                           />
-                          <Button
-                            variant="secondary"
-                            className="text-sm h-8 w-12"
+                          <button
+                            onClick={copyLink}
+                            disabled={copied}
+                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 z-10 h-7 w-7 text-zinc-50 hover:bg-zinc-700 hover:text-zinc-50"
                           >
-                            Copy
-                          </Button>
+                            {copied ? (
+                              <Check className="w-4 h-4" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                          </button>
                         </div>
                       </TableCell>
                     </TableRow>
