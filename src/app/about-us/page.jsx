@@ -14,10 +14,10 @@ export default function AboutUs() {
             <p className="text-center max-w-[1000px] px-8">
               Embark on a daring journey with Klaro, where four college comrades
               converge to reinvent parcel tracking. Fueled by late-night pizza
-              and boundless creativity, we're reshaping shipping with coding
-              mastery, design finesse, and logistical expertise. Join us on this
-              epic quest as we transform every parcel journey into a thrilling
-              saga under the banner of Klaro.
+              and boundless creativity, we&apos;re reshaping shipping with
+              coding mastery, design finesse, and logistical expertise. Join us
+              on this epic quest as we transform every parcel journey into a
+              thrilling saga under the banner of Klaro.
             </p>
           </div>
         </div>
