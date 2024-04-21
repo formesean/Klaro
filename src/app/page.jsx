@@ -54,7 +54,6 @@ export default async function Home() {
   const { fetchParcel, fetchParcelByRTN } = useParcels();
   const { fetchOrder } = useOrders();
   const searchParams = useSearchParams();
-  //TODO: load details from searchParam, currently not working
   const searchRTN = searchParams.get("rtn");
   console.log("searchRTN", searchRTN);
 
@@ -127,10 +126,21 @@ export default async function Home() {
     });
   };
 
+  useEffect(async () => {
+    if (searchRTN) {
+      await queryDatabase(searchRTN);
+      setShowParcelDetails(true);
+    }
+  }, []);
+
   const handleSearchSubmit = async () => {
     const rtnInput = document.getElementById("rtn-input").value;
     await queryDatabase(rtnInput);
     setShowParcelDetails(true);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("rtn", rtnInput);
+    window.history.pushState({ path: url.href }, "", url.href);
   };
 
   return (
