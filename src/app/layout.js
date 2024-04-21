@@ -7,8 +7,6 @@ import { ThemeProvider } from "../components/theme-provider";
 import { cn } from "../lib/utils";
 import { authOptions } from "../lib/auth";
 import { Toaster } from "../components/ui/toaster";
-import bg_black from "../../public/bg_black.jpg";
-import bg_white from "../../public/bg_white.jpg";
 import Image from "next/image";
 
 const fontSans = FontSans({
@@ -33,12 +31,14 @@ export default async function RootLayout({ children }) {
         )}
       >
         <Image
-          src={bg_black}
+          priority={true}
+          src={"/bg_black.jpg"}
           fill
           className="hidden dark:block absolute blur-[2px] object-contain object-top -z-10"
         />
         <Image
-          src={bg_white}
+          priority={true}
+          src={"/bg_white.jpg"}
           fill
           className="block dark:hidden absolute blur-[2px] object-contain object-top -z-20"
         />
