@@ -535,7 +535,7 @@ export default async function Home() {
                         <Input
                           className="w-40 h-8"
                           id="link"
-                          value="https://klaro.vercel.app/" // should have a search param
+                          value={`https://klaro.vercel.app/?=rtn=${searchRTN}`} // should have a search param
                           readOnly
                         />
                         <Button
