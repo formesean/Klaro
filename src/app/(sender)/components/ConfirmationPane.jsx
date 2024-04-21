@@ -42,6 +42,7 @@ export function ConfirmationPane({
   isFormComplete,
   sessionEmail,
   clearData,
+  router,
 }) {
   const { getSenderDocRef, fetchSender } = useSender();
   const { createOrder } = useOrders();
@@ -136,6 +137,7 @@ export function ConfirmationPane({
     );
 
     await clearData();
+    router.replace("/dashboard");
   };
 
   return (
@@ -208,10 +210,20 @@ export function ConfirmationPane({
                           itemsData.map((item, index) => (
                             <TableRow key={index}>
                               <TableCell>{item.itemName}</TableCell>
-                              <TableCell>₱{item.itemPrice}</TableCell>
+                              <TableCell>
+                                {item.itemPrice.toLocaleString("en-PH", {
+                                  style: "currency",
+                                  currency: "PHP",
+                                })}
+                              </TableCell>
                               <TableCell>{item.itemQuantity}</TableCell>
                               <TableCell>
-                                ₱{item.itemPrice * item.itemQuantity}
+                                {(
+                                  item.itemPrice * item.itemQuantity
+                                ).toLocaleString("en-PH", {
+                                  style: "currency",
+                                  currency: "PHP",
+                                })}
                               </TableCell>
                             </TableRow>
                           ))}
@@ -230,14 +242,20 @@ export function ConfirmationPane({
                         <TableRow>
                           <TableCell>Merchandise Subtotal:</TableCell>
                           <TableCell className="text-center">
-                            ₱{merchandiseSubtotal.toFixed(2)}
+                            {merchandiseSubtotal.toLocaleString("en-PH", {
+                              style: "currency",
+                              currency: "PHP",
+                            })}
                           </TableCell>
                         </TableRow>
 
                         <TableRow>
                           <TableCell>Shipping Total:</TableCell>
                           <TableCell className="text-center">
-                            ₱{shippingTotal.toFixed(2)}
+                            {shippingTotal.toLocaleString("en-PH", {
+                              style: "currency",
+                              currency: "PHP",
+                            })}
                           </TableCell>
                         </TableRow>
 
@@ -246,7 +264,10 @@ export function ConfirmationPane({
                             Total Payment:
                           </TableCell>
                           <TableCell className="text-center text-lg">
-                            ₱{totalPayment.toFixed(2)}
+                            {totalPayment.toLocaleString("en-PH", {
+                              style: "currency",
+                              currency: "PHP",
+                            })}
                           </TableCell>
                         </TableRow>
                       </TableBody>

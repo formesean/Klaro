@@ -111,7 +111,7 @@ export default function Forms() {
       items.length > 0;
 
     setIsFormComplete(complete);
-  }, [form, items]);
+  }, [form, items, selectedOption]);
 
   useEffect(() => {
     const cachedFormData = localStorage.getItem("formData");
@@ -135,7 +135,7 @@ export default function Forms() {
 
   useEffect(() => {
     localStorage.setItem("formData", JSON.stringify(form.getValues()));
-  }, [form]);
+  }, [form.getValues()]);
 
   useEffect(() => {
     localStorage.setItem("itemData", JSON.stringify(itemData));
@@ -158,14 +158,9 @@ export default function Forms() {
   };
 
   const clearData = () => {
-    form.reset({
-      receiverName: "",
-      receiverEmail: "",
-      receiverAddress1: "",
-      receiverAddress2: "",
-    });
-    setItems([]);
-    setValue("");
+    localStorage.removeItem("formData");
+    localStorage.removeItem("itemData");
+    localStorage.removeItem("items");
   };
 
   const handleItem = (e) => {
@@ -173,7 +168,7 @@ export default function Forms() {
 
     try {
       if (!itemData.itemName || !itemData.itemQuantity || !itemData.itemPrice) {
-        throw new Error("All fields are required");
+        return alert("All fields are required");
       }
 
       const newItem = { ...itemData };
@@ -400,7 +395,10 @@ export default function Forms() {
                     <TableCell>{item.itemName}</TableCell>
                     <TableCell>{item.itemQuantity}</TableCell>
                     <TableCell className="text-right">
-                      {item.itemPrice}
+                      {item.itemPrice.toLocaleString("en-PH", {
+                        style: "currency",
+                        currency: "PHP",
+                      })}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -434,6 +432,7 @@ export default function Forms() {
               isFormComplete={isFormComplete}
               sessionEmail={session?.user.email}
               clearData={clearData}
+              router={router}
             />
           </div>
         </Card>
