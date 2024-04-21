@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { senderExists } from "./api/useUsers";
@@ -27,28 +27,112 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
+import { useParcels } from "../app/api/useParcels";
+import { useOrders } from "../app/api/useOrders";
+import { useDeliveryService } from "../app/api/useDeliveryService";
+import { useSearchParams } from "next/navigation";
+import { Link } from "lucide-react";
 
 export default async function Home() {
   const { data: session } = useSession();
   const router = useRouter();
+  const [details, setDetails] = useState({
+    currentStatus: "",
+    hubLocation: "",
+    centerLocation: "",
+    orderPlacedDate: null,
+    centerDate: null,
+    inTransitDate: null,
+    hubDate: null,
+    deliveryDate: null,
+  });
+  const [showParcelDetails, setShowParcelDetails] = useState(false);
+  const [parcelData, setParcelData] = useState();
+  const [orderData, setOrderData] = useState();
+  const [deliveryServiceData, setDeliveryService] = useState();
+  const { fetchDeliveryService } = useDeliveryService();
+  const { fetchParcel, fetchParcelByRTN } = useParcels();
+  const { fetchOrder } = useOrders();
 
-  useEffect(() => {
-    async function redirectUser() {
-      if (session) {
-        if (session.user.role === "deliveryService") {
+  const searchParams = useSearchParams();
+  const searchRTN = searchParams.get("rtn");
+  console.log("searchRTN", searchRTN);
+
+  useEffect(async () => {
+    if (session) {
+      if (session.user.role === "deliveryService") {
+        router.replace("/dashboard");
+      } else if (session.user.role === "sender") {
+        if (!(await senderExists(session.user.email))) {
+          router.replace("/account");
+        } else {
           router.replace("/dashboard");
-        } else if (session.user.role === "sender") {
-          if (!(await senderExists(session.user.email))) {
-            router.replace("/account");
-          } else {
-            router.replace("/dashboard");
-          }
         }
       }
     }
+  }, [session]);
 
-    redirectUser();
-  }, [session, router]);
+  const queryDatabase = async (rtnInput) => {
+    const parcelRef = await fetchParcelByRTN(rtnInput);
+    console.log(parcelRef);
+    const parcelData = await fetchParcel(parcelRef);
+    console.log(parcelData);
+    const orderData = await fetchOrder(parcelData.orderRef);
+    console.log(orderData);
+
+    const deliveryServiceData = await fetchDeliveryService(
+      orderData.deliveryService
+    );
+    console.log(deliveryServiceData);
+
+    setParcelData(parcelData);
+    setOrderData(orderData);
+    setDeliveryService(deliveryServiceData);
+
+    const hubLocation = orderData.receiverAddress
+      .split(",")
+      .slice(1)
+      .join(",")
+      .trim();
+    const centerLocation = orderData.senderAddress
+      .split(",")
+      .slice(1)
+      .join(",")
+      .trim();
+
+    const orderPlacedDate = new Date(orderData.dateIssued.seconds * 1000);
+    const centerDate =
+      parcelData.centerDate === undefined
+        ? null
+        : new Date(parcelData.centerDate?.seconds * 1000);
+    const inTransitDate =
+      parcelData.inTransitDate === undefined
+        ? null
+        : new Date(parcelData.inTransitDate?.seconds * 1000);
+    const hubDate =
+      parcelData.hubDate === undefined
+        ? null
+        : new Date(parcelData.hubDate?.seconds * 1000);
+    const deliveryDate = new Date(parcelData.deliveryDate.seconds * 1000);
+
+    setDetails({
+      currentStatus: parcelData.currentStatus,
+      hubLocation: hubLocation,
+      centerLocation: centerLocation,
+      orderPlacedDate: orderPlacedDate,
+      centerDate: centerDate,
+      inTransitDate: inTransitDate,
+      hubDate: hubDate,
+      deliveryDate: deliveryDate,
+    });
+  };
+
+  const handleSearchSubmit = async () => {
+    const rtnInput = document.getElementById("rtn-input").value;
+    await queryDatabase(rtnInput);
+    setShowParcelDetails(true);
+    // document.getElementById("rtn-input").value = "";
+  };
 
   return (
     <>
@@ -57,14 +141,15 @@ export default async function Home() {
           <Input
             className="rounded-full w-[350px] border-primary border-2"
             placeholder="enter reference tracking number"
+            id="rtn-input"
             onWheel={(e) => e.target.blur()}
           />
-          <Button className="rounded-full">
+          <Link onClick={handleSearchSubmit} className="rounded-full">
             <Search />
-          </Button>
+          </Link>
         </div>
 
-        {false ? (
+        {!showParcelDetails ? (
           <Card className="min-w-full">
             <CardHeader className="text-center font-extrabold text-4xl">
               Welcome to Klaro Parcel Tracking System
@@ -170,18 +255,17 @@ export default async function Home() {
                   className="w-full"
                   disabled
                   defaultValue={
-                    // details.currentStatus === "Order Placed"
-                    //   ? "option-order"
-                    //   : details.currentStatus === "Arrived at Sort Center"
-                    //   ? "option-center"
-                    //   : details.currentStatus === "In Transit"
-                    //   ? "option-intransit"
-                    //   : details.currentStatus === "Arrived at the Logistics Hub"
-                    //   ? "option-hub"
-                    //   : details.currentStatus === "Delivered"
-                    //   ?
-                    "option-delivered"
-                    // : ""
+                    details.currentStatus === "Order Placed"
+                      ? "option-order"
+                      : details.currentStatus === "Arrived at Sort Center"
+                      ? "option-center"
+                      : details.currentStatus === "In Transit"
+                      ? "option-intransit"
+                      : details.currentStatus === "Arrived at the Logistics Hub"
+                      ? "option-hub"
+                      : details.currentStatus === "Delivered"
+                      ? "option-delivered"
+                      : ""
                   }
                 >
                   <div className="flex items-center space-x-2">
@@ -191,10 +275,9 @@ export default async function Home() {
                         id="option-delivered"
                         selected="option-delivered"
                         className={`w-16 h-16 disabled:opacity-100 ${
-                          // details.currentStatus === "Delivered"
-                          //   ?
-                          "bg-green-500 border-green-500 text-secondary"
-                          // : "border-border"
+                          details.currentStatus === "Delivered"
+                            ? "bg-green-500 border-green-500 text-secondary"
+                            : "border-border"
                         }`}
                       />
                       <Label htmlFor="option-delivered">
@@ -202,8 +285,9 @@ export default async function Home() {
                           <div className="flex justify-start items-center gap-4">
                             <h1 className="font-bold text-base">Delivered</h1>
                             <p className="text-sm text-[#808080]">
-                              4/20/2024
-                              {/* {details.deliveryDate.toLocaleDateString()} */}
+                              {details.deliveryDate
+                                ? details.deliveryDate.toLocaleDateString()
+                                : ""}
                             </p>
                           </div>
                           <p className="text-[#ffffffdb]">
@@ -212,16 +296,18 @@ export default async function Home() {
                         </div>
                       </Label>
                     </div>
+                    {details.currentStatus === "Delivered" && (
+                      <Button>Confirm Delivery</Button>
+                    )}
                   </div>
 
                   <div className="flex-grow">
                     <Separator
                       orientation="vertical"
                       className={`h-6 w-[5px] ml-[30px] -my-2 ${
-                        // details.currentStatus === "Delivered"
-                        //   ?
-                        "bg-green-500"
-                        // : "border-border"
+                        details.currentStatus === "Delivered"
+                          ? "bg-green-500"
+                          : "border-border"
                       }`}
                     />
                   </div>
@@ -233,11 +319,11 @@ export default async function Home() {
                         id="option-hub"
                         selected="option-hub"
                         className={`w-16 h-16 disabled:opacity-100 ${
-                          // details.currentStatus === "Arrived at the Logistics Hub" ||
-                          // details.currentStatus === "Delivered"
-                          //   ?
-                          "bg-green-500 border-green-500 text-secondary"
-                          // : "border-border"
+                          details.currentStatus ===
+                            "Arrived at the Logistics Hub" ||
+                          details.currentStatus === "Delivered"
+                            ? "bg-green-500 border-green-500 text-secondary"
+                            : "border-border"
                         }`}
                       />
                       <Label htmlFor="option-hub">
@@ -247,15 +333,13 @@ export default async function Home() {
                               Arrived at the Logistics Hub
                             </h1>
                             <p className="text-sm text-[#808080]">
-                              4/13/2024
-                              {/* {details?.hubDate !== null
-                  ? details?.hubDate?.toLocaleDateString()
-                  : ""} */}
+                              {details?.hubDate !== null
+                                ? details?.hubDate?.toLocaleDateString()
+                                : ""}
                             </p>
                           </div>
                           <p className="text-[#ffffffdb]">
-                            Logistics Facility: Cebu
-                            {/* {details.hubLocation} */}
+                            Logistics Facility: {details.hubLocation}
                           </p>
                         </div>
                       </Label>
@@ -266,11 +350,11 @@ export default async function Home() {
                     <Separator
                       orientation="vertical"
                       className={`h-6 w-[5px] ml-[30px] -my-2 ${
-                        // details.currentStatus === "Arrived at the Logistics Hub" ||
-                        // details.currentStatus === "Delivered"
-                        //   ?
-                        "bg-green-500"
-                        // : "border-border"
+                        details.currentStatus ===
+                          "Arrived at the Logistics Hub" ||
+                        details.currentStatus === "Delivered"
+                          ? "bg-green-500"
+                          : "border-border"
                       }`}
                     />
                   </div>
@@ -282,12 +366,12 @@ export default async function Home() {
                         id="option-intransit"
                         selected="option-intransit"
                         className={`w-16 h-16 disabled:opacity-100 ${
-                          // details.currentStatus === "In Transit" ||
-                          // details.currentStatus === "Arrived at the Logistics Hub" ||
-                          // details.currentStatus === "Delivered"
-                          //   ?
-                          "bg-green-500 border-green-500 text-secondary"
-                          // : "border-border"
+                          details.currentStatus === "In Transit" ||
+                          details.currentStatus ===
+                            "Arrived at the Logistics Hub" ||
+                          details.currentStatus === "Delivered"
+                            ? "bg-green-500 border-green-500 text-secondary"
+                            : "border-border"
                         }`}
                       />
                       <Label htmlFor="option-intransit">
@@ -298,9 +382,9 @@ export default async function Home() {
                             </h1>
                             <p className="text-sm text-[#808080]">
                               4/13/2024
-                              {/* {details?.inTransitDate !== null
-                  ? details?.inTransitDate?.toLocaleDateString()
-                  : ""} */}
+                              {details?.inTransitDate !== null
+                                ? details?.inTransitDate?.toLocaleDateString()
+                                : ""}
                             </p>
                           </div>
                           <p className="text-[#ffffffdb]">
@@ -315,12 +399,12 @@ export default async function Home() {
                     <Separator
                       orientation="vertical"
                       className={`h-6 w-[5px] ml-[30px] -my-2 ${
-                        // details.currentStatus === "In Transit" ||
-                        // details.currentStatus === "Arrived at the Logistics Hub" ||
-                        // details.currentStatus === "Delivered"
-                        //   ?
-                        "bg-green-500"
-                        // : "border-border"
+                        details.currentStatus === "In Transit" ||
+                        details.currentStatus ===
+                          "Arrived at the Logistics Hub" ||
+                        details.currentStatus === "Delivered"
+                          ? "bg-green-500"
+                          : "border-border"
                       }`}
                     />
                   </div>
@@ -332,13 +416,13 @@ export default async function Home() {
                         id="option-center"
                         selected="option-center"
                         className={`w-16 h-16 disabled:opacity-100 ${
-                          // details.currentStatus === "Arrived at Sort Center" ||
-                          // details.currentStatus === "In Transit" ||
-                          // details.currentStatus === "Arrived at the Logistics Hub" ||
-                          // details.currentStatus === "Delivered"
-                          // ?
-                          "bg-green-500 border-green-500 text-secondary"
-                          // : "border-border"
+                          details.currentStatus === "Arrived at Sort Center" ||
+                          details.currentStatus === "In Transit" ||
+                          details.currentStatus ===
+                            "Arrived at the Logistics Hub" ||
+                          details.currentStatus === "Delivered"
+                            ? "bg-green-500 border-green-500 text-secondary"
+                            : "border-border"
                         }`}
                       />
                       <Label htmlFor="option-center">
@@ -348,16 +432,13 @@ export default async function Home() {
                               Arrived at Sort Center
                             </h1>
                             <p className="text-sm text-[#808080]">
-                              4/13/2024
-                              {/* {details?.centerDate !== null
-                        ? details?.centerDate?.toLocaleDateString() 
-                      :
-                        ""} */}
+                              {details?.centerDate !== null
+                                ? details?.centerDate?.toLocaleDateString()
+                                : ""}
                             </p>
                           </div>
                           <p className="text-[#ffffffdb]">
-                            Logistics Facility: Poblacion, Asturias, Cebu
-                            {/* {details.centerLocation} */}
+                            Logistics Facility: {details.centerLocation}
                           </p>
                         </div>
                       </Label>
@@ -368,13 +449,13 @@ export default async function Home() {
                     <Separator
                       orientation="vertical"
                       className={`h-6 w-[5px] ml-[30px] -my-2 ${
-                        // details.currentStatus === "Arrived at Sort Center" ||
-                        // details.currentStatus === "In Transit" ||
-                        // details.currentStatus === "Arrived at the Logistics Hub" ||
-                        // details.currentStatus === "Delivered"
-                        // ?
-                        "bg-green-500"
-                        // : "border-border"
+                        details.currentStatus === "Arrived at Sort Center" ||
+                        details.currentStatus === "In Transit" ||
+                        details.currentStatus ===
+                          "Arrived at the Logistics Hub" ||
+                        details.currentStatus === "Delivered"
+                          ? "bg-green-500"
+                          : "border-border"
                       }`}
                     />
                   </div>
@@ -386,14 +467,14 @@ export default async function Home() {
                         id="option-order"
                         selected="option-order"
                         className={`w-16 h-16 disabled:opacity-100 ${
-                          // details.currentStatus === "Order Placed" ||
-                          // details.currentStatus === "Arrived at Sort Center" ||
-                          // details.currentStatus === "In Transit" ||
-                          // details.currentStatus === "Arrived at the Logistics Hub" ||
-                          // details.currentStatus === "Delivered"
-                          // ?
-                          "bg-green-500 border-green-500 text-secondary"
-                          // : "border-border"
+                          details.currentStatus === "Order Placed" ||
+                          details.currentStatus === "Arrived at Sort Center" ||
+                          details.currentStatus === "In Transit" ||
+                          details.currentStatus ===
+                            "Arrived at the Logistics Hub" ||
+                          details.currentStatus === "Delivered"
+                            ? "bg-green-500 border-green-500 text-secondary"
+                            : "border-border"
                         }`}
                       />
                       <div className="flex items-center gap-10">
@@ -404,7 +485,9 @@ export default async function Home() {
                                 Order Placed
                               </h1>
                               <p className="text-sm text-[#808080]">
-                                {/* {details.orderPlacedDate.toLocaleDateString()} */}
+                                {details.orderPlacedDate
+                                  ? details.orderPlacedDate.toLocaleDateString()
+                                  : ""}
                               </p>
                             </div>
                             <p className="text-[#ffffffdb]">
@@ -412,7 +495,6 @@ export default async function Home() {
                             </p>
                           </div>
                         </Label>
-                        <Button>Confirm Delivery</Button>
                       </div>
                     </div>
                   </div>
@@ -423,19 +505,19 @@ export default async function Home() {
                 <TableBody>
                   <TableRow>
                     <TableHead>Reference Tracking Number</TableHead>
-                    <TableCell>12345678901</TableCell>
+                    <TableCell>{parcelData?.rtn}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableHead>Origin</TableHead>
-                    <TableCell>Cebu, Philippines</TableCell>
+                    <TableCell>{orderData?.senderAddress}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableHead>Destination</TableHead>
-                    <TableCell>Cebu, Philippines</TableCell>
+                    <TableCell>{orderData?.receiverAddress}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableHead>Delivery Service</TableHead>
-                    <TableCell>SKA Express</TableCell>
+                    <TableCell>{deliveryServiceData?.name}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableHead>Tracking Link</TableHead>
