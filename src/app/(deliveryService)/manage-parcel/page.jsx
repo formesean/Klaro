@@ -1,12 +1,11 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
@@ -21,7 +20,7 @@ import {
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Separator } from "../../../components/ui/separator";
-import { ArrowUpDown, Loader, MoreHorizontal, Radio } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -38,239 +37,422 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Label } from "@radix-ui/react-dropdown-menu";
-import { DeliveryStatus } from "../../dashboard/@sender/components/DeliveryStatus";
-import {
-  RadioGroup,
-  RadioGroupItemWithIcons,
-} from "../../../components/ui/radio-group";
+import { useParcels } from "../../api/useParcels";
+import { useOrders } from "../../api/useOrders";
+import { useDeliveryService } from "../../api/useDeliveryService";
+import Loader from "../components/Loader";
+import Link from "next/link";
+const DeliveryStatus = dynamic(
+  () =>
+    import("../components/DeliveryStatus").then((mod) => mod.DeliveryStatus),
+  {
+    loading: () => (
+      <Loader className="items-center justify-center" big={true} />
+    ),
+  }
+);
 
-export default function Dashboard() {
+const columns = [
+  {
+    accessorKey: "rtn",
+    header: () => <div className="text-left">RTN</div>,
+    cell: ({ row }) => {
+      const rtn = row.getValue("rtn");
+
+      return <div className="text-left font-medium">{rtn}</div>;
+    },
+  },
+  {
+    accessorKey: "receiverName",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={column.getToggleSortingHandler()}
+          title={
+            column.getCanSort()
+              ? column.getNextSortingOrder() === "asc"
+                ? "Sort ascending"
+                : column.getNextSortingOrder() === "desc"
+                ? "Sort descending"
+                : "Clear sort"
+              : undefined
+          }
+        >
+          Recipient
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="pl-4">{row.getValue("receiverName")}</div>
+    ),
+  },
+  {
+    accessorKey: "currentStatus",
+    header: "Status",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("currentStatus")}</div>
+    ),
+  },
+  {
+    accessorKey: "deliveryDate",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={column.getToggleSortingHandler()}
+          title={
+            column.getCanSort()
+              ? column.getNextSortingOrder() === "asc"
+                ? "Sort ascending"
+                : column.getNextSortingOrder() === "desc"
+                ? "Sort descending"
+                : "Clear sort"
+              : undefined
+          }
+        >
+          Delivery Date
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const deliveryDateObj = row.getValue("deliveryDate");
+      if (!deliveryDateObj || typeof deliveryDateObj.seconds !== "number") {
+        return <div className="pl-4">Invalid Date</div>;
+      }
+      const formattedDeliveryDate = new Date(deliveryDateObj.seconds * 1000);
+      const formattedDeliveryDateString =
+        formattedDeliveryDate.toLocaleDateString();
+
+      return <div className="pl-4">{formattedDeliveryDateString}</div>;
+    },
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const docRef = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(docRef.rtn)}
+            >
+              Copy RTN
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Link href={`/manage-parcel/${docRef.rtn}`}>Parcel Details</Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
+
+export default function ManageParcel() {
   const { data: session } = useSession();
+  const { getDeliveryServiceDocRef } = useDeliveryService();
+  const { fetchDeliveryServiceParcels, fetchParcel, fetchParcelByRTN } =
+    useParcels();
+  const { fetchOrder } = useOrders();
+  const [isLoading, setIsLoading] = useState(false);
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [pageView, setPageView] = useState(0);
+  const [parcels, setParcels] = useState([]);
+  const [parcelData, setParcelData] = useState();
+  const [copied, setCopied] = useState(false);
+  const [orderData, setOrderData] = useState();
+  const [details, setDetails] = useState({
+    currentStatus: "",
+    hubLocation: "",
+    centerLocation: "",
+    orderPlacedDate: null,
+    centerDate: null,
+    inTransitDate: null,
+    hubDate: null,
+    deliveryDate: null,
+  });
+  const [showParcelDetails, setShowParcelDetails] = useState(false);
 
-  if (!session && session?.user.role !== "deliveryService") {
+  const table = useReactTable({
+    data: parcels,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      pagination: {
+        pageIndex: pageView,
+        pageSize: 10,
+      },
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const parcelsData = [];
+
+        const parcelsRef = await fetchDeliveryServiceParcels(
+          await getDeliveryServiceDocRef(session?.user.email)
+        );
+
+        for (const parcelRef of parcelsRef) {
+          const parcelSnapshot = await fetchParcel(parcelRef);
+          parcelsData.push(parcelSnapshot);
+        }
+
+        const orderPromises = parcelsData.map(async (parcel) => {
+          const orderRef = parcel.orderRef;
+          const order = await fetchOrder(orderRef);
+          return { ...parcel, receiverName: order.receiverName };
+        });
+
+        const updatedParcels = await Promise.all(orderPromises);
+        setParcels(updatedParcels);
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error", error);
+      }
+    };
+
+    setIsLoading(true);
+    fetchData();
+  }, []);
+
+  if (!session && session?.user.role !== "sender") {
     return redirect("/");
   }
 
+  const copyText = () => {
+    const textToCopy = document.getElementById("textToCopy").innerText;
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => console.error("Failed to copy:", err));
+  };
+
+  const handleTrackRTN = async () => {
+    setShowParcelDetails(false);
+    const rtnInput = document.getElementById("rtn-input").value;
+
+    if (rtnInput) {
+      const parcelRef = await fetchParcelByRTN(rtnInput);
+      const parcelData = await fetchParcel(parcelRef);
+      const orderData = await fetchOrder(parcelData.orderRef);
+      setParcelData(parcelData);
+      setOrderData(orderData);
+
+      const hubLocation = orderData.receiverAddress
+        .split(",")
+        .slice(1)
+        .join(",")
+        .trim();
+      const centerLocation = orderData.senderAddress
+        .split(",")
+        .slice(1)
+        .join(",")
+        .trim();
+
+      const orderPlacedDate = new Date(orderData.dateIssued.seconds * 1000);
+      const centerDate =
+        parcelData.centerDate === undefined
+          ? null
+          : new Date(parcelData.centerDate?.seconds * 1000);
+      const inTransitDate =
+        parcelData.inTransitDate === undefined
+          ? null
+          : new Date(parcelData.inTransitDate?.seconds * 1000);
+      const hubDate =
+        parcelData.hubDate === undefined
+          ? null
+          : new Date(parcelData.hubDate?.seconds * 1000);
+      const deliveryDate = new Date(parcelData.deliveryDate.seconds * 1000);
+
+      setDetails({
+        currentStatus: parcelData.currentStatus,
+        hubLocation: hubLocation,
+        centerLocation: centerLocation,
+        orderPlacedDate: orderPlacedDate,
+        centerDate: centerDate,
+        inTransitDate: inTransitDate,
+        hubDate: hubDate,
+        deliveryDate: deliveryDate,
+      });
+
+      setShowParcelDetails(true);
+      document.getElementById("rtn-input").value = "";
+    }
+  };
+
+  const handleHideDetail = () => {
+    setShowParcelDetails(false);
+  };
+
   return (
-    <div class="flex max-sm:px-4 max-sm:py-4 py-40 pr-20 pl-20">
-      <Card className="">
-        <CardHeader className="">
-          <CardTitle> Parcel Tracking Number </CardTitle>
-          <CardDescription> RTN: #123456789 </CardDescription>
-          <h3>Order Status: In Transit</h3>
-        </CardHeader>
-        <Separator className="my-3" />
-        <CardContent className="p-6">
-          <div className="rounded-lg border grid grid-cols-4 grid-rows-2">
-            <Card className="col-span-1 rounded-tl-lg max-xl:col-span-4">
+    <>
+      <div className="py-7 px-10 max-sm:px-4 max-sm:py-4">
+        <div className="max-w-screen">
+          <div className="grid grid-rows-5 grid-cols-5 max-xl:grid-rows-8 max-xl:grid-cols-1 gap-4">
+            <Card className="row-span-5 col-span-2 max-xl:row-span-4 max-xl:col-span-1">
               <CardHeader>
-                <CardTitle>Delivery Address</CardTitle>
+                <CardTitle>Track a Package</CardTitle>
               </CardHeader>
-              <CardContent>
-                <h2>Lysander S. Uy</h2>
-                <br />
-                <h2>lysander.uy@gmail.com</h2>
-                <br />
-                <h2>
-                  Block 5 Lot 6 Annex 1, Villa del Rio, Babag 2, Lapu-Lapu City,
-                  Cebu, Philippines
-                </h2>
-              </CardContent>
-            </Card>
-            <Card className="col-span-3 rounded-tr-lg max-xl:col-span-4">
-              <CardContent>
-                <div className="my-10 grid grid-cols-5 grid-row-2">
-                  <div className="max-xl:flex-col flex col-span-5 pt-5">
-                    <RadioGroup className="md:flex gap-5 m-10 flex-auto justify-evenly">
-                      <div className="">
-                        <div className="">
-                          <RadioGroupItemWithIcons
-                            value="option-order"
-                            id="option-order"
-                            selected="option-order"
-                            className="h-16 w-16 my-2"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="option-order"
-                            className="justify-self-center"
-                          >
-                            <div className="flex flex-col justify-center pl-2">
-                              <p className="text-sm text-[#808080]">
-                                mm/dd/yyyy
-                              </p>
-                              <h1 className="font-bold text-base border-slate-600">
-                                Order Placed
-                              </h1>
-                              <p className="text-[#ffffffdb] text-sm">
-                                Ready for pick up
-                              </p>
-                            </div>
-                          </Label>
-                        </div>
-                      </div>
-                      <div className="">
-                        <div className="">
-                          <RadioGroupItemWithIcons
-                            value="option-center"
-                            id="option-center"
-                            selected="option-center"
-                            className="h-16 w-16 my-2"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="option-center"
-                            className="justify-self-center"
-                          >
-                            <div className="flex flex-col justify-center pl-2">
-                              <p className="text-sm text-[#808080]">
-                                mm/dd/yyyy
-                              </p>
-                              <h1 className="font-bold text-base border-slate-600">
-                                Arrived at Sort Center
-                              </h1>
-                              <p className="text-[#ffffffdb] text-sm">
-                                Logistics Facility:
-                              </p>
-                            </div>
-                          </Label>
-                        </div>
-                      </div>
-                      <div className="">
-                        <div className="">
-                          <RadioGroupItemWithIcons
-                            value="option-intransit"
-                            id="option-intransit"
-                            selected="option-intransit"
-                            className="h-16 w-16 my-2"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="option-intransit"
-                            className="justify-self-center"
-                          >
-                            <div className="flex flex-col justify-center pl-2">
-                              <p className="text-sm text-[#808080]">
-                                mm/dd/yyyy
-                              </p>
-                              <h1 className="font-bold text-base border-slate-600">
-                                In Transit
-                              </h1>
-                              <p className="text-[#ffffffdb] text-sm">
-                                On its way to the next logistics facility
-                              </p>
-                            </div>
-                          </Label>
-                        </div>
-                      </div>
-                      <div className="">
-                        <div className="">
-                          <RadioGroupItemWithIcons
-                            value="option-hub"
-                            id="option-hub"
-                            selected="option-hub"
-                            className="h-16 w-16 my-2"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="option-hub"
-                            className="justify-self-center"
-                          >
-                            <div className="flex flex-col justify-center pl-2">
-                              <p className="text-sm text-[#808080]">
-                                mm/dd/yyyy
-                              </p>
-                              <h1 className="font-bold text-base border-slate-600">
-                                Arrived at the Logistics Hub
-                              </h1>
-                              <p className="text-[#ffffffdb] text-sm">
-                                Logistics Facility:
-                              </p>
-                            </div>
-                          </Label>
-                        </div>
-                      </div>
-                      <div className="">
-                        <div className="">
-                          <RadioGroupItemWithIcons
-                            value="option-delivered"
-                            id="option-delivered"
-                            selected="option-delivered"
-                            className="h-16 w-16 my-2"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="option-delivered"
-                            className="justify-self-center"
-                          >
-                            <div className="flex flex-col justify-center pl-2">
-                              <p className="text-sm text-[#808080]">
-                                mm/dd/yyyy
-                              </p>
-                              <h1 className="font-bold text-base border-slate-600">
-                                Delivered
-                              </h1>
-                              <p className="text-[#ffffffdb] text-sm">
-                                Parcel has been delivered
-                              </p>
-                            </div>
-                          </Label>
-                        </div>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  <div className=" row-span-5 col-start-5 flex justify-end pr-2">
-                    <Button className="height-30px">Confirm</Button>
-                  </div>
+              <CardContent className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
+                  <Input type="number" id="rtn-input" placeholder="RTN" />
+                  <Button onClick={handleTrackRTN}>Track</Button>
                 </div>
+
+                <Separator className="my-3" />
+
+                {showParcelDetails && (
+                  <DeliveryStatus
+                    parcelData={parcelData}
+                    copied={copied}
+                    copyText={copyText}
+                    orderData={orderData}
+                    details={details}
+                    handleHideDetail={handleHideDetail}
+                  />
+                )}
               </CardContent>
             </Card>
-            <Card className="col-span-4 rounded-b-md">
+
+            <Card className="row-span-5 col-span-3 max-xl:row-span-4 max-xl:col-span-1">
               <CardHeader>
-                <CardTitle>Item Ordered</CardTitle>
+                <CardTitle>Order History</CardTitle>
+                <CardDescription>1234 Orders</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex justify-around max-xl:flex-col ">
-                  <div className="">
-                    <br />
-                    <h3 className="text-base border-slate-600">Sender:</h3>
-                    <h3 className="text-base border-slate-600">
-                      Sender Location:
-                    </h3>
-                    <br />
-                    <h1 className="text-[#ffffffdb] text-sm">
-                      Knee Cap Replacements
-                    </h1>
-                    <h3 className="text-base border-slate-600">
-                      Item Quantity:
-                    </h3>
+              <CardContent className="-mt-4">
+                <div className="w-full">
+                  <div className="flex items-center py-4">
+                    <Input
+                      placeholder="Search recipient"
+                      value={
+                        table.getColumn("receiverName")?.getFilterValue() ?? ""
+                      }
+                      onChange={(event) =>
+                        table
+                          .getColumn("receiverName")
+                          ?.setFilterValue(event.target.value)
+                      }
+                      className="max-w-sm"
+                    />
                   </div>
-                  <div className="">
-                    <Label>
-                      <br />
-                      <h3 className="font-bold text-base border-slate-600">
-                        Merchandise Subtotal:
-                      </h3>
-                      <h3 className="text-base border-slate-600">
-                        Shipping Total:
-                      </h3>
-                      <h3 className="text-base border-slate-600">
-                        Total Payment:
-                      </h3>
-                    </Label>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                          <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => {
+                              return (
+                                <TableHead key={header.id}>
+                                  {header.isPlaceholder
+                                    ? null
+                                    : flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext()
+                                      )}
+                                </TableHead>
+                              );
+                            })}
+                          </TableRow>
+                        ))}
+                      </TableHeader>
+                      <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                          table.getRowModel().rows.map((row) => (
+                            <TableRow
+                              key={row.id}
+                              data-state={row.getIsSelected() && "selected"}
+                            >
+                              {row.getVisibleCells().map((cell) => (
+                                <TableCell key={cell.id}>
+                                  {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
+                                  )}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell
+                              colSpan={columns.length}
+                              className="h-24 text-center"
+                            >
+                              {!isLoading ? (
+                                "No results."
+                              ) : (
+                                <Loader className="items-center justify-center" />
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex items-center justify-end space-x-2 py-4">
+                    <div className="space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          table.previousPage();
+                          setPageView(pageView - 1);
+                        }}
+                        disabled={!table.getCanPreviousPage()}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          table.nextPage();
+                          setPageView(pageView + 1);
+                        }}
+                        disabled={!table.getCanNextPage()}
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }

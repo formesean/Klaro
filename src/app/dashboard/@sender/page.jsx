@@ -166,7 +166,7 @@ export default function Dashboard() {
   const { data: session } = useSession();
   const { fetchSenderParcels, fetchParcel, fetchParcelByRTN } = useParcels();
   const { fetchOrder } = useOrders();
-  const { getDocRef } = useSender();
+  const { getSenderDocRef } = useSender();
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [sorting, setSorting] = useState([]);
@@ -185,6 +185,10 @@ export default function Dashboard() {
     hubLocation: "",
     centerLocation: "",
     orderPlacedDate: null,
+    centerDate: null,
+    inTransitDate: null,
+    hubDate: null,
+    deliveryDate: null,
   });
   const [showParcelDetails, setShowParcelDetails] = useState(false);
 
@@ -217,7 +221,7 @@ export default function Dashboard() {
         const parcelsData = [];
 
         const parcelsRef = await fetchSenderParcels(
-          await getDocRef(session?.user.email)
+          await getSenderDocRef(session?.user.email)
         );
 
         for (const parcelRef of parcelsRef) {
@@ -292,13 +296,31 @@ export default function Dashboard() {
         .slice(1)
         .join(",")
         .trim();
+
       const orderPlacedDate = new Date(orderData.dateIssued.seconds * 1000);
+      const centerDate =
+        parcelData.centerDate === undefined
+          ? null
+          : new Date(parcelData.centerDate?.seconds * 1000);
+      const inTransitDate =
+        parcelData.inTransitDate === undefined
+          ? null
+          : new Date(parcelData.inTransitDate?.seconds * 1000);
+      const hubDate =
+        parcelData.hubDate === undefined
+          ? null
+          : new Date(parcelData.hubDate?.seconds * 1000);
+      const deliveryDate = new Date(parcelData.deliveryDate.seconds * 1000);
 
       setDetails({
         currentStatus: parcelData.currentStatus,
         hubLocation: hubLocation,
         centerLocation: centerLocation,
         orderPlacedDate: orderPlacedDate,
+        centerDate: centerDate,
+        inTransitDate: inTransitDate,
+        hubDate: hubDate,
+        deliveryDate: deliveryDate,
       });
 
       setShowParcelDetails(true);

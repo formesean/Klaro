@@ -1,9 +1,9 @@
 import {
   RadioGroup,
   RadioGroupItemWithIcons,
-} from "../../../../components/ui/radio-group";
-import { Label } from "../../../../components/ui/label";
-import { Button } from "../../../../components/ui/button";
+} from "../../../components/ui/radio-group";
+import { Label } from "../../../components/ui/label";
+import { Button } from "../../../components/ui/button";
 import { Copy, Check } from "lucide-react";
 
 export function DeliveryStatus({
