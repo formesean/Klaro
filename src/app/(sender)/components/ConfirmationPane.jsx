@@ -34,6 +34,7 @@ import { useDeliveryService } from "../../api/useDeliveryService";
 import { useParcels } from "../../api/useParcels";
 import { Timestamp } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
+import { useMapBox } from "../../api/useMapBox";
 
 export function ConfirmationPane({
   formData,
@@ -43,6 +44,8 @@ export function ConfirmationPane({
   sessionEmail,
   clearData,
   router,
+  senderAddress,
+  recipientAddress,
 }) {
   const { getSenderDocRef, fetchSender } = useSender();
   const { createOrder } = useOrders();
@@ -50,15 +53,38 @@ export function ConfirmationPane({
   const { createParcel, updateSenderParcels, updateDeliveryServiceParcels } =
     useParcels();
   const { getDeliveryServiceDocRef } = useDeliveryService();
+  const { fetchGeocode, fetchDistance } = useMapBox();
   const { toast } = useToast();
   const [recipientData, setRecipientData] = useState(formData);
   const [itemsData, setItemsData] = useState(item);
   const [showToast, setShowToast] = useState(false);
+  const [shippingFee, setShippingFee] = useState(0);
 
-  const handleProcessOrder = () => {
+  const handleProcessOrder = async () => {
+    const coordinateOne = await fetchGeocode(senderAddress, "first");
+    const coordinateTwo = await fetchGeocode(recipientAddress, "second");
+    const distance = await fetchDistance(coordinateOne, coordinateTwo);
+
+    const shippingFee = calculateShippingFee(distance);
+    setShippingFee(shippingFee);
+
     setRecipientData(formData);
     setItemsData(item);
     setShowToast(true);
+  };
+
+  const calculateShippingFee = (distance) => {
+    const baseFee = 70;
+    const excessKm = 200;
+    const perKmFee = 5;
+
+    if (distance <= 250) {
+      return baseFee;
+    } else {
+      const excessDistance = distance - 250;
+      const excessFee = (excessDistance / excessKm) * perKmFee;
+      return Math.ceil(baseFee + excessFee);
+    }
   };
 
   const merchandiseSubtotal = itemsData
@@ -67,7 +93,7 @@ export function ConfirmationPane({
         0
       )
     : 0;
-  const shippingTotal = 50;
+  const shippingTotal = shippingFee;
   const totalPayment = merchandiseSubtotal + shippingTotal;
 
   const handleOrder = async () => {
@@ -116,10 +142,8 @@ export function ConfirmationPane({
       deliveryDate: deliveryDate,
     };
     const parcelRef = await createParcel(parcelData);
-
     await updateSenderParcels(senderRef, parcelRef);
     await updateDeliveryServiceParcels(deliveryServiceRef, parcelRef);
-
     const emailParams = {
       subject: `Your order ${rtn} has been placed`,
       message: `Hello ${recipientData.receiverName}, \n Your order ${rtn} has been placed`,
@@ -128,14 +152,12 @@ export function ConfirmationPane({
       totalAmount: totalPayment,
       to_email: recipientData.receiverEmail,
     };
-
     emailjs.send(
       process.env.NEXT_PUBLIC_SERVICE_ID,
       process.env.NEXT_PUBLIC_TEMPLATE_ID,
       emailParams,
       process.env.NEXT_PUBLIC_EMAILJS
     );
-
     await clearData();
     router.replace("/dashboard");
   };
@@ -170,9 +192,7 @@ export function ConfirmationPane({
                       {recipientData && (
                         <p>
                           {recipientData.receiverName} |{" "}
-                          {recipientData.receiverEmail} |{" "}
-                          {recipientData.receiverAddress1},{" "}
-                          {recipientData.receiverAddress2}
+                          {recipientData.receiverEmail} | {recipientAddress}
                         </p>
                       )}
                     </div>
