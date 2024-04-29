@@ -445,7 +445,6 @@ export default function Home() {
                                 In Transit
                               </h1>
                               <p className="text-sm text-[#808080]">
-                                4/13/2024
                                 {details?.inTransitDate !== null
                                   ? details?.inTransitDate?.toLocaleDateString()
                                   : ""}
