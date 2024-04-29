@@ -11,7 +11,6 @@ export function DeliveryStatus({
   parcelData,
   copied,
   copyText,
-  orderData,
   details,
   handleHideDetail,
 }) {
@@ -20,13 +19,10 @@ export function DeliveryStatus({
       <div className="flex justify-between">
         <div>
           <p className="font-bold text-lg">Delivery Status</p>
-          <p className="font-bold font text-sm text-[#808080]">
-            {orderData.receiverName}
-          </p>
           <div className="flex gap-1">
             <p
               id="textToCopy"
-              className="font-bold font text-sm text-[#808080]"
+              className="font-bold font text-sm text-muted-foreground"
             >
               {parcelData.rtn}
             </p>
@@ -43,6 +39,13 @@ export function DeliveryStatus({
               )}
             </button>
           </div>
+          <p className="font-bold font text-base text-muted-foreground">
+            {details.currentStatus === "Delivered" && details.received
+              ? "Received: Confirmed Delivery"
+              : details.currentStatus === "Delivered" && !details.received
+              ? "Waiting for Recipient Confirmation"
+              : ""}
+          </p>
         </div>
         <div>
           <Button
@@ -87,7 +90,7 @@ export function DeliveryStatus({
               <div className="flex flex-col justify-center pl-2">
                 <div className="flex justify-start items-center gap-4">
                   <h1 className="font-bold text-base">Delivered</h1>
-                  <p className="text-sm text-[#808080]">
+                  <p className="text-sm text-muted-foreground">
                     {details.deliveryDate.toLocaleDateString()}
                   </p>
                 </div>
@@ -127,7 +130,7 @@ export function DeliveryStatus({
                   <h1 className="font-bold text-base max-md:leading-4">
                     Arrived at the Logistics Hub
                   </h1>
-                  <p className="text-sm text-[#808080]">
+                  <p className="text-sm text-muted-foreground">
                     {details?.hubDate !== null
                       ? details?.hubDate?.toLocaleDateString()
                       : ""}
@@ -173,7 +176,7 @@ export function DeliveryStatus({
                   <h1 className="font-bold text-base border-slate-600">
                     In Transit
                   </h1>
-                  <p className="text-sm text-[#808080]">
+                  <p className="text-sm text-muted-foreground">
                     {details?.inTransitDate !== null
                       ? details?.inTransitDate?.toLocaleDateString()
                       : ""}
@@ -221,7 +224,7 @@ export function DeliveryStatus({
                   <h1 className="font-bold text-base max-md:leading-4">
                     Arrived at Sort Center
                   </h1>
-                  <p className="text-sm text-[#808080]">
+                  <p className="text-sm text-muted-foreground">
                     {details?.centerDate !== null
                       ? details?.centerDate?.toLocaleDateString()
                       : ""}
@@ -269,7 +272,7 @@ export function DeliveryStatus({
               <div className="flex flex-col justify-center pl-2">
                 <div className="flex justify-center items-center gap-4">
                   <h1 className="font-bold text-base">Order Placed</h1>
-                  <p className="text-sm text-[#808080]">
+                  <p className="text-sm text-muted-foreground">
                     {details.orderPlacedDate.toLocaleDateString()}
                   </p>
                 </div>

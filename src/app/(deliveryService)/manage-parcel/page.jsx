@@ -185,6 +185,7 @@ export default function ManageParcel() {
     inTransitDate: null,
     hubDate: null,
     deliveryDate: null,
+    received: false,
   });
   const [showParcelDetails, setShowParcelDetails] = useState(false);
 
@@ -305,6 +306,7 @@ export default function ManageParcel() {
         inTransitDate: inTransitDate,
         hubDate: hubDate,
         deliveryDate: deliveryDate,
+        received: parcelData.received,
       });
 
       setShowParcelDetails(true);
@@ -348,7 +350,6 @@ export default function ManageParcel() {
                     parcelData={parcelData}
                     copied={copied}
                     copyText={copyText}
-                    orderData={orderData}
                     details={details}
                     handleHideDetail={handleHideDetail}
                   />
@@ -365,13 +366,11 @@ export default function ManageParcel() {
                 <div className="w-full">
                   <div className="flex items-center py-4">
                     <Input
-                      placeholder="Search recipient"
-                      value={
-                        table.getColumn("receiverName")?.getFilterValue() ?? ""
-                      }
+                      placeholder="Search RTN"
+                      value={table.getColumn("rtn")?.getFilterValue() ?? ""}
                       onChange={(event) =>
                         table
-                          .getColumn("receiverName")
+                          .getColumn("rtn")
                           ?.setFilterValue(event.target.value)
                       }
                       className="max-w-sm"

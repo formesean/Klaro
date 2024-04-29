@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -61,6 +62,7 @@ export default function UpdateParcel({ params }) {
     centerDate: null,
     inTransitDate: null,
     hubDate: null,
+    received: false,
   });
   const [status, setStatus] = useState();
   const [merchandiseSubtotal, setMerchandiseSubtotal] = useState(0);
@@ -137,6 +139,7 @@ export default function UpdateParcel({ params }) {
           centerDate: centerDate,
           inTransitDate: inTransitDate,
           hubDate: hubDate,
+          received: parcelData.received,
         });
 
         const deliveryDate = new Date(parcelData.deliveryDate.seconds * 1000);
@@ -159,6 +162,7 @@ export default function UpdateParcel({ params }) {
 
   const handleChange = (status) => {
     setStatus(status);
+
     const timestamp = Timestamp.now();
     const timestampString = new Date(timestamp.seconds * 1000);
 
@@ -177,7 +181,7 @@ export default function UpdateParcel({ params }) {
 
   const handleStatusUpdate = async () => {
     try {
-      const updatedData = { currentStatus: status };
+      const updatedData = { currentStatus: status, received: false };
 
       if (centerDate !== undefined) updatedData.centerDate = centerDate;
       if (inTransitDate !== undefined)
@@ -236,6 +240,15 @@ export default function UpdateParcel({ params }) {
                     <Card className="col-span-2 row-span-2">
                       <CardHeader>
                         <CardTitle>Update Status</CardTitle>
+                        <CardDescription className="text-base">
+                          {details.currentStatus === "Delivered" &&
+                          details.received
+                            ? "Received: Confirmed Delivery"
+                            : details.currentStatus === "Delivered" &&
+                              !details.received
+                            ? "Waiting for Recipient Confirmation"
+                            : ""}
+                        </CardDescription>
                       </CardHeader>
                       <CardContent className="flex flex-col">
                         <RadioGroup
@@ -258,6 +271,7 @@ export default function UpdateParcel({ params }) {
                           <div className="flex items-center space-x-2 -mt-4">
                             <div className="flex items-center">
                               <RadioGroupItemWithIcons
+                                disabled={details.received}
                                 onClick={() => {
                                   handleChange("Delivered");
                                 }}

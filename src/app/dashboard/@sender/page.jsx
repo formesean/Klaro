@@ -63,7 +63,7 @@ export const columns = [
     cell: ({ row }) => {
       const rtn = row.getValue("rtn");
 
-      return <div className="text-left font-medium">{rtn}</div>;
+      return <div className="text-left font-medium">{row.getValue("rtn")}</div>;
     },
   },
   {
@@ -189,6 +189,7 @@ export default function Dashboard() {
     inTransitDate: null,
     hubDate: null,
     deliveryDate: null,
+    received: false,
   });
   const [showParcelDetails, setShowParcelDetails] = useState(false);
 
@@ -321,6 +322,7 @@ export default function Dashboard() {
         inTransitDate: inTransitDate,
         hubDate: hubDate,
         deliveryDate: deliveryDate,
+        received: parcelData.received,
       });
 
       setShowParcelDetails(true);
@@ -364,7 +366,6 @@ export default function Dashboard() {
                     parcelData={parcelData}
                     copied={copied}
                     copyText={copyText}
-                    orderData={orderData}
                     details={details}
                     handleHideDetail={handleHideDetail}
                   />
