@@ -27,11 +27,26 @@ const formSchema = z.object({
   fullName: z.string().min(3, {
     message: "Name must be at least 3 characters.",
   }),
-  address1: z.string().min(3, {
+  address: z.string().min(3, {
     message: "Address must be at least 3 characters.",
   }),
-  address2: z.string().min(3, {
-    message: "Address must be at least 3 characters.",
+  barangay: z.string().min(3, {
+    message: "Barangay must be at least 3 characters.",
+  }),
+  city: z.string().min(3, {
+    message: "City must be at least 3 characters.",
+  }),
+  province: z.string().min(3, {
+    message: "Province must be at least 3 characters.",
+  }),
+  region: z.string().min(3, {
+    message: "Region must be at least 3 characters.",
+  }),
+  zipcode: z.string().min(3, {
+    message: "Zip Code must be at least 3 characters.",
+  }),
+  country: z.string().min(3, {
+    message: "Country must be at least 3 characters.",
   }),
 });
 
@@ -43,8 +58,13 @@ export default function CompleteAccount() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
-      address1: "",
-      address2: "",
+      address: "",
+      barangay: "",
+      city: "",
+      province: "",
+      region: "",
+      zipcode: "",
+      country: "",
     },
   });
 
@@ -70,18 +90,30 @@ export default function CompleteAccount() {
       const userData = {
         email: session?.user.email,
         fullName: data.fullName,
-        address: data.address1 + ", " + data.address2,
+        address:
+          data.address +
+          ", " +
+          data.barangay +
+          ", " +
+          data.city +
+          ", " +
+          data.province +
+          ", " +
+          data.region +
+          ", " +
+          data.zipcode +
+          ", " +
+          data.country,
         parcels: [],
       };
-      
-      await createSender(userData);
 
+      await createSender(userData);
 
       router.replace("/dashboard");
     } catch (error) {
       console.error("Error submitting form:", error);
     }
-  }   
+  }
 
   return (
     <div className="fixed top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4">
@@ -109,12 +141,13 @@ export default function CompleteAccount() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name="address1"
+                  name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
+                      <FormLabel>Full Address</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Street Name, Building, House No."
@@ -125,21 +158,87 @@ export default function CompleteAccount() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="address2"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          placeholder="Barangay, City, Province, Region"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
+                <div className="flex gap-2 w-full">
+                  <FormField
+                    control={form.control}
+                    name="barangay"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Barangay" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="City" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex gap-2 w-full">
+                  <FormField
+                    control={form.control}
+                    name="province"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Province" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="region"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Region" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex gap-2 w-full">
+                  <FormField
+                    control={form.control}
+                    name="zipcode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Zip Code" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Country" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <Button type="submit" className="w-full">
                   Submit
                 </Button>

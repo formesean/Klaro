@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, PlaneLanding, PlaneTakeoff } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -49,6 +49,8 @@ import {
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "../.././../lib/utils";
 import { useDeliveryService } from "../../api/useDeliveryService";
+import { useSender } from "../../api/useSender";
+import InputAddress from "../components/InputAddress";
 
 const FormSchema = z.object({
   receiverName: z.string().min(3, {
@@ -57,19 +59,38 @@ const FormSchema = z.object({
   receiverEmail: z.string().email().min(3, {
     message: "Invalid email address",
   }),
-  receiverAddress1: z.string().min(3, {
+  address: z.string().min(3, {
     message: "Address must be at least 3 characters.",
   }),
-  receiverAddress2: z.string().min(3, {
-    message: "Address must be at least 3 characters.",
+  barangay: z.string().min(3, {
+    message: "Barangay must be at least 3 characters.",
+  }),
+  city: z.string().min(3, {
+    message: "City must be at least 3 characters.",
+  }),
+  province: z.string().min(3, {
+    message: "Province must be at least 3 characters.",
+  }),
+  region: z.string().min(3, {
+    message: "Region must be at least 3 characters.",
+  }),
+  zipcode: z.string().min(3, {
+    message: "Zip Code must be at least 3 characters.",
+  }),
+  country: z.string().min(3, {
+    message: "Country must be at least 3 characters.",
   }),
 });
 
 export default function Forms() {
+  const { getSenderDocRef, fetchSender } = useSender();
   const { fetchDeliveryServices } = useDeliveryService();
 
   const router = useRouter();
   const { data: session } = useSession();
+  const [senderData, setSenderData] = useState();
+  const [openInputAddress, setOpenInputAddress] = useState(false);
+  const [address, setAddress] = useState();
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -86,8 +107,13 @@ export default function Forms() {
     defaultValues: {
       receiverName: "",
       receiverEmail: "",
-      receiverAddress1: "",
-      receiverAddress2: "",
+      address: "",
+      barangay: "",
+      city: "",
+      province: "",
+      region: "",
+      zipcode: "",
+      country: "",
     },
   });
 
@@ -98,20 +124,27 @@ export default function Forms() {
   }, [session, router]);
 
   useEffect(() => {
+    const fetchSenderData = async () => {
+      const docRef = await getSenderDocRef(session?.user.email);
+      const data = await fetchSender(docRef);
+      setSenderData(data);
+    };
+
+    fetchSenderData();
+  }, []);
+
+  useEffect(() => {
     const nameValue = form.watch("receiverName");
     const emailValue = form.watch("receiverEmail");
-    const addressValue1 = form.watch("receiverAddress1");
-    const addressValue2 = form.watch("receiverAddress2");
     const complete =
       nameValue !== "" &&
       emailValue !== "" &&
-      addressValue1 !== "" &&
-      addressValue2 !== "" &&
+      address !== "" &&
       Object.keys(selectedOption).length > 0 &&
       items.length > 0;
 
     setIsFormComplete(complete);
-  }, [form, items, selectedOption]);
+  }, [form, address, items, selectedOption]);
 
   useEffect(() => {
     const cachedFormData = localStorage.getItem("formData");
@@ -204,6 +237,30 @@ export default function Forms() {
     setOptions(await fetchDeliveryServices());
   };
 
+  const handleInputAddress = () => {
+    setOpenInputAddress(true);
+  };
+
+  const handleAddress = () => {
+    const { address, barangay, city, province, region, zipcode, country } =
+      form.getValues();
+    const parts = [address, barangay, city, province, region, zipcode, country];
+    const nonEmptyParts = parts.filter((part) => part.trim() !== "");
+    const fullAddress = nonEmptyParts.join(", ");
+    setAddress(fullAddress);
+  };
+
+  const clearAddress = () => {
+    form.setValue("address", "");
+    form.setValue("barangay", "");
+    form.setValue("city", "");
+    form.setValue("country", "");
+    form.setValue("province", "");
+    form.setValue("region", "");
+    form.setValue("zipcode", "");
+    setAddress("");
+  };
+
   return (
     <>
       <div className="py-7 px-10">
@@ -213,8 +270,8 @@ export default function Forms() {
               <div className="grid grid-cols-5 grid-rows-1 max-xl:flex max-xl:flex-col gap-5">
                 <Card className="row-span-1 col-span-4 w-full">
                   <CardHeader>Recipient Information</CardHeader>
-                  <CardContent>
-                    <div className="flex max-md:flex-col gap-5">
+                  <CardContent className="grid grid-cols-2 max-md:grid-cols-none max-md:grid-rows-2 gap-5">
+                    <div className="flex max-md:flex-col gap-5 items-center">
                       <FormField
                         control={form.control}
                         name="receiverName"
@@ -243,44 +300,31 @@ export default function Forms() {
                           </>
                         )}
                       />
-                      <FormField
-                        control={form.control}
-                        name="receiverAddress1"
-                        render={({ field }) => (
-                          <>
-                            <FormItem className="w-full">
-                              <FormLabel>address:</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Street Name, Building, House No."
-                                  type="string"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          </>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="receiverAddress2"
-                        render={({ field }) => (
-                          <>
-                            <FormItem className="w-full">
-                              <FormLabel className="text-transparent select-none">
-                                address:
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Barangay, City, Province, Region"
-                                  type="string"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          </>
-                        )}
-                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>address:</Label>
+                      <div className="flex max-md:flex-col gap-5 items-center">
+                        <div className="flex gap-3 items-center">
+                          <PlaneTakeoff />
+                          <Input
+                            type="string"
+                            readOnly
+                            value={senderData?.address}
+                            className="overflow-x-auto"
+                          />
+                        </div>
+                        <div className="flex gap-3 items-center">
+                          <PlaneLanding />
+                          <InputAddress
+                            handleInputAddress={handleInputAddress}
+                            handleAddress={handleAddress}
+                            clearAddress={clearAddress}
+                            form={form}
+                            address={address}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -348,7 +392,7 @@ export default function Forms() {
               <div className="mx-3 w-screen max-md:w-full max-md:pe-3">
                 <Label htmlFor="itemName">item:</Label>
                 <Input
-                  type="text"
+                  type="string"
                   id="itemName"
                   value={itemData.itemName}
                   onChange={handleChange}
@@ -433,6 +477,8 @@ export default function Forms() {
               sessionEmail={session?.user.email}
               clearData={clearData}
               router={router}
+              senderAddress={senderData?.address}
+              recipientAddress={address}
             />
           </div>
         </Card>
