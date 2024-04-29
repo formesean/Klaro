@@ -57,10 +57,9 @@ const columns = [
     accessorKey: "rtn",
     header: () => <div className="text-left">RTN</div>,
     cell: ({ row }) => {
-      const rtn = row.getValue("rtn");
-
-      return <div className="text-left font-medium">{rtn}</div>;
+      return <div className="text-left font-medium">{row.getValue("rtn")}</div>;
     },
+    canFilter: true,
   },
   {
     accessorKey: "receiverName",
@@ -175,7 +174,6 @@ export default function ManageParcel() {
   const [parcels, setParcels] = useState([]);
   const [parcelData, setParcelData] = useState();
   const [copied, setCopied] = useState(false);
-  const [orderData, setOrderData] = useState();
   const [details, setDetails] = useState({
     currentStatus: "",
     hubLocation: "",
@@ -269,7 +267,6 @@ export default function ManageParcel() {
       const parcelData = await fetchParcel(parcelRef);
       const orderData = await fetchOrder(parcelData.orderRef);
       setParcelData(parcelData);
-      setOrderData(orderData);
 
       const hubLocation = orderData.receiverAddress
         .split(",")
@@ -366,12 +363,10 @@ export default function ManageParcel() {
                 <div className="w-full">
                   <div className="flex items-center py-4">
                     <Input
-                      placeholder="Search RTN"
-                      value={table.getColumn("rtn")?.getFilterValue() ?? ""}
+                      placeholder="Search here"
+                      // value={table.getColumn("rtn")?.getFilterValue() ?? ""}
                       onChange={(event) =>
-                        table
-                          .getColumn("rtn")
-                          ?.setFilterValue(event.target.value)
+                        table.setGlobalFilter(event.target.value, "rtn")
                       }
                       className="max-w-sm"
                     />
