@@ -343,7 +343,17 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 <div className="  flex flex-col gap-4">
-                  <Input type="number" id="rtn-input" placeholder="RTN" />
+                  <Input
+                    type="number"
+                    id="rtn-input"
+                    placeholder="RTN"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleTrackRTN();
+                      }
+                    }}
+                  />
                   <Button onClick={handleTrackRTN}>Track</Button>
                 </div>
 
