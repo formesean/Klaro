@@ -24,6 +24,7 @@ interface Parcel {
   centerDate: Timestamp;
   inTransitDate: Timestamp;
   hubDate: Timestamp;
+  received: boolean;
 }
 
 export const useParcels = () => {

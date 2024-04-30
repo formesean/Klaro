@@ -115,8 +115,7 @@ export function ConfirmationPane({
       senderAddress: senderData.address,
       receiverName: recipientData.receiverName,
       receiverEmail: recipientData.receiverEmail,
-      receiverAddress:
-        recipientData.receiverAddress1 + ", " + recipientData.receiverAddress2,
+      receiverAddress: recipientAddress,
       deliveryService: deliveryServiceRef,
       totalQuantity: itemsData.reduce(
         (total, item) => total + item.itemQuantity,

@@ -57,10 +57,9 @@ const columns = [
     accessorKey: "rtn",
     header: () => <div className="text-left">RTN</div>,
     cell: ({ row }) => {
-      const rtn = row.getValue("rtn");
-
-      return <div className="text-left font-medium">{rtn}</div>;
+      return <div className="text-left font-medium">{row.getValue("rtn")}</div>;
     },
+    canFilter: true,
   },
   {
     accessorKey: "receiverName",
@@ -175,7 +174,6 @@ export default function ManageParcel() {
   const [parcels, setParcels] = useState([]);
   const [parcelData, setParcelData] = useState();
   const [copied, setCopied] = useState(false);
-  const [orderData, setOrderData] = useState();
   const [details, setDetails] = useState({
     currentStatus: "",
     hubLocation: "",
@@ -185,6 +183,7 @@ export default function ManageParcel() {
     inTransitDate: null,
     hubDate: null,
     deliveryDate: null,
+    received: false,
   });
   const [showParcelDetails, setShowParcelDetails] = useState(false);
 
@@ -268,7 +267,6 @@ export default function ManageParcel() {
       const parcelData = await fetchParcel(parcelRef);
       const orderData = await fetchOrder(parcelData.orderRef);
       setParcelData(parcelData);
-      setOrderData(orderData);
 
       const hubLocation = orderData.receiverAddress
         .split(",")
@@ -305,6 +303,7 @@ export default function ManageParcel() {
         inTransitDate: inTransitDate,
         hubDate: hubDate,
         deliveryDate: deliveryDate,
+        received: parcelData.received,
       });
 
       setShowParcelDetails(true);
@@ -327,7 +326,17 @@ export default function ManageParcel() {
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 <div className="flex flex-col gap-4">
-                  <Input type="number" id="rtn-input" placeholder="RTN" />
+                  <Input
+                    type="number"
+                    id="rtn-input"
+                    placeholder="RTN"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleTrackRTN();
+                      }
+                    }}
+                  />
                   <Button onClick={handleTrackRTN}>Track</Button>
                 </div>
 
@@ -338,7 +347,6 @@ export default function ManageParcel() {
                     parcelData={parcelData}
                     copied={copied}
                     copyText={copyText}
-                    orderData={orderData}
                     details={details}
                     handleHideDetail={handleHideDetail}
                   />
@@ -355,14 +363,10 @@ export default function ManageParcel() {
                 <div className="w-full">
                   <div className="flex items-center py-4">
                     <Input
-                      placeholder="Search recipient"
-                      value={
-                        table.getColumn("receiverName")?.getFilterValue() ?? ""
-                      }
+                      placeholder="Search here"
+                      // value={table.getColumn("rtn")?.getFilterValue() ?? ""}
                       onChange={(event) =>
-                        table
-                          .getColumn("receiverName")
-                          ?.setFilterValue(event.target.value)
+                        table.setGlobalFilter(event.target.value, "rtn")
                       }
                       className="max-w-sm"
                     />

@@ -33,13 +33,15 @@ export default async function RootLayout({ children }) {
         <Image
           priority={true}
           src={"/bg_black.jpg"}
-          fill
+          width={999999}
+          height={999999}
           className="hidden dark:block absolute blur-[2px] object-contain object-top -z-10"
         />
         <Image
           priority={true}
           src={"/bg_white.jpg"}
-          fill
+          width={999999}
+          height={999999}
           className="block dark:hidden absolute blur-[2px] object-contain object-top -z-20"
         />
         <ThemeProvider

@@ -45,6 +45,7 @@ export default function Home() {
     inTransitDate: null,
     hubDate: null,
     deliveryDate: null,
+    received: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showParcelDetails, setShowParcelDetails] = useState(false);
@@ -52,11 +53,12 @@ export default function Home() {
   const [orderData, setOrderData] = useState();
   const [deliveryServiceData, setDeliveryService] = useState();
   const { fetchDeliveryService } = useDeliveryService();
-  const { fetchParcel, fetchParcelByRTN } = useParcels();
+  const { fetchParcel, fetchParcelByRTN, updateParcel } = useParcels();
   const { fetchOrder } = useOrders();
   const [copied, setCopied] = useState(false);
   const searchParams = useSearchParams();
   const searchRTN = searchParams.get("rtn");
+  const [parcelRef, setParcelRef] = useState();
 
   useEffect(() => {
     const checkUserRoleAndRedirect = async () => {
@@ -94,6 +96,7 @@ export default function Home() {
     const parcelRef = await fetchParcelByRTN(rtnInput);
     const parcelData = await fetchParcel(parcelRef);
     const orderData = await fetchOrder(parcelData.orderRef);
+    setParcelRef(parcelRef);
 
     const deliveryServiceData = await fetchDeliveryService(
       orderData.deliveryService
@@ -138,6 +141,7 @@ export default function Home() {
       inTransitDate: inTransitDate,
       hubDate: hubDate,
       deliveryDate: deliveryDate,
+      received: parcelData.received,
     });
 
     setIsLoading(false);
@@ -168,6 +172,15 @@ export default function Home() {
         setTimeout(() => setCopied(false), 2000);
       })
       .catch((err) => console.error("Failed to copy:", err));
+  };
+
+  const handleConfirmDelivery = async () => {
+    try {
+      const updatedData = { received: true };
+      await updateParcel(parcelRef, updatedData);
+    } catch (error) {
+      console.error("Error", error);
+    }
   };
 
   return (
@@ -312,7 +325,7 @@ export default function Home() {
                         : ""
                     }
                   >
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 gap-5">
                       <div className="flex items-center">
                         <RadioGroupItemWithIcons
                           value="option-delivered"
@@ -341,7 +354,14 @@ export default function Home() {
                         </Label>
                       </div>
                       {details.currentStatus === "Delivered" && (
-                        <Button>Confirm Delivery</Button>
+                        <Button
+                          disabled={details.received}
+                          onClick={handleConfirmDelivery}
+                        >
+                          {!details.received
+                            ? "Confirm Delivery"
+                            : "Confirmed Delivery"}
+                        </Button>
                       )}
                     </div>
 
@@ -425,7 +445,6 @@ export default function Home() {
                                 In Transit
                               </h1>
                               <p className="text-sm text-[#808080]">
-                                4/13/2024
                                 {details?.inTransitDate !== null
                                   ? details?.inTransitDate?.toLocaleDateString()
                                   : ""}
