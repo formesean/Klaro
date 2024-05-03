@@ -147,8 +147,12 @@ export function ConfirmationPane({
       subject: `Your order ${rtn} has been placed`,
       message: `Hello ${recipientData.receiverName}, \n Your order ${rtn} has been placed`,
       deliveryServiceName: deliveryServiceData.name,
-      items: itemsData.map((item) => item.itemName).join(", "),
-      totalAmount: totalPayment,
+      items: itemsData.map((item) => `- ${item.itemName}`).join("\n"),
+      totalAmount: totalPayment.toLocaleString("en-PH", {
+        style: "currency",
+        currency: "PHP",
+      }),
+      rtn: rtn,
       to_email: recipientData.receiverEmail,
     };
     emailjs.send(
