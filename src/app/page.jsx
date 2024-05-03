@@ -59,6 +59,7 @@ export default function Home() {
   const searchParams = useSearchParams();
   const searchRTN = searchParams.get("rtn");
   const [parcelRef, setParcelRef] = useState();
+  const [invalidRTN, setInvalidRTN] = useState(false);
 
   useEffect(() => {
     const checkUserRoleAndRedirect = async () => {
@@ -94,6 +95,15 @@ export default function Home() {
   const queryDatabase = async (rtnInput) => {
     setIsLoading(true);
     const parcelRef = await fetchParcelByRTN(rtnInput);
+
+    if (parcelRef) {
+      setInvalidRTN(false);
+    } else {
+      setIsLoading(false);
+      setInvalidRTN(true);
+      return;
+    }
+
     const parcelData = await fetchParcel(parcelRef);
     const orderData = await fetchOrder(parcelData.orderRef);
     setParcelRef(parcelRef);
@@ -154,13 +164,18 @@ export default function Home() {
     if (rtnInput) {
       queryDatabase(rtnInput);
       setShowParcelDetails(true);
-    } else {
-      setShowParcelDetails(false);
-    }
 
-    const url = new URL(window.location.href);
-    url.searchParams.set("rtn", rtnInput);
-    window.history.pushState({ path: url.href }, "", url.href);
+      const url = new URL(window.location.href);
+      url.searchParams.set("rtn", rtnInput);
+      window.history.pushState({ path: url.href }, "", url.href);
+    } else {
+      setInvalidRTN(false);
+      setShowParcelDetails(false);
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete("rtn");
+      window.history.pushState({ path: url.href }, "", url.href);
+    }
   };
 
   const copyLink = () => {
@@ -186,26 +201,38 @@ export default function Home() {
   return (
     <>
       <div className="flex flex-col mx-auto px-10 pt-16 max-lg:py-16 gap-12">
-        <div className="flex items-end justify-center gap-3">
-          <Input
-            className="rounded-full w-[350px] border-primary border-2"
-            placeholder="enter reference tracking number"
-            id="rtn-input"
-            onWheel={(e) => e.target.blur()}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleSearchSubmit();
-              }
-            }}
-          />
-          <Button onClick={handleSearchSubmit} className="rounded-full">
-            <Search />
-          </Button>
+        <div className="flex flex-col items-center justify-center gap-3">
+          <div className="flex items-center justify-center gap-3">
+            <Input
+              className={`rounded-full w-[350px] border-primary border-2 ${
+                invalidRTN && "border-red-600"
+              }`}
+              placeholder="enter reference tracking number"
+              id="rtn-input"
+              onWheel={(e) => e.target.blur()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSearchSubmit();
+                }
+              }}
+            />
+            <Button
+              onClick={handleSearchSubmit}
+              className={`rounded-full ${invalidRTN && "bg-red-600"}`}
+            >
+              <Search />
+            </Button>
+          </div>
+          {invalidRTN && (
+            <Label className="text-red-600">
+              Invalid RTN! Please try again.
+            </Label>
+          )}
         </div>
 
         {!isLoading ? (
-          !showParcelDetails ? (
+          !showParcelDetails || invalidRTN ? (
             <Card className="min-w-full">
               <CardHeader className="text-center font-extrabold text-4xl">
                 Welcome to Klaro Parcel Tracking System
