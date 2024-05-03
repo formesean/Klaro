@@ -203,8 +203,12 @@ export default function UpdateParcel({ params }) {
         subject,
         message: `Hello ${orders.receiverName},\n${subject}`,
         deliveryServiceName: deliveryService.name,
-        items: itemsData.map((item) => item.itemName).join(", "),
-        totalAmount: totalPayment,
+        items: itemsData.map((item) => `- ${item.itemName}`).join("\n"),
+        totalAmount: totalPayment.toLocaleString("en-PH", {
+          style: "currency",
+          currency: "PHP",
+        }),
+        rtn: params.rtn,
         to_email: orders.receiverEmail,
       };
 
