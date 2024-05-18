@@ -242,7 +242,7 @@ export default function Home() {
                   <CardHeader className="text-center font-bold text-lg text-black">
                     Receiver Features:
                   </CardHeader>
-                  <CardContent className="flex flex-col justify-center items-center text-black gap-3">
+                  <CardContent className="flex flex-col justify-center text-black gap-3">
                     <div>
                       <p className="font-bold">Track Parcel</p>
                       <p className="text-justify">
@@ -275,7 +275,7 @@ export default function Home() {
                   <CardHeader className="text-center font-bold text-lg text-black">
                     Sender Features:
                   </CardHeader>
-                  <CardContent className="flex flex-col justify-center items-center text-black gap-9">
+                  <CardContent className="flex flex-col justify-center text-black gap-9">
                     <div>
                       <p className="font-bold">Input Parcel Data</p>
                       <p className="text-justify">
@@ -306,7 +306,7 @@ export default function Home() {
                   <CardHeader className="text-center font-bold text-lg text-black">
                     Delivery Features:
                   </CardHeader>
-                  <CardContent className="flex flex-col justify-center items-center text-black gap-10">
+                  <CardContent className="flex flex-col justify-center text-black gap-10">
                     <div>
                       <p className=" font-bold">Statistics Report</p>
                       <p className="text-justify">
