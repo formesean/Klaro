@@ -16,13 +16,14 @@ import Loader from "./components/Loader";
 
 export default function Dashboard() {
   const { data: session } = useSession();
-  const { fetchDeliveryServiceParcels, fetchParcel } = useParcels();
+  const { fetchDeliveryServiceParcels, fetchParcel, updateParcel } =
+    useParcels();
   const { getDeliveryServiceDocRef } = useDeliveryService();
   const [isLoading, setIsLoading] = useState(true);
   const [stat, setStat] = useState({
     inTransit: 0,
     delivered: 0,
-    returned: 0,
+    cancelled: 0,
   });
   const [months, setMonths] = useState({
     Jan: 0,
@@ -38,6 +39,45 @@ export default function Dashboard() {
     Nov: 0,
     Dec: 0,
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const currentDate = new Date();
+        const parcelsRef = await fetchDeliveryServiceParcels(
+          await getDeliveryServiceDocRef(session?.user.email)
+        );
+
+        for (const parcelRef of parcelsRef) {
+          const parcelSnapshot = await fetchParcel(parcelRef);
+          const deliveryDateTimestamp = parcelSnapshot.deliveryDate;
+          const deliveryDate = deliveryDateTimestamp.toDate();
+
+          const timeDifference = currentDate.getTime() - deliveryDate.getTime();
+          const daysDifference = Math.floor(
+            timeDifference / (1000 * 3600 * 24)
+          );
+
+          if (
+            daysDifference >= 3 &&
+            parcelSnapshot.currentStatus !== "Delivered"
+          ) {
+            await updateParcel(parcelRef, {
+              currentStatus: "Cancelled",
+              received: false,
+            });
+          }
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    setIsLoading(true);
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,8 +102,8 @@ export default function Dashboard() {
               const month = parcelSnapshot.deliveryDate.toDate().getMonth();
               updatedMonths[Object.keys(updatedMonths)[month]]++;
               break;
-            case "Returned":
-              updatedStats.returned++;
+            case "Cancelled":
+              updatedStats.cancelled++;
               break;
             default:
               break;
@@ -123,10 +163,10 @@ export default function Dashboard() {
           <Card className="row-span-1 col-span-1 max-xl:row-span-1 max-xl:col-span-1">
             <CardHeader className="max-md:p-2">
               <CardTitle className="text-4xl">
-                {!isLoading ? `${stat.returned}` : <Loader big={true} />}
+                {!isLoading ? `${stat.cancelled}` : <Loader big={true} />}
               </CardTitle>
               <CardDescription className="text-lg max-md:text-base">
-                Returned
+                Cancelled
               </CardDescription>
             </CardHeader>
           </Card>
